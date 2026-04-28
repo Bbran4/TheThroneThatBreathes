@@ -208,7 +208,7 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 
 	var visual := CombatantVisual.new()
 	visual.name = combatant.get_display_name() + "_Visual"
-	visual.scale = Vector2(0.15, 0.15)
+	visual.scale = Vector2(0.12, 0.12)
 	visual.idle_texture = data.combat_sprite
 
 	slot.add_child(visual)

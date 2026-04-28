@@ -28,24 +28,24 @@ script = ExtResource("2_84fr5")
 [node name="PlayerSlots" type="Node2D" parent="Battlefield" unique_id=1218945332]
 
 [node name="Slot1" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=112249003]
-position = Vector2(300, 310)
+position = Vector2(200, 360)
 
 [node name="Slot2" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=1091353013]
-position = Vector2(220, 310)
+position = Vector2(330, 360)
 
 [node name="Slot3" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=1059053817]
-position = Vector2(140, 310)
+position = Vector2(460, 360)
 
 [node name="EnemySlots" type="Node2D" parent="Battlefield" unique_id=463775274]
 
 [node name="Slot1" type="Node2D" parent="Battlefield/EnemySlots" unique_id=361448813]
-position = Vector2(900, 310)
+position = Vector2(1050, 340)
 
 [node name="Slot2" type="Node2D" parent="Battlefield/EnemySlots" unique_id=884624981]
-position = Vector2(980, 310)
+position = Vector2(920, 340)
 
 [node name="Slot3" type="Node2D" parent="Battlefield/EnemySlots" unique_id=2092028916]
-position = Vector2(1060, 310)
+position = Vector2(790, 340)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1819585525]
 
