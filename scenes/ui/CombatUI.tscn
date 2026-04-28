@@ -24,6 +24,14 @@ grow_horizontal = 2
 [node name="EnemyLabel" type="Label" parent="EnemyInfo" unique_id=262705246]
 layout_mode = 2
 
+[node name="EnemyIntentLabel" type="Label" parent="." unique_id=1932082960]
+layout_mode = 0
+offset_left = 544.5
+offset_top = 68.0
+offset_right = 607.5
+offset_bottom = 91.0
+text = "Intent: ?"
+
 [node name="PlayerInfo" type="PanelContainer" parent="." unique_id=2028430772]
 layout_mode = 1
 offset_right = 40.0

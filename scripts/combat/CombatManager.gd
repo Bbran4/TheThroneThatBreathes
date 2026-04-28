@@ -18,6 +18,7 @@ signal combat_started
 signal player_turn_started
 signal enemy_turn_started
 signal combat_ended(winner: Combatant)
+signal enemy_intent_prepared
 
 @export var starting_hand_size: int = 5
 @export var cards_drawn_per_turn: int = 5
@@ -48,6 +49,7 @@ func start_combat() -> void:
 	combat_is_active = true
 	combat_started.emit()
 
+	_prepare_enemy_intent()
 	start_player_turn()
 
 
@@ -85,17 +87,12 @@ func start_enemy_turn() -> void:
 	enemy_turn_started.emit()
 
 	enemy.reset_guard()
-	enemy.roll_dice()
-	enemy.draw_cards(cards_drawn_per_turn)
 
-	# Enemy chooses a card automatically.
-	enemy.choose_card()
-
-	# For now, enemy immediately tries to play its selected card.
-	var selected_card = enemy.get_selected_card()
+	var selected_card := enemy.get_selected_card()
+	var selected_dice := enemy.get_selected_dice()
 
 	if selected_card != null:
-		_try_enemy_play_card(selected_card)
+		_try_enemy_play_prepared_card(selected_card, selected_dice)
 
 	enemy.discard_hand()
 	enemy.clear_selected_card()
@@ -103,8 +100,8 @@ func start_enemy_turn() -> void:
 	_check_combat_end()
 
 	if combat_is_active:
+		_prepare_enemy_intent()
 		start_player_turn()
-
 
 func play_player_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
 	# This function will be called by UI later.
@@ -235,3 +232,34 @@ func _end_combat(winner: Combatant) -> void:
 func _on_combatant_died(dead_combatant: Combatant) -> void:
 	# If someone dies from damage, immediately check who won.
 	_check_combat_end()
+
+func _prepare_enemy_intent() -> void:
+	# Enemy prepares its next action before the player acts.
+	# This gives the player tactical information.
+
+	enemy.roll_dice()
+	enemy.draw_cards(cards_drawn_per_turn)
+	enemy.prepare_intent()
+
+	enemy_intent_prepared.emit()
+
+func _try_enemy_play_prepared_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
+	if card == null:
+		return false
+
+	if not enemy.hand.has(card):
+		return false
+
+	if not card.can_use_with_dice(assigned_dice):
+		return false
+
+	for die in assigned_dice:
+		if not enemy.get_available_dice().has(die):
+			return false
+
+	for die in assigned_dice:
+		enemy.dice_pool.assign_die(die)
+
+	_resolve_card(card, enemy, player)
+
+	return true

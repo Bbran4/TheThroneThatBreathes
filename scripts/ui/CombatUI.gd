@@ -15,6 +15,7 @@ class_name CombatUI
 @onready var hand_container: HBoxContainer = $Container/HandContainer
 @onready var end_turn_button: Button = $EndTurnButton
 @export var card_view_scene: PackedScene
+@onready var enemy_intent_label: Label = $EnemyIntentLabel
 
 var combat_manager: CombatManager
 var player: PlayerCombatant
@@ -37,7 +38,8 @@ func setup_ui(new_combat_manager: CombatManager, new_player: PlayerCombatant, ne
 
 	enemy.hp_changed.connect(_on_enemy_hp_changed)
 	enemy.guard_changed.connect(_on_enemy_guard_changed)
-
+	enemy.intent_changed.connect(_on_enemy_intent_changed)
+	
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
@@ -241,7 +243,8 @@ func _on_enemy_turn_started() -> void:
 
 func _on_combat_ended(winner: Combatant) -> void:
 	end_turn_button.disabled = true
-
+	enemy_intent_label.text = ""
+	
 	if winner == player:
 		player_label.text += "\nVictory."
 	else:
@@ -258,3 +261,6 @@ func _get_card_button_text(card: CardData) -> String:
 func _clear_children(container: Node) -> void:
 	for child in container.get_children():
 		child.queue_free()
+
+func _on_enemy_intent_changed(intent_text: String) -> void:
+	enemy_intent_label.text = intent_text
