@@ -22,7 +22,7 @@ var active_player: PlayerCombatant
 
 var is_player_turn: bool = false
 var combat_is_active: bool = false
-
+var has_started_first_player_turn: bool = false
 
 func setup_combat(new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
 	players = new_players
@@ -63,11 +63,12 @@ func start_combat() -> void:
 	if players.is_empty() or enemies.is_empty():
 		push_error("CombatManager cannot start combat without both teams.")
 		return
-
+		
 	combat_is_active = true
 	combat_started.emit()
 	combat_log.emit("Combat started.")
-
+	has_started_first_player_turn = false
+	
 	for p in players:
 		p.draw_cards(starting_hand_size)
 
@@ -93,11 +94,14 @@ func start_player_turn() -> void:
 	for p in get_living_players():
 		p.reset_guard()
 		p.roll_dice()
-		p.draw_cards(cards_drawn_per_turn)
+
+		if has_started_first_player_turn:
+			p.draw_cards(cards_drawn_per_turn)
+
+	has_started_first_player_turn = true
 
 	combat_log.emit("--- Player Turn ---")
 	player_turn_started.emit()
-
 
 func end_player_turn() -> void:
 	if not combat_is_active:
@@ -198,12 +202,10 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData], target: Co
 
 	_resolve_card(card, active_player, target)
 
+	if active_player.hand.has(card):
+		active_player.discard_card(card)
+
 	_check_combat_end()
-
-	if not combat_is_active:
-		return true
-
-	active_player.discard_card(card)
 
 	return true
 

@@ -175,13 +175,25 @@ func _on_enemy_turn_started() -> void:
 
 
 func _on_combat_ended(winner: Combatant) -> void:
-	if players.has(winner):
+	if _is_player_combatant(winner):
 		print("Combat ended. Player team wins.")
-	elif enemies.has(winner):
+	elif _is_enemy_combatant(winner):
 		print("Combat ended. Enemy team wins.")
 	else:
 		print("Combat ended.")
 
+func _is_player_combatant(combatant: Combatant) -> bool:
+	for p in players:
+		if p == combatant:
+			return true
+	return false
+
+
+func _is_enemy_combatant(combatant: Combatant) -> bool:
+	for e in enemies:
+		if e == combatant:
+			return true
+	return false
 
 func _on_player_hand_changed(hand: Array) -> void:
 	print("Player hand size: ", hand.size())

@@ -27,6 +27,7 @@ var intent_text_by_enemy: Dictionary = {}
 var combat_log_label: Label
 var result_panel: PanelContainer
 var reward_buttons_container: VBoxContainer
+var hand_refresh_version: int = 0
 
 const FAN_ARC_MAX := 50.0
 const CARD_SPREAD := 95.0
@@ -132,9 +133,34 @@ func _ensure_polish_ui_nodes() -> void:
 
 
 func _refresh_hand() -> void:
-	await get_tree().process_frame
-	call_deferred("_do_refresh_hand")
+	hand_refresh_version += 1
+	var my_version := hand_refresh_version
 
+	await get_tree().process_frame
+
+	if my_version != hand_refresh_version:
+		return
+
+	call_deferred("_do_refresh_hand_if_current", my_version)
+
+func _do_refresh_hand_if_current(version: int) -> void:
+	if version != hand_refresh_version:
+		return
+
+	_do_refresh_hand()
+
+func _is_player_combatant(combatant: Combatant) -> bool:
+	for p in players:
+		if p == combatant:
+			return true
+	return false
+
+
+func _is_enemy_combatant(combatant: Combatant) -> bool:
+	for e in enemies:
+		if e == combatant:
+			return true
+	return false
 
 func _do_refresh_hand() -> void:
 	_clear_children(hand_container)
@@ -489,7 +515,7 @@ func _on_combat_ended(winner: Combatant) -> void:
 	end_turn_button.disabled = true
 	enemy_intent_label.text = ""
 
-	if players.has(winner):
+	if _is_player_combatant(winner):
 		_show_result_panel(true)
 	else:
 		_show_result_panel(false)
@@ -645,11 +671,13 @@ func _on_combatant_guard_reset(
 
 
 func _get_floating_text_position_for_combatant(combatant: Combatant) -> Vector2:
-	if players.has(combatant):
-		return player_label.global_position + Vector2(0, -20)
+	for p in players:
+		if p == combatant:
+			return player_label.global_position + Vector2(0, -20)
 
-	if enemies.has(combatant):
-		return enemy_label.global_position + Vector2(0, -20)
+	for e in enemies:
+		if e == combatant:
+			return enemy_label.global_position + Vector2(0, -20)
 
 	return global_position + Vector2(300, 300)
 
