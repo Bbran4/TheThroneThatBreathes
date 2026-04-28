@@ -3,9 +3,12 @@
 [ext_resource type="Script" uid="uid://ccwada60nx028" path="res://scripts/combat/CombatTest.gd" id="1_aa5v2"]
 [ext_resource type="Script" uid="uid://ca0wwrvp3wqly" path="res://scripts/combat/CombatManager.gd" id="2_84fr5"]
 [ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="2_gaico"]
-[ext_resource type="Resource" uid="uid://cihmxdwhbg2la" path="res://resources/enemies/HollowAcolyte.tres" id="3_gaico"]
 [ext_resource type="Script" uid="uid://cui60d7oj1du7" path="res://scripts/combat/PlayerCombatant.gd" id="3_psff3"]
+[ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="3_ycf86"]
 [ext_resource type="Script" uid="uid://lmhct1c1dyfj" path="res://scripts/combat/EnemyCombatant.gd" id="4_uvkbr"]
+[ext_resource type="Script" uid="uid://bpjd3fk6h83lq" path="res://scripts/combat/CombatantVisual.gd" id="7_mvvgd"]
+[ext_resource type="Texture2D" uid="uid://c3t77l4lfd6y1" path="res://assets/ExiledKnight.png" id="8_qqmgp"]
+[ext_resource type="Texture2D" uid="uid://e5p2pie3bik0" path="res://assets/RotWolf.png" id="9_8equi"]
 [ext_resource type="PackedScene" uid="uid://curcwunumwlcv" path="res://scenes/ui/FloatingText.tscn" id="9_ycf86"]
 [ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="11_qqmgp"]
 [ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="12_8equi"]
@@ -13,7 +16,7 @@
 [node name="CombatTest" type="Node" unique_id=1986889536]
 script = ExtResource("1_aa5v2")
 player_data = ExtResource("2_gaico")
-enemy_data = ExtResource("3_gaico")
+enemy_data = ExtResource("3_ycf86")
 enemy_name = "Hollow Acolyte"
 
 [node name="CombatManager" type="Node" parent="." unique_id=1843945017]
@@ -24,6 +27,22 @@ script = ExtResource("3_psff3")
 
 [node name="EnemyCombatant" type="Node" parent="." unique_id=1193692274]
 script = ExtResource("4_uvkbr")
+
+[node name="Battlefield" type="Node2D" parent="." unique_id=2740168]
+
+[node name="Background" type="Sprite2D" parent="Battlefield" unique_id=222489155]
+
+[node name="PlayerVisual" type="Sprite2D" parent="Battlefield" unique_id=1188018208]
+position = Vector2(300, 360)
+scale = Vector2(0.25, 0.25)
+script = ExtResource("7_mvvgd")
+idle_texture = ExtResource("8_qqmgp")
+
+[node name="EnemyVisual" type="Sprite2D" parent="Battlefield" unique_id=1535846619]
+position = Vector2(900, 360)
+scale = Vector2(0.25, 0.25)
+script = ExtResource("7_mvvgd")
+idle_texture = ExtResource("9_8equi")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2131173972]
 

@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="CombatantData" format=3 uid="uid://dcw5eigaq2x3m"]
 
+[ext_resource type="Texture2D" uid="uid://do77c187tnnqb" path="res://assets/CrownboundGuard.png" id="1_nnx6x"]
 [ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_q6s5n"]
 [ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_ejcgt"]
 [ext_resource type="Resource" uid="uid://fpcubyocjj4x" path="res://resources/cards/enemies/ShieldWall.tres" id="3_87fhj"]
@@ -12,4 +13,5 @@ script = ExtResource("1_q6s5n")
 display_name = "Crownbound Guard"
 stats = ExtResource("6_uul51")
 starting_deck = Array[ExtResource("2_ejcgt")]([ExtResource("3_87fhj"), ExtResource("3_87fhj"), ExtResource("4_nnx6x"), ExtResource("5_sb0g1")])
+combat_sprite = ExtResource("1_nnx6x")
 metadata/_custom_type_script = "uid://0vgymfy4egw4"

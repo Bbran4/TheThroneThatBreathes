@@ -13,6 +13,8 @@ extends Node
 @onready var player: PlayerCombatant = $PlayerCombatant
 @onready var enemy: EnemyCombatant = $EnemyCombatant
 @onready var combat_ui: CombatUI = $CanvasLayer/CombatUI
+@onready var player_visual: CombatantVisual = $Battlefield/PlayerVisual
+@onready var enemy_visual: CombatantVisual = $Battlefield/EnemyVisual
 
 @export var enemy_name: String = "Rot Wolf"
 
@@ -56,10 +58,14 @@ func _ready() -> void:
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
-
+	
 	player.hp_changed.connect(_on_player_hp_changed)
 	enemy.hp_changed.connect(_on_enemy_hp_changed)
+	player.hp_changed.connect(_on_player_visual_hp_changed)
+	enemy.hp_changed.connect(_on_enemy_visual_hp_changed)
 
+	player.guard_changed.connect(_on_player_visual_guard_changed)
+	enemy.guard_changed.connect(_on_enemy_visual_guard_changed)
 	player.hand_changed.connect(_on_player_hand_changed)
 	player.dice_pool.dice_rolled.connect(_on_player_dice_rolled)
 
@@ -105,6 +111,20 @@ func _on_player_hand_changed(hand: Array) -> void:
 func _on_player_dice_rolled(dice: Array[DiceData]) -> void:
 	print("Player rolled: ", _dice_values_to_text(dice))
 
+func _on_player_visual_hp_changed(_current_hp: int, _max_hp: int) -> void:
+	player_visual.play_hit_reaction()
+
+
+func _on_enemy_visual_hp_changed(_current_hp: int, _max_hp: int) -> void:
+	enemy_visual.play_hit_reaction()
+
+
+func _on_player_visual_guard_changed(_current_guard: int) -> void:
+	player_visual.play_guard_reaction()
+
+
+func _on_enemy_visual_guard_changed(_current_guard: int) -> void:
+	enemy_visual.play_guard_reaction()
 
 func _dice_values_to_text(dice: Array[DiceData]) -> String:
 	var values: Array[String] = []

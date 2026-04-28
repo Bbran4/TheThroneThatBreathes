@@ -14,3 +14,4 @@ class_name CombatantData
 @export var display_name: String = "Unnamed Combatant"
 @export var stats: CharacterStats
 @export var starting_deck: Array[CardData] = []
+@export var combat_sprite: Texture2D

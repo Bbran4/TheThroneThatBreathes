@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="CombatantData" format=3 uid="uid://wuq22glnh27c"]
 
 [ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_8sdo4"]
+[ext_resource type="Texture2D" uid="uid://c3t77l4lfd6y1" path="res://assets/ExiledKnight.png" id="1_e5qh0"]
 [ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_jr1e6"]
 [ext_resource type="Resource" uid="uid://dfh04h2nyx7wo" path="res://resources/characters/ExiledKnightStats.tres" id="3_jr1e6"]
 [ext_resource type="Resource" uid="uid://dwtgw0nqbdy5p" path="res://resources/cards/Strike.tres" id="3_n0e86"]
@@ -19,4 +20,5 @@ script = ExtResource("1_8sdo4")
 display_name = "Exiled Knight"
 stats = ExtResource("3_jr1e6")
 starting_deck = Array[ExtResource("2_jr1e6")]([ExtResource("3_n0e86"), ExtResource("4_e5qh0"), ExtResource("5_gspro"), ExtResource("6_cbna0"), ExtResource("7_3gqma"), ExtResource("8_4x3cc"), ExtResource("9_uvyxt"), ExtResource("10_1oks2"), ExtResource("11_fnvj0"), ExtResource("3_n0e86"), ExtResource("12_kox51")])
+combat_sprite = ExtResource("1_e5qh0")
 metadata/_custom_type_script = "uid://0vgymfy4egw4"
