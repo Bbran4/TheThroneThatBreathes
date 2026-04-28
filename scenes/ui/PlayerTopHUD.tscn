@@ -2,38 +2,34 @@
 
 [ext_resource type="Script" uid="uid://dcwfhw2prwiop" path="res://scripts/ui/player_top_hud.gd" id="1_1tcc5"]
 
-[node name="PlayerTopHUD" type="Control" unique_id=288534297]
+[node name="PlayerTopHud" type="Control" unique_id=288534297]
 layout_mode = 3
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-size_flags_horizontal = 3
+grow_vertical = 2
+mouse_filter = 1
 script = ExtResource("1_1tcc5")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1785905755]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
 anchor_right = 1.0
-offset_bottom = 31.0
-grow_horizontal = 2
-alignment = 1
-
-[node name="PlayerNameLabel" type="Label" parent="HBoxContainer" unique_id=753462214]
-layout_mode = 2
-text = "Exiled Knight"
-
-[node name="HealthBar" type="ProgressBar" parent="HBoxContainer" unique_id=1951356201]
-layout_mode = 2
-value = 100.0
-
-[node name="GuardLabel" type="Label" parent="HBoxContainer" unique_id=454823958]
-layout_mode = 2
-text = "5"
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -64.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 2
 
 [node name="StatusLabel" type="Label" parent="HBoxContainer" unique_id=1047804451]
 layout_mode = 2
 
 [node name="EndTurnButton" type="Button" parent="HBoxContainer" unique_id=939273223]
+custom_minimum_size = Vector2(140, 44)
 layout_mode = 2
-size_flags_horizontal = 8
 text = "End Turn"

@@ -13,10 +13,9 @@ grow_vertical = 2
 script = ExtResource("1_k0kdm")
 
 [node name="PlayerTopHUD" parent="." unique_id=288534297 instance=ExtResource("2_2xdv1")]
-layout_mode = 0
-anchors_preset = 0
-anchor_right = 0.0
-grow_horizontal = 1
+layout_mode = 1
+size_flags_horizontal = 3
+mouse_filter = 0
 
 [node name="EnemyInfo" type="PanelContainer" parent="." unique_id=1931787022]
 layout_mode = 1

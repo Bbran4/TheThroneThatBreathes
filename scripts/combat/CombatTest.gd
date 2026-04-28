@@ -88,10 +88,14 @@ func _process(_delta: float) -> void:
 
 		var screen_pos := visual.get_global_transform_with_canvas().origin
 
-		if combatant is EnemyCombatant:
-			status_ui.global_position = screen_pos + Vector2(-80, 85)
-		else:
-			status_ui.visible = false
+		# For all combatants: status UI sits just below the sprite.
+		# StatusLabel (status effects) sits above the bar row, so the whole widget
+		# is placed so the bar appears underneath the sprite feet.
+		# We offset by half the sprite display height (sprites use scale 0.15, adjust as needed).
+		var sprite_half_height := 90.0  # tweak to match your sprite display size
+
+		status_ui.global_position = screen_pos + Vector2(-100, sprite_half_height)
+		status_ui.visible = true
 
 func _on_combat_log(message: String) -> void:
 	print(message)
