@@ -15,7 +15,7 @@ extends Node
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var player: PlayerCombatant = $PlayerCombatant
 @onready var enemy: EnemyCombatant = $EnemyCombatant
-
+@onready var combat_ui: CombatUI = $CanvasLayer/CombatUI
 
 func _ready() -> void:
 	# Validate exported data before starting combat.
@@ -42,7 +42,8 @@ func _ready() -> void:
 
 	# Then setup the manager.
 	combat_manager.setup_combat(player, enemy)
-
+	combat_ui.setup_ui(combat_manager, player, enemy)
+	
 	# Connect useful debug signals.
 	combat_manager.combat_started.connect(_on_combat_started)
 	combat_manager.player_turn_started.connect(_on_player_turn_started)

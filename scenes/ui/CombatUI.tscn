@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://dhvfey22vpu1o"]
+
+[ext_resource type="Script" uid="uid://cc67nka1h7bq5" path="res://scripts/ui/CombatUI.gd" id="1_k0kdm"]
+
+[node name="CombatUI" type="Control" unique_id=1242325184]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_k0kdm")
+
+[node name="EnemyInfo" type="PanelContainer" parent="." unique_id=1931787022]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_right = 20.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="EnemyLabel" type="Label" parent="EnemyInfo" unique_id=262705246]
+layout_mode = 2
+
+[node name="PlayerInfo" type="PanelContainer" parent="." unique_id=2028430772]
+layout_mode = 1
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PlayerLabel" type="Label" parent="PlayerInfo" unique_id=1210953472]
+layout_mode = 2
+
+[node name="DiceContainer" type="HBoxContainer" parent="." unique_id=1664900922]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+
+[node name="HandContainer" type="HBoxContainer" parent="." unique_id=497366421]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="EndTurnButton" type="Button" parent="." unique_id=992076841]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -78.0
+offset_top = -31.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "End Turn"

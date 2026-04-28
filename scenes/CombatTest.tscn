@@ -10,6 +10,7 @@
 [ext_resource type="Resource" uid="uid://dwtgw0nqbdy5p" path="res://resources/cards/test/Strike.tres" id="5_2nakn"]
 [ext_resource type="Resource" uid="uid://clbraadrbyb5u" path="res://resources/cards/test/Guard.tres" id="6_e14ux"]
 [ext_resource type="Resource" uid="uid://cjbc63iwfx7it" path="res://resources/cards/test/HeavyBlow.tres" id="7_qf82r"]
+[ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="11_qqmgp"]
 
 [node name="CombatTest" type="Node" unique_id=1986889536]
 script = ExtResource("1_aa5v2")
@@ -26,3 +27,7 @@ script = ExtResource("3_psff3")
 
 [node name="EnemyCombatant" type="Node" parent="." unique_id=1193692274]
 script = ExtResource("4_uvkbr")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2131173972]
+
+[node name="CombatUI" parent="CanvasLayer" unique_id=1242325184 instance=ExtResource("11_qqmgp")]
