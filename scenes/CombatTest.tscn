@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://ceqfbta17oxn3"]
+
+[ext_resource type="Script" uid="uid://ccwada60nx028" path="res://scripts/combat/CombatTest.gd" id="1_aa5v2"]
+[ext_resource type="Script" uid="uid://ca0wwrvp3wqly" path="res://scripts/combat/CombatManager.gd" id="2_84fr5"]
+[ext_resource type="Resource" uid="uid://ckuoywb7m42ga" path="res://resources/test/PlayerStats.tres" id="2_mvvgd"]
+[ext_resource type="Script" uid="uid://cui60d7oj1du7" path="res://scripts/combat/PlayerCombatant.gd" id="3_psff3"]
+[ext_resource type="Resource" uid="uid://b3505qhy4nypm" path="res://resources/test/EnemyStats.tres" id="3_qqmgp"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="4_8equi"]
+[ext_resource type="Script" uid="uid://lmhct1c1dyfj" path="res://scripts/combat/EnemyCombatant.gd" id="4_uvkbr"]
+[ext_resource type="Resource" uid="uid://dwtgw0nqbdy5p" path="res://resources/cards/test/Strike.tres" id="5_2nakn"]
+[ext_resource type="Resource" uid="uid://clbraadrbyb5u" path="res://resources/cards/test/Guard.tres" id="6_e14ux"]
+[ext_resource type="Resource" uid="uid://cjbc63iwfx7it" path="res://resources/cards/test/HeavyBlow.tres" id="7_qf82r"]
+
+[node name="CombatTest" type="Node" unique_id=1986889536]
+script = ExtResource("1_aa5v2")
+player_stats = ExtResource("2_mvvgd")
+enemy_stats = ExtResource("3_qqmgp")
+player_deck = Array[ExtResource("4_8equi")]([ExtResource("5_2nakn"), ExtResource("5_2nakn"), ExtResource("5_2nakn"), ExtResource("6_e14ux"), ExtResource("6_e14ux"), ExtResource("7_qf82r")])
+enemy_deck = Array[ExtResource("4_8equi")]([ExtResource("5_2nakn"), ExtResource("5_2nakn"), ExtResource("6_e14ux")])
+
+[node name="CombatManager" type="Node" parent="." unique_id=1843945017]
+script = ExtResource("2_84fr5")
+
+[node name="PlayerCombatant" type="Node" parent="." unique_id=2140839672]
+script = ExtResource("3_psff3")
+
+[node name="EnemyCombatant" type="Node" parent="." unique_id=1193692274]
+script = ExtResource("4_uvkbr")

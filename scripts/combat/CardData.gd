@@ -84,7 +84,11 @@ func can_use_with_dice(assigned_dice: Array[DiceData]) -> bool:
 	return true
 
 func get_final_damage(user: Combatant) -> int:
-	# Damage scales with user's Power stat
+	# Only cards with base damage should scale with Power.
+	# This prevents non-attack cards like Guard from becoming damage cards.
+	if base_damage <= 0:
+		return 0
+
 	return base_damage + user.get_power()
 
 func get_final_guard(user: Combatant) -> int:
@@ -92,3 +96,6 @@ func get_final_guard(user: Combatant) -> int:
 
 func get_display_text() -> String:
 	return card_name + "\n" + description
+
+func _to_string() -> String:
+	return card_name

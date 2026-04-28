@@ -1,10 +1,11 @@
 [gd_resource type="Resource" script_class="CardData" format=3 uid="uid://dwtgw0nqbdy5p"]
 
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_bhepu"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_cegqs"]
 
 [resource]
-script = ExtResource("1_bhepu")
+script = ExtResource("1_cegqs")
 card_name = "Strike"
 description = "Deal 6 damage."
 base_damage = 6
+can_target_enemy = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

@@ -41,17 +41,12 @@ func setup_combat(new_player: PlayerCombatant, new_enemy: EnemyCombatant) -> voi
 
 
 func start_combat() -> void:
-	# Combat begins only if both combatants exist.
 	if player == null or enemy == null:
 		push_error("CombatManager cannot start combat without both player and enemy.")
 		return
 
 	combat_is_active = true
 	combat_started.emit()
-
-	# Initial combat setup.
-	player.draw_cards(starting_hand_size)
-	enemy.draw_cards(starting_hand_size)
 
 	start_player_turn()
 
@@ -62,14 +57,8 @@ func start_player_turn() -> void:
 
 	is_player_turn = true
 
-	# Guard usually resets at the start of a character's turn.
 	player.reset_guard()
-
-	# Roll dice for the active combatant.
 	player.roll_dice()
-
-	# Draw new cards each turn.
-	# Later, this may change depending on balance.
 	player.draw_cards(cards_drawn_per_turn)
 
 	player_turn_started.emit()
@@ -149,9 +138,14 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
 
 	_resolve_card(card, player, enemy)
 
-	player.discard_card(card)
-
+	# Check for combat end immediately after resolving the card.
 	_check_combat_end()
+
+	# If combat ended, stop resolving extra cleanup logic.
+	if not combat_is_active:
+		return true
+
+	player.discard_card(card)
 
 	return true
 
@@ -195,10 +189,23 @@ func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 	var damage_amount: int = card.get_final_damage(user)
 	var guard_amount: int = card.get_final_guard(user)
 
+	print("--- Resolving Card ---")
+	print("Card: ", card.card_name)
+	print("Base damage: ", card.base_damage)
+	print("User power: ", user.get_power())
+	print("Final damage: ", damage_amount)
+	print("Can target enemy: ", card.can_target_enemy)
+	print("Base guard: ", card.base_guard)
+	print("Final guard: ", guard_amount)
+
 	if damage_amount > 0 and card.can_target_enemy:
+		print("Applying damage to target.")
 		target.take_damage(damage_amount)
+	else:
+		print("No damage applied.")
 
 	if guard_amount > 0:
+		print("Applying guard to user.")
 		user.gain_guard(guard_amount)
 
 	if card.cards_to_draw > 0:

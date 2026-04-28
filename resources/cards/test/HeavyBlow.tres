@@ -1,12 +1,13 @@
 [gd_resource type="Resource" script_class="CardData" format=3 uid="uid://cjbc63iwfx7it"]
 
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_tc5ac"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_psuy8"]
 
 [resource]
-script = ExtResource("1_tc5ac")
+script = ExtResource("1_psuy8")
 card_name = "Heavy Blow"
 description = "Deal 12 damage. Requires a die of 4 or higher."
 dice_requirement_type = 1
 required_die_value = 4
 base_damage = 12
+can_target_enemy = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"
