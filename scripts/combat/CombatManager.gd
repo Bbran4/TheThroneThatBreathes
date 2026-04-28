@@ -73,6 +73,11 @@ func end_player_turn() -> void:
 	if not is_player_turn:
 		return
 
+	# If the enemy is already dead, end combat instead of passing turn.
+	if enemy == null or enemy.is_dead():
+		_end_combat(player)
+		return
+
 	# Discard remaining player hand at end of turn.
 	player.discard_hand()
 
@@ -82,6 +87,10 @@ func end_player_turn() -> void:
 
 func start_enemy_turn() -> void:
 	if not combat_is_active:
+		return
+
+	if enemy == null or enemy.is_dead():
+		_end_combat(player)
 		return
 
 	enemy_turn_started.emit()
