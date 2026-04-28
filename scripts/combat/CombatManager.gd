@@ -216,7 +216,9 @@ func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 
 	if card.cards_to_draw > 0:
 		user.draw_cards(card.cards_to_draw)
-
+	
+	if card.can_target_self and damage_amount > 0:
+		user.take_damage(damage_amount)
 
 func _check_combat_end() -> void:
 	if player.is_dead():

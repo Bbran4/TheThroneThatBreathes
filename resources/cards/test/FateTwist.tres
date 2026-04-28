@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://bjd605pctd2tj"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_jjmeb"]
+
+[resource]
+script = ExtResource("1_jjmeb")
+card_name = "Fate Twist"
+description = "Reroll one available die."
+card_type = 2
+dice_required = 0
+effect_type = 1
+can_target_self = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

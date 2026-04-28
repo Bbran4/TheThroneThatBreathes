@@ -5,7 +5,8 @@
 [resource]
 script = ExtResource("1_psuy8")
 card_name = "Heavy Blow"
-description = "Deal 12 damage. Requires a die of 4 or higher."
+description = "Deal 12 damage.
+Requires: 4+"
 dice_requirement_type = 1
 required_die_value = 4
 base_damage = 12

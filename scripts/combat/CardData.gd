@@ -21,6 +21,11 @@ enum DiceRequirementType {
 	ODD
 }
 
+enum CardEffectType {
+	NORMAL,
+	REROLL_DIE
+}
+
 @export var card_art: Texture2D
 
 @export var card_name: String = "Unnamed Card"
@@ -40,7 +45,7 @@ enum DiceRequirementType {
 
 # Used when a card requires a minimum value or exact value.
 @export var required_die_value: int = 1
-
+@export var effect_type: CardEffectType = CardEffectType.NORMAL
 # Base combat values.
 @export var base_damage: int = 0
 @export var base_guard: int = 0

@@ -5,7 +5,8 @@
 [resource]
 script = ExtResource("1_o5nhl")
 card_name = "Guard"
-description = "Gain 5 guard."
+description = "Gain 5 guard.
+Requires: Any die"
 card_type = 1
 base_guard = 5
 can_target_self = true

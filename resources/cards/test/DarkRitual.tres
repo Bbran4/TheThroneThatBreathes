@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://wbp2t40kpxby"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_3xx6a"]
+
+[resource]
+script = ExtResource("1_3xx6a")
+card_name = "Dark Ritual"
+description = "Draw 2 cards.
+Lose 3 HP.
+Requires: Any die"
+base_damage = 3
+cards_to_draw = 2
+can_target_self = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

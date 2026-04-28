@@ -5,7 +5,9 @@
 [resource]
 script = ExtResource("1_cegqs")
 card_name = "Strike"
-description = "Deal 6 damage."
+description = "Deal 6 damage.
+Requires: Any die"
+flavor_text = "Basic sword attack."
 base_damage = 6
 can_target_enemy = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

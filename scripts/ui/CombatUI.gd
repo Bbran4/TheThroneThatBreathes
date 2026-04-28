@@ -22,7 +22,7 @@ var player: PlayerCombatant
 var enemy: EnemyCombatant
 
 var selected_dice: Array[DiceData] = []
-
+var pending_rerolls: int = 0
 
 func setup_ui(new_combat_manager: CombatManager, new_player: PlayerCombatant, new_enemy: EnemyCombatant) -> void:
 	# Store references to the combat objects.
@@ -153,32 +153,62 @@ func _refresh_dice() -> void:
 	_clear_children(dice_container)
 
 	for die in player.get_dice():
-		var button := Button.new()
-		button.custom_minimum_size = Vector2(60, 60)
+		var die_slot := VBoxContainer.new()
+
+		var die_button := Button.new()
+		die_button.custom_minimum_size = Vector2(60, 60)
 
 		if selected_dice.has(die):
-			button.text = "[" + str(die.current_value) + "]"
+			die_button.text = "[" + str(die.current_value) + "]"
 		else:
-			button.text = str(die.current_value)
+			die_button.text = str(die.current_value)
 
-		# Disable dice that are already spent.
 		if die.is_assigned:
-			button.disabled = true
-
-		# Disable dice if no card in hand could use it.
+			die_button.disabled = true
 		elif not _can_any_card_use_die(die):
-			button.disabled = true
+			die_button.disabled = true
 
-		button.pressed.connect(func():
+		die_button.pressed.connect(func():
 			_on_die_pressed(die)
 		)
 
-		dice_container.add_child(button)
+		die_slot.add_child(die_button)
+
+		if pending_rerolls > 0 and not die.is_assigned:
+			var reroll_button := Button.new()
+			reroll_button.text = "Reroll"
+			reroll_button.custom_minimum_size = Vector2(60, 24)
+
+			reroll_button.pressed.connect(func():
+				_on_reroll_pressed(die)
+			)
+
+			die_slot.add_child(reroll_button)
+
+		dice_container.add_child(die_slot)
+
+func _on_reroll_pressed(die: DiceData) -> void:
+	if pending_rerolls <= 0:
+		return
+
+	if die == null:
+		return
+
+	if die.is_assigned:
+		return
+
+	die.reroll()
+	pending_rerolls -= 1
+
+	selected_dice.clear()
+
+	print("Rerolled die. New value: ", die.current_value)
+
+	_refresh_dice()
+	_refresh_hand()
+	_update_all()
 
 func _on_card_pressed(card: CardData) -> void:
-	# Cards resolve immediately when clicked.
-	# The player must already have selected enough valid dice.
-
 	if selected_dice.size() < card.dice_required:
 		print("Not enough dice selected for ", card.card_name)
 		return
@@ -192,10 +222,12 @@ func _on_card_pressed(card: CardData) -> void:
 	if success:
 		print("Played card: ", card.card_name)
 
-		# Clear dice selection after spending dice.
 		selected_dice.clear()
 
-		# Refresh UI immediately after card resolution.
+		if card.effect_type == CardData.CardEffectType.REROLL_DIE:
+			pending_rerolls += 1
+			print("Reroll available.")
+
 		_refresh_hand()
 		_refresh_dice()
 		_update_all()
@@ -223,23 +255,24 @@ func _on_die_pressed(die: DiceData) -> void:
 
 func _on_end_turn_pressed() -> void:
 	selected_dice.clear()
+	pending_rerolls = 0
 	combat_manager.end_player_turn()
 
 func _on_player_turn_started() -> void:
 	end_turn_button.disabled = false
 	selected_dice.clear()
+	pending_rerolls = 0
 
 	_refresh_hand()
 	_refresh_dice()
 	_update_all()
 
-
 func _on_enemy_turn_started() -> void:
 	end_turn_button.disabled = true
 	selected_dice.clear()
+	pending_rerolls = 0
 
 	_update_all()
-
 
 func _on_combat_ended(winner: Combatant) -> void:
 	end_turn_button.disabled = true

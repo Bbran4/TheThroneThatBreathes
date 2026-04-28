@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://c44i5167vmuk5"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_5xhd0"]
+
+[resource]
+script = ExtResource("1_5xhd0")
+card_name = "Twin Strike"
+description = "Deal 10 damage.
+Requires: 2 dice (any)"
+dice_required = 2
+base_damage = 10
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

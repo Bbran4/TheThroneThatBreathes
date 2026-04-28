@@ -33,3 +33,8 @@ func can_be_used() -> bool:
 
 func get_display_text() -> String:
 	return str(current_value)
+
+func reroll() -> int:
+	# Rerolls this die without changing whether it is assigned.
+	current_value = randi_range(1, sides)
+	return current_value
