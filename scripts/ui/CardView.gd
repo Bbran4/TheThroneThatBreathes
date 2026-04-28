@@ -72,33 +72,11 @@ func _on_pressed() -> void:
 
 
 func _on_mouse_entered() -> void:
-	if hover_tween != null:
-		hover_tween.kill()
-
-	normal_position = position
-	normal_scale = scale
-	z_index = 100
-
-	hover_tween = create_tween()
-	hover_tween.set_parallel(true)
-	hover_tween.tween_property(self, "position:y", normal_position.y - hover_lift_amount, 0.10)
-	hover_tween.tween_property(self, "scale", hover_scale, 0.10)
-
 	if card_data != null:
 		card_hovered.emit(card_data)
 
 
 func _on_mouse_exited() -> void:
-	if hover_tween != null:
-		hover_tween.kill()
-
-	z_index = 0
-
-	hover_tween = create_tween()
-	hover_tween.set_parallel(true)
-	hover_tween.tween_property(self, "position:y", normal_position.y, 0.08)
-	hover_tween.tween_property(self, "scale", normal_scale, 0.08)
-
 	card_unhovered.emit()
 
 

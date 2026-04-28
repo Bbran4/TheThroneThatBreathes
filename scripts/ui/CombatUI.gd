@@ -38,7 +38,7 @@ const FAN_ARC_MAX      := 50.0   # Max total spread in degrees across all cards
 const CARD_SPREAD      := 95.0   # Horizontal gap between card centers (px)
 const FAN_SINK         := 1.5    # How much edge cards dip below center (multiplier)
 const HOVER_LIFT       := 120.0  # How far a hovered card rises (px)
-const HAND_BOTTOM_CROP := 110.0  # How many px of the card hide below screen bottom
+const HAND_BOTTOM_CROP := 120.0  # How many px of the card hide below screen bottom
 const CARD_WIDTH       := 180.0
 const CARD_HEIGHT      := 270.0
 
@@ -48,8 +48,6 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	players = new_players
 	enemies = new_enemies
 	active_player = combat_manager.active_player
-
-	hand_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	for p in players:
 		p.hp_changed.connect(_on_any_combatant_changed)
@@ -69,13 +67,15 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
 	_update_all()
-
+	_refresh_hand()
+	_refresh_dice()
 
 # ─── Fan Hand ─────────────────────────────────────────────────────────────────
 
 func _refresh_hand() -> void:
 	# Defer by one frame so hand_container.size is populated.
 	# Without this, size is Vector2.ZERO on the first call and the arc collapses.
+	await get_tree().process_frame
 	call_deferred("_do_refresh_hand")
 
 
@@ -90,7 +90,9 @@ func _do_refresh_hand() -> void:
 	var n := hand.size()
 	if n == 0:
 		return
-
+	
+	var viewport_size := get_viewport_rect().size
+	
 	var container_width := hand_container.size.x
 	if container_width <= 0:
 		# Container still not ready — try again next frame
@@ -101,8 +103,8 @@ func _do_refresh_hand() -> void:
 	var angle_step : Variant = arc / max(n - 1, 1)
 	var start_angle : Variant = -arc / 2.0
 
-	var center_x := container_width / 2.0
-	var bottom_y := hand_container.size.y - HAND_BOTTOM_CROP
+	var center_x := viewport_size.x * 0.5 - hand_container.global_position.x
+	var bottom_y := viewport_size.y - hand_container.global_position.y + HAND_BOTTOM_CROP
 
 	for i in n:
 		var card: CardData = hand[i]
