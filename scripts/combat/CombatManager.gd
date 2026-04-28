@@ -23,53 +23,82 @@ signal enemy_intent_prepared
 @export var starting_hand_size: int = 5
 @export var cards_drawn_per_turn: int = 1
 
-var player: PlayerCombatant
-var enemy: EnemyCombatant
+var players: Array[PlayerCombatant] = []
+var enemies: Array[EnemyCombatant] = []
+
+var active_player: PlayerCombatant
 
 var is_player_turn: bool = false
 var combat_is_active: bool = false
 
 
-func setup_combat(new_player: PlayerCombatant, new_enemy: EnemyCombatant) -> void:
-	# The manager receives combatants that already exist in the scene.
-	# This keeps CombatManager flexible and reusable.
-	player = new_player
-	enemy = new_enemy
+func setup_combat(new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
+	players = new_players
+	enemies = new_enemies
 
-	# Listen for death events so combat can end immediately.
-	player.died.connect(_on_combatant_died)
-	enemy.died.connect(_on_combatant_died)
+	active_player = _get_first_living_player()
 
+	for combatant in players + enemies:
+		combatant.died.connect(_on_combatant_died)
+
+func get_living_players() -> Array[PlayerCombatant]:
+	return players.filter(func(p): return p != null and not p.is_dead())
+
+
+func get_living_enemies() -> Array[EnemyCombatant]:
+	return enemies.filter(func(e): return e != null and not e.is_dead())
+
+
+func _get_first_living_player() -> PlayerCombatant:
+	var living_players := get_living_players()
+	if living_players.is_empty():
+		return null
+
+	return living_players[0]
+
+
+func _get_first_living_enemy() -> EnemyCombatant:
+	var living_enemies := get_living_enemies()
+	if living_enemies.is_empty():
+		return null
+
+	return living_enemies[0]
 
 func start_combat() -> void:
-	if player == null or enemy == null:
-		push_error("CombatManager cannot start combat without both player and enemy.")
+	if players.is_empty() or enemies.is_empty():
+		push_error("CombatManager cannot start combat without both teams.")
 		return
 
 	combat_is_active = true
 	combat_started.emit()
 
-	player.draw_cards(starting_hand_size)
-	enemy.draw_cards(starting_hand_size)
+	for p in players:
+		p.draw_cards(starting_hand_size)
 
-	_prepare_enemy_intent()
+	for e in enemies:
+		e.draw_cards(starting_hand_size)
+
+	_prepare_enemy_intents()
 	start_player_turn()
-
 
 func start_player_turn() -> void:
 	if not combat_is_active:
 		return
 
+	active_player = _get_first_living_player()
+
+	if active_player == null:
+		_end_combat(_get_first_living_enemy())
+		return
+
 	is_player_turn = true
 
-	player.reset_guard()
-	player.roll_dice()
-
-	# Player keeps their hand and draws only one new card per turn.
-	player.draw_cards(cards_drawn_per_turn)
+	for p in get_living_players():
+		p.reset_guard()
+		p.roll_dice()
+		p.draw_cards(cards_drawn_per_turn)
 
 	player_turn_started.emit()
-
 
 func end_player_turn() -> void:
 	if not combat_is_active:
@@ -78,41 +107,42 @@ func end_player_turn() -> void:
 	if not is_player_turn:
 		return
 
-	if enemy == null or enemy.is_dead():
-		_end_combat(player)
+	if get_living_enemies().is_empty():
+		_end_combat(_get_first_living_player())
 		return
 
 	is_player_turn = false
 	start_enemy_turn()
 
-
 func start_enemy_turn() -> void:
 	if not combat_is_active:
 		return
 
-	if enemy == null or enemy.is_dead():
-		_end_combat(player)
+	if get_living_enemies().is_empty():
+		_end_combat(_get_first_living_player())
 		return
 
 	enemy_turn_started.emit()
 
-	enemy.reset_guard()
+	for e in get_living_enemies():
+		e.reset_guard()
 
-	var selected_card := enemy.get_selected_card()
-	var selected_dice := enemy.get_selected_dice()
+		var selected_card := e.get_selected_card()
+		var selected_dice := e.get_selected_dice()
+		var target := _get_first_living_player()
 
-	if selected_card != null:
-		_try_enemy_play_prepared_card(selected_card, selected_dice)
+		if selected_card != null and target != null:
+			_try_enemy_play_prepared_card(e, selected_card, selected_dice, target)
 
-	enemy.clear_selected_card()
+		e.clear_selected_card()
 
 	_check_combat_end()
 
 	if combat_is_active:
-		_prepare_enemy_intent()
+		_prepare_enemy_intents()
 		start_player_turn()
-
-func play_player_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
+	
+func play_player_card(card: CardData, assigned_dice: Array[DiceData], target: Combatant = null) -> bool:
 	# This function will be called by UI later.
 	#
 	# The player selects a card, assigns dice, then confirms.
@@ -127,7 +157,7 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
 	if card == null:
 		return false
 
-	if not player.hand.has(card):
+	if active_player == null:
 		return false
 
 	if not card.can_use_with_dice(assigned_dice):
@@ -135,14 +165,17 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
 
 	# Make sure dice are actually available before using them.
 	for die in assigned_dice:
-		if not player.get_available_dice().has(die):
+		if not active_player.get_available_dice().has(die):
 			return false
 
 	# Assign dice so they cannot be reused.
 	for die in assigned_dice:
-		player.dice_pool.assign_die(die)
+		active_player.dice_pool.assign_die(die)
 
-	_resolve_card(card, player, enemy)
+	if target == null and card.can_target_enemy:
+		target = _get_first_living_enemy()
+
+	_resolve_card(card, active_player, target)
 
 	# Check for combat end immediately after resolving the card.
 	_check_combat_end()
@@ -151,33 +184,7 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
 	if not combat_is_active:
 		return true
 
-	player.discard_card(card)
-
-	return true
-
-
-func _try_enemy_play_card(card: CardData) -> bool:
-	# Simple enemy card play logic.
-	#
-	# For now, enemy uses the first available dice that meet the card requirement.
-	# Later, AI can become smarter.
-
-	var assigned_dice: Array[DiceData] = []
-
-	for die in enemy.get_available_dice():
-		if card.can_use_with_die(die.current_value):
-			assigned_dice.append(die)
-
-			if assigned_dice.size() >= card.dice_required:
-				break
-
-	if not card.can_use_with_dice(assigned_dice):
-		return false
-
-	for die in assigned_dice:
-		enemy.dice_pool.assign_die(die)
-
-	_resolve_card(card, enemy, player)
+	active_player.discard_card(card)
 
 	return true
 
@@ -205,8 +212,11 @@ func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 	print("Final guard: ", guard_amount)
 
 	if damage_amount > 0 and card.can_target_enemy:
-		print("Applying damage to target.")
-		target.take_damage(damage_amount)
+		if target != null:
+			print("Applying damage to target.")
+			target.take_damage(damage_amount)
+		else:
+			print("No target for damage.")
 	else:
 		print("No damage applied.")
 
@@ -221,12 +231,12 @@ func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 		user.take_damage(damage_amount)
 
 func _check_combat_end() -> void:
-	if player.is_dead():
-		_end_combat(enemy)
+	if get_living_players().is_empty():
+		_end_combat(_get_first_living_enemy())
 		return
 
-	if enemy.is_dead():
-		_end_combat(player)
+	if get_living_enemies().is_empty():
+		_end_combat(_get_first_living_player())
 		return
 
 
@@ -244,32 +254,33 @@ func _on_combatant_died(dead_combatant: Combatant) -> void:
 	# If someone dies from damage, immediately check who won.
 	_check_combat_end()
 
-func _prepare_enemy_intent() -> void:
-	enemy.roll_dice()
-	enemy.draw_cards(cards_drawn_per_turn)
-	enemy.prepare_intent()
+func _prepare_enemy_intents() -> void:
+	for e in get_living_enemies():
+		e.roll_dice()
+		e.draw_cards(cards_drawn_per_turn)
+		e.prepare_intent()
 
 	enemy_intent_prepared.emit()
 
-func _try_enemy_play_prepared_card(card: CardData, assigned_dice: Array[DiceData]) -> bool:
+func _try_enemy_play_prepared_card(enemy_actor: EnemyCombatant, card: CardData, assigned_dice: Array[DiceData], target: Combatant) -> bool:
 	if card == null:
 		return false
 
-	if not enemy.hand.has(card):
+	if not enemy_actor.hand.has(card):
 		return false
 
 	if not card.can_use_with_dice(assigned_dice):
 		return false
 
 	for die in assigned_dice:
-		if not enemy.get_available_dice().has(die):
+		if not enemy_actor.get_available_dice().has(die):
 			return false
 
 	for die in assigned_dice:
-		enemy.dice_pool.assign_die(die)
+		enemy_actor.dice_pool.assign_die(die)
 
-	_resolve_card(card, enemy, player)
+	_resolve_card(card, enemy_actor, target)
 
-	enemy.discard_card(card)
+	enemy_actor.discard_card(card)
 
 	return true

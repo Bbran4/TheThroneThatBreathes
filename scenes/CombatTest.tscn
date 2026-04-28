@@ -2,50 +2,49 @@
 
 [ext_resource type="Script" uid="uid://ccwada60nx028" path="res://scripts/combat/CombatTest.gd" id="1_aa5v2"]
 [ext_resource type="Script" uid="uid://ca0wwrvp3wqly" path="res://scripts/combat/CombatManager.gd" id="2_84fr5"]
-[ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="2_gaico"]
-[ext_resource type="Script" uid="uid://cui60d7oj1du7" path="res://scripts/combat/PlayerCombatant.gd" id="3_psff3"]
-[ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="3_ycf86"]
-[ext_resource type="Script" uid="uid://lmhct1c1dyfj" path="res://scripts/combat/EnemyCombatant.gd" id="4_uvkbr"]
-[ext_resource type="Script" uid="uid://bpjd3fk6h83lq" path="res://scripts/combat/CombatantVisual.gd" id="7_mvvgd"]
-[ext_resource type="Texture2D" uid="uid://c3t77l4lfd6y1" path="res://assets/ExiledKnight.png" id="8_qqmgp"]
-[ext_resource type="Texture2D" uid="uid://e5p2pie3bik0" path="res://assets/RotWolf.png" id="9_8equi"]
-[ext_resource type="PackedScene" uid="uid://curcwunumwlcv" path="res://scenes/ui/FloatingText.tscn" id="9_ycf86"]
-[ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="11_qqmgp"]
-[ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="12_8equi"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="3_2nakn"]
+[ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="3_player"]
+[ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="4_enemy"]
+[ext_resource type="PackedScene" uid="uid://curcwunumwlcv" path="res://scenes/ui/FloatingText.tscn" id="7_float"]
+[ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="8_ui"]
+[ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="9_card"]
 
-[node name="CombatTest" type="Node" unique_id=1986889536]
+[node name="CombatTest" type="Node" unique_id=204473287]
 script = ExtResource("1_aa5v2")
-player_data = ExtResource("2_gaico")
-enemy_data = ExtResource("3_ycf86")
-enemy_name = "Hollow Acolyte"
+player_team_data = Array[ExtResource("3_2nakn")]([ExtResource("3_player")])
+enemy_team_data = Array[ExtResource("3_2nakn")]([ExtResource("4_enemy"), ExtResource("4_enemy")])
 
-[node name="CombatManager" type="Node" parent="." unique_id=1843945017]
+[node name="CombatManager" type="Node" parent="." unique_id=1814825218]
 script = ExtResource("2_84fr5")
 
-[node name="PlayerCombatant" type="Node" parent="." unique_id=2140839672]
-script = ExtResource("3_psff3")
+[node name="Battlefield" type="Node2D" parent="." unique_id=1319888349]
 
-[node name="EnemyCombatant" type="Node" parent="." unique_id=1193692274]
-script = ExtResource("4_uvkbr")
+[node name="Background" type="Sprite2D" parent="Battlefield" unique_id=179849089]
 
-[node name="Battlefield" type="Node2D" parent="." unique_id=2740168]
+[node name="PlayerSlots" type="Node2D" parent="Battlefield" unique_id=1218945332]
 
-[node name="Background" type="Sprite2D" parent="Battlefield" unique_id=222489155]
+[node name="Slot1" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=112249003]
+position = Vector2(300, 310)
 
-[node name="PlayerVisual" type="Sprite2D" parent="Battlefield" unique_id=1188018208]
-position = Vector2(300, 360)
-scale = Vector2(0.25, 0.25)
-script = ExtResource("7_mvvgd")
-idle_texture = ExtResource("8_qqmgp")
+[node name="Slot2" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=1091353013]
+position = Vector2(220, 380)
 
-[node name="EnemyVisual" type="Sprite2D" parent="Battlefield" unique_id=1535846619]
-position = Vector2(900, 360)
-scale = Vector2(0.25, 0.25)
-script = ExtResource("7_mvvgd")
-idle_texture = ExtResource("9_8equi")
+[node name="Slot3" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=1059053817]
+position = Vector2(220, 240)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2131173972]
+[node name="EnemySlots" type="Node2D" parent="Battlefield" unique_id=463775274]
 
-[node name="CombatUI" parent="CanvasLayer" unique_id=1242325184 instance=ExtResource("11_qqmgp")]
-card_view_scene = ExtResource("12_8equi")
-floating_text_scene = ExtResource("9_ycf86")
+[node name="Slot1" type="Node2D" parent="Battlefield/EnemySlots" unique_id=361448813]
+position = Vector2(900, 310)
+
+[node name="Slot2" type="Node2D" parent="Battlefield/EnemySlots" unique_id=884624981]
+position = Vector2(980, 380)
+
+[node name="Slot3" type="Node2D" parent="Battlefield/EnemySlots" unique_id=2092028916]
+position = Vector2(980, 240)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1819585525]
+
+[node name="CombatUI" parent="CanvasLayer" unique_id=1585304774 instance=ExtResource("8_ui")]
+card_view_scene = ExtResource("9_card")
+floating_text_scene = ExtResource("7_float")

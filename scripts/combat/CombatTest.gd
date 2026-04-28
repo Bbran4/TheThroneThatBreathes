@@ -6,102 +6,159 @@ extends Node
 # Later, this will be replaced by proper scene loading,
 # character selection, enemy spawning, and UI.
 
-@export var player_data: CombatantData
-@export var enemy_data: CombatantData
+@export var player_team_data: Array[CombatantData] = []
+@export var enemy_team_data: Array[CombatantData] = []
+
+@export var player_combatant_scene: PackedScene
+@export var enemy_combatant_scene: PackedScene
+@export var combatant_visual_scene: PackedScene
 
 @onready var combat_manager: CombatManager = $CombatManager
-@onready var player: PlayerCombatant = $PlayerCombatant
-@onready var enemy: EnemyCombatant = $EnemyCombatant
 @onready var combat_ui: CombatUI = $CanvasLayer/CombatUI
-@onready var player_visual: CombatantVisual = $Battlefield/PlayerVisual
-@onready var enemy_visual: CombatantVisual = $Battlefield/EnemyVisual
+@onready var player_slots: Node2D = $Battlefield/PlayerSlots
+@onready var enemy_slots: Node2D = $Battlefield/EnemySlots
 
-@export var enemy_name: String = "Rot Wolf"
+var players: Array[PlayerCombatant] = []
+var enemies: Array[EnemyCombatant] = []
+var combatant_visuals: Dictionary = {}
 
 func _ready() -> void:
-	# Validate exported data before starting combat.
-	# This helps catch missing resources early.
-	if player_data == null:
-		push_error("CombatTest is missing player_data.")
+	if not _validate_team_data(player_team_data, "Player team"):
 		return
 
-	if enemy_data == null:
-		push_error("CombatTest is missing enemy_data.")
+	if not _validate_team_data(enemy_team_data, "Enemy team"):
 		return
 
-	if player_data.stats == null:
-		push_error("Player data is missing stats.")
-		return
+	_spawn_player_team()
+	_spawn_enemy_team()
 
-	if enemy_data.stats == null:
-		push_error("Enemy data is missing stats.")
-		return
+	combat_manager.setup_combat(players, enemies)
+	combat_ui.setup_ui(combat_manager, players, enemies)
 
-	if player_data.starting_deck.is_empty():
-		push_error("Player data is missing starting deck.")
-		return
-
-	if enemy_data.starting_deck.is_empty():
-		push_error("Enemy data is missing starting deck.")
-		return
-
-	# Setup combatants first.
-	player.setup(player_data.stats, player_data.starting_deck)
-	enemy.setup_enemy(enemy_data.display_name, enemy_data.stats, enemy_data.starting_deck)
-
-	# Then setup the manager.
-	combat_manager.setup_combat(player, enemy)
-	combat_ui.setup_ui(combat_manager, player, enemy)
-	
-	# Connect useful debug signals.
 	combat_manager.combat_started.connect(_on_combat_started)
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
-	
-	player.hp_changed.connect(_on_player_hp_changed)
-	enemy.hp_changed.connect(_on_enemy_hp_changed)
-	player.hp_changed.connect(_on_player_visual_hp_changed)
-	enemy.hp_changed.connect(_on_enemy_visual_hp_changed)
 
-	player.guard_changed.connect(_on_player_visual_guard_changed)
-	enemy.guard_changed.connect(_on_enemy_visual_guard_changed)
-	player.hand_changed.connect(_on_player_hand_changed)
-	player.dice_pool.dice_rolled.connect(_on_player_dice_rolled)
+	for combatant in players + enemies:
+		combatant.died.connect(_on_combatant_died)
 
-	# Start the test combat.
+		combatant.hp_changed.connect(func(_current_hp: int, _max_hp: int):
+			_on_combatant_visual_hp_changed(combatant)
+		)
+
+		combatant.guard_changed.connect(func(_current_guard: int):
+			_on_combatant_visual_guard_changed(combatant)
+		)
+
 	combat_manager.start_combat()
 
+func _on_combatant_visual_hp_changed(combatant: Combatant) -> void:
+	if combatant_visuals.has(combatant):
+		combatant_visuals[combatant].play_hit_reaction()
+
+
+func _on_combatant_visual_guard_changed(combatant: Combatant) -> void:
+	if combatant_visuals.has(combatant):
+		combatant_visuals[combatant].play_guard_reaction()
+
+func _validate_team_data(team_data: Array[CombatantData], label: String) -> bool:
+	if team_data.is_empty():
+		push_error(label + " is empty.")
+		return false
+
+	for data in team_data:
+		if data == null:
+			push_error(label + " contains null CombatantData.")
+			return false
+
+		if data.stats == null:
+			push_error(data.display_name + " is missing stats.")
+			return false
+
+		if data.starting_deck.is_empty():
+			push_error(data.display_name + " is missing starting deck.")
+			return false
+
+	return true
+
+func _spawn_player_team() -> void:
+	players.clear()
+
+	for i in player_team_data.size():
+		var data := player_team_data[i]
+
+		var combatant: PlayerCombatant = PlayerCombatant.new()
+		add_child(combatant)
+		combatant.name = "PlayerCombatant_%s" % i
+		combatant.setup(data.stats, data.starting_deck)
+
+		players.append(combatant)
+		_spawn_visual_for_combatant(combatant, data, player_slots, i)
+
+
+func _spawn_enemy_team() -> void:
+	enemies.clear()
+
+	for i in enemy_team_data.size():
+		var data := enemy_team_data[i]
+
+		var combatant: EnemyCombatant = EnemyCombatant.new()
+		add_child(combatant)
+		combatant.name = "EnemyCombatant_%s" % i
+		combatant.setup_enemy(data.display_name, data.stats, data.starting_deck)
+
+		enemies.append(combatant)
+		_spawn_visual_for_combatant(combatant, data, enemy_slots, i)
+
+func _on_combatant_died(combatant: Combatant) -> void:
+	if combatant_visuals.has(combatant):
+		var visual: Node = combatant_visuals[combatant]
+		combatant_visuals.erase(combatant)
+		visual.queue_free()
+
+func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot_parent: Node2D, index: int) -> void:
+	if index >= slot_parent.get_child_count():
+		push_error("Not enough visual slots for combatants.")
+		return
+
+	var slot := slot_parent.get_child(index)
+
+	var visual := CombatantVisual.new()
+	visual.scale = Vector2(0.15, 0.15)
+	visual.idle_texture = data.combat_sprite
+
+	slot.add_child(visual)
+
+	combatant_visuals[combatant] = visual
 
 func _on_combat_started() -> void:
 	print("Combat started.")
 
 
 func _on_player_turn_started() -> void:
-	print("--- Player Turn ---")
-	print("Player HP: ", player.current_hp)
-	print("Enemy HP: ", enemy.current_hp)
-	print("Player hand: ", player.hand)
-	print("Player dice: ", _dice_values_to_text(player.get_dice()))
+	var active_player := combat_manager.active_player
 
+	print("--- Player Turn ---")
+
+	if active_player != null:
+		print("Active Player HP: ", active_player.current_hp)
+		print("Active Player hand: ", active_player.hand)
+		print("Active Player dice: ", _dice_values_to_text(active_player.get_dice()))
+
+	print("Living enemies: ", combat_manager.get_living_enemies().size())
 
 func _on_enemy_turn_started() -> void:
 	print("--- Enemy Turn ---")
 
 
 func _on_combat_ended(winner: Combatant) -> void:
-	if winner == player:
-		print("Combat ended. Player wins.")
+	if players.has(winner):
+		print("Combat ended. Player team wins.")
+	elif enemies.has(winner):
+		print("Combat ended. Enemy team wins.")
 	else:
-		print("Combat ended. Enemy wins.")
-
-
-func _on_player_hp_changed(current_hp: int, max_hp: int) -> void:
-	print("Player HP changed: ", current_hp, "/", max_hp)
-
-
-func _on_enemy_hp_changed(current_hp: int, max_hp: int) -> void:
-	print("Enemy HP changed: ", current_hp, "/", max_hp)
+		print("Combat ended.")
 
 
 func _on_player_hand_changed(hand: Array) -> void:
@@ -110,21 +167,6 @@ func _on_player_hand_changed(hand: Array) -> void:
 
 func _on_player_dice_rolled(dice: Array[DiceData]) -> void:
 	print("Player rolled: ", _dice_values_to_text(dice))
-
-func _on_player_visual_hp_changed(_current_hp: int, _max_hp: int) -> void:
-	player_visual.play_hit_reaction()
-
-
-func _on_enemy_visual_hp_changed(_current_hp: int, _max_hp: int) -> void:
-	enemy_visual.play_hit_reaction()
-
-
-func _on_player_visual_guard_changed(_current_guard: int) -> void:
-	player_visual.play_guard_reaction()
-
-
-func _on_enemy_visual_guard_changed(_current_guard: int) -> void:
-	enemy_visual.play_guard_reaction()
 
 func _dice_values_to_text(dice: Array[DiceData]) -> String:
 	var values: Array[String] = []
@@ -149,14 +191,26 @@ func _try_play_first_card() -> void:
 		print("Cannot play card. It is not the player's turn.")
 		return
 
-	if player.hand.is_empty():
+	var active_player := combat_manager.active_player
+
+	if active_player == null:
+		print("No active player.")
+		return
+
+	if active_player.hand.is_empty():
 		print("No cards in hand.")
 		return
 
-	var card: CardData = player.hand[0]
+	var target := combat_manager._get_first_living_enemy()
+
+	if target == null:
+		print("No living enemy target.")
+		return
+
+	var card: CardData = active_player.hand[0]
 	var assigned_dice: Array[DiceData] = []
 
-	for die in player.get_available_dice():
+	for die in active_player.get_available_dice():
 		if card.can_use_with_die(die.current_value):
 			assigned_dice.append(die)
 
@@ -166,10 +220,10 @@ func _try_play_first_card() -> void:
 	print("Trying to play: ", card.card_name)
 	print("Assigned dice: ", _dice_values_to_text(assigned_dice))
 
-	var success := combat_manager.play_player_card(card, assigned_dice)
+	var success := combat_manager.play_player_card(card, assigned_dice, target)
 
 	if success:
 		print("Played card: ", card.card_name)
-		print("Enemy HP now: ", enemy.current_hp)
+		print("Target HP now: ", target.current_hp)
 	else:
 		print("Could not play card: ", card.card_name)

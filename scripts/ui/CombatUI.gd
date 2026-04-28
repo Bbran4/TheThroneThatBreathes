@@ -19,40 +19,50 @@ class_name CombatUI
 @export var floating_text_scene: PackedScene
 
 var combat_manager: CombatManager
-var player: PlayerCombatant
-var enemy: EnemyCombatant
+var players: Array[PlayerCombatant] = []
+var enemies: Array[EnemyCombatant] = []
+
+var active_player: PlayerCombatant
+var selected_target: Combatant = null
 
 var selected_dice: Array[DiceData] = []
 var pending_rerolls: int = 0
 var hovered_card: CardData = null
 
-func setup_ui(new_combat_manager: CombatManager, new_player: PlayerCombatant, new_enemy: EnemyCombatant) -> void:
-	# Store references to the combat objects.
+func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
 	combat_manager = new_combat_manager
-	player = new_player
-	enemy = new_enemy
+	players = new_players
+	enemies = new_enemies
+	active_player = combat_manager.active_player
 
-	# Connect combatant signals so UI updates when data changes.
-	player.hp_changed.connect(_on_player_hp_changed)
-	player.guard_changed.connect(_on_player_guard_changed)
-	player.hand_changed.connect(_on_player_hand_changed)
-	player.dice_pool.dice_changed.connect(_on_player_dice_changed)
+	for p in players:
+		p.hp_changed.connect(_on_any_combatant_changed)
+		p.guard_changed.connect(_on_any_guard_changed)
+		p.hand_changed.connect(_on_player_hand_changed)
+		p.dice_pool.dice_changed.connect(_on_player_dice_changed)
 
-	enemy.hp_changed.connect(_on_enemy_hp_changed)
-	enemy.guard_changed.connect(_on_enemy_guard_changed)
-	enemy.intent_changed.connect(_on_enemy_intent_changed)
-	
+	for e in enemies:
+		e.hp_changed.connect(_on_any_combatant_changed)
+		e.guard_changed.connect(_on_any_guard_changed)
+		e.intent_changed.connect(_on_enemy_intent_changed)
+
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
-	
-	hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	hand_container.add_theme_constant_override("separation", -55)
-	
+
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
 	_update_all()
 
+func _on_any_combatant_changed(_current_hp: int, _max_hp: int) -> void:
+	_update_all()
+
+
+func _on_any_guard_changed(_current_guard: int) -> void:
+	_update_all()
+
+func _refresh_active_player() -> void:
+	active_player = combat_manager.active_player
 
 func _update_all() -> void:
 	_update_player_info()
@@ -60,20 +70,51 @@ func _update_all() -> void:
 
 
 func _update_player_info() -> void:
-	player_label.text = "Player\nHP: %s / %s\nGuard: %s" % [
-		player.current_hp,
-		player.stats.max_hp,
-		player.current_guard
-	]
+	var lines: Array[String] = []
 
+	for p in players:
+		if p == null:
+			continue
+
+		var prefix := ""
+		if p == active_player:
+			prefix = "> "
+
+		lines.append("%sPlayer  HP: %s/%s  Guard: %s" % [
+			prefix,
+			p.current_hp,
+			p.stats.max_hp,
+			p.current_guard
+		])
+
+	player_label.text = "\n".join(lines)
+
+func _get_default_target_for_card(card: CardData) -> Combatant:
+	if card.can_target_enemy:
+		for e in enemies:
+			if e != null and not e.is_dead():
+				return e
+
+	if card.can_target_self:
+		return active_player
+
+	return null
 
 func _update_enemy_info() -> void:
-	enemy_label.text = "%s\nHP: %s / %s\nGuard: %s" % [
-		enemy.enemy_name,
-		enemy.current_hp,
-		enemy.stats.max_hp,
-		enemy.current_guard
-	]
+	var lines: Array[String] = []
+
+	for e in enemies:
+		if e == null:
+			continue
+
+		lines.append("%s  HP: %s/%s  Guard: %s" % [
+			e.enemy_name,
+			e.current_hp,
+			e.stats.max_hp,
+			e.current_guard
+		])
+
+	enemy_label.text = "\n".join(lines)
 
 
 func _on_player_hp_changed(_current_hp: int, _max_hp: int) -> void:
@@ -116,7 +157,7 @@ func _can_any_card_use_die(die: DiceData) -> bool:
 	if die.is_assigned:
 		return false
 
-	for card in player.hand:
+	for card in active_player.hand:
 		if card.can_use_with_die(die.current_value):
 			return true
 
@@ -141,7 +182,7 @@ func _refresh_hand() -> void:
 		push_error("CombatUI is missing card_view_scene.")
 		return
 
-	for card in player.hand:
+	for card in active_player.hand:
 		var card_view: CardView = card_view_scene.instantiate()
 		hand_container.add_child(card_view)
 
@@ -167,7 +208,7 @@ func _refresh_dice() -> void:
 	_clear_invalid_selected_dice()
 	_clear_children(dice_container)
 
-	for die in player.get_dice():
+	for die in active_player.get_dice():
 		var die_slot := VBoxContainer.new()
 
 		var die_button := Button.new()
@@ -238,7 +279,12 @@ func _on_card_pressed(card: CardData) -> void:
 		print("Selected dice cannot be used for ", card.card_name)
 		return
 
-	var success := combat_manager.play_player_card(card, selected_dice)
+	var target := selected_target
+
+	if target == null:
+		target = _get_default_target_for_card(card)
+
+	var success := combat_manager.play_player_card(card, selected_dice, target)
 
 	if success:
 		print("Played card: ", card.card_name)
@@ -280,6 +326,7 @@ func _on_end_turn_pressed() -> void:
 	combat_manager.end_player_turn()
 
 func _on_player_turn_started() -> void:
+	_refresh_active_player()
 	end_turn_button.disabled = false
 	selected_dice.clear()
 	pending_rerolls = 0
@@ -299,7 +346,7 @@ func _on_combat_ended(winner: Combatant) -> void:
 	end_turn_button.disabled = true
 	enemy_intent_label.text = ""
 	
-	if winner == player:
+	if winner == active_player:
 		player_label.text += "\nVictory."
 	else:
 		player_label.text += "\nDefeat."
