@@ -27,6 +27,13 @@ enum CardEffectType {
 	REROLL_DIE
 }
 
+enum TargetMode {
+	NONE,
+	SINGLE_ENEMY,
+	SINGLE_ALLY,
+	SLOT_1_AND_RANDOM_OTHER
+}
+
 @export var card_art: Texture2D
 
 @export var card_name: String = "Unnamed Card"
@@ -47,6 +54,7 @@ enum CardEffectType {
 # Used when a card requires a minimum value or exact value.
 @export var required_die_value: int = 1
 @export var effect_type: CardEffectType = CardEffectType.NORMAL
+@export var target_mode: TargetMode = TargetMode.SINGLE_ENEMY
 # Base combat values.
 @export var base_damage: int = 0
 @export var base_guard: int = 0
@@ -80,19 +88,51 @@ func can_use_with_die(die_value: int) -> bool:
 	return false
 
 func can_use_with_dice(assigned_dice: Array[DiceData]) -> bool:
-	# First check if the card received enough dice.
+	if dice_required <= 0:
+		return true
+
 	if assigned_dice.size() < dice_required:
 		return false
 
-	# Every assigned die must satisfy this card's requirement.
+	var checked_count := 0
+
 	for die in assigned_dice:
+		if checked_count >= dice_required:
+			break
+
 		if die == null:
 			return false
 
 		if not can_use_with_die(die.current_value):
 			return false
 
-	return true
+		checked_count += 1
+
+	return checked_count >= dice_required
+
+func requires_manual_target() -> bool:
+	match target_mode:
+		TargetMode.SINGLE_ENEMY:
+			return true
+
+		TargetMode.SINGLE_ALLY:
+			return true
+
+		TargetMode.NONE:
+			return false
+
+		TargetMode.SLOT_1_AND_RANDOM_OTHER:
+			return false
+
+	return false
+
+
+func targets_enemies() -> bool:
+	return target_mode == TargetMode.SINGLE_ENEMY or target_mode == TargetMode.SLOT_1_AND_RANDOM_OTHER
+
+
+func targets_allies() -> bool:
+	return target_mode == TargetMode.SINGLE_ALLY
 
 func get_final_damage(user: Combatant) -> int:
 	# Only cards with base damage should scale with Power.

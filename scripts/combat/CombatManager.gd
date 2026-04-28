@@ -58,6 +58,35 @@ func _get_first_living_enemy() -> EnemyCombatant:
 
 	return living_enemies[0]
 
+func get_enemy_slot_targets_for_cleave() -> Array[Combatant]:
+	return _get_slot_1_and_random_other(enemies)
+
+
+func get_player_slot_targets_for_cleave() -> Array[Combatant]:
+	return _get_slot_1_and_random_other(players)
+
+
+func _get_slot_1_and_random_other(team: Array) -> Array[Combatant]:
+	var targets: Array[Combatant] = []
+
+	# Slot 1 means index 0.
+	if team.size() > 0:
+		var slot_1 = team[0]
+		if slot_1 != null and not slot_1.is_dead():
+			targets.append(slot_1)
+
+	var other_slots: Array[Combatant] = []
+
+	for i in range(1, team.size()):
+		var combatant = team[i]
+		if combatant != null and not combatant.is_dead():
+			other_slots.append(combatant)
+
+	if not other_slots.is_empty():
+		other_slots.shuffle()
+		targets.append(other_slots[0])
+
+	return targets
 
 func start_combat() -> void:
 	if players.is_empty() or enemies.is_empty():
@@ -137,7 +166,7 @@ func start_enemy_turn() -> void:
 
 		var selected_card := e.get_selected_card()
 		var selected_dice := e.get_selected_dice()
-		var target := _get_first_living_player()
+		var target := _get_enemy_target_for_card(selected_card)
 
 		if selected_card != null and target != null:
 			enemy_action_started.emit(e, selected_card, target)
@@ -161,6 +190,24 @@ func start_enemy_turn() -> void:
 		_prepare_enemy_intents()
 		start_player_turn()
 
+func _get_enemy_target_for_card(card: CardData) -> Combatant:
+	if card == null:
+		return null
+
+	match card.target_mode:
+		CardData.TargetMode.SINGLE_ENEMY:
+			return _get_first_living_player()
+
+		CardData.TargetMode.SINGLE_ALLY:
+			return null
+
+		CardData.TargetMode.NONE:
+			return null
+
+		CardData.TargetMode.SLOT_1_AND_RANDOM_OTHER:
+			return null
+
+	return null
 
 func play_player_card(card: CardData, assigned_dice: Array[DiceData], target: Combatant = null) -> bool:
 	if not combat_is_active:
@@ -181,26 +228,17 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData], target: Co
 	if not active_player.hand.has(card):
 		return false
 
-	if not card.can_use_with_dice(assigned_dice):
+	var dice_to_spend : Variant = _get_valid_dice_to_spend(active_player, card, assigned_dice)
+	if dice_to_spend == null:
 		return false
 
-	for die in assigned_dice:
-		if not active_player.get_available_dice().has(die):
-			return false
-
-	if target != null and target.is_dead():
+	if not _is_valid_player_target_for_card(card, target):
 		return false
 
-	if target == null and card.can_target_enemy:
-		target = _get_first_living_enemy()
-
-	if card.can_target_enemy and target == null:
-		return false
-
-	for die in assigned_dice:
+	for die in dice_to_spend:
 		active_player.dice_pool.assign_die(die)
 
-	_resolve_card(card, active_player, target)
+	_resolve_player_card_by_target_mode(card, active_player, target)
 
 	if active_player.hand.has(card):
 		active_player.discard_card(card)
@@ -209,6 +247,78 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData], target: Co
 
 	return true
 
+func _get_valid_dice_to_spend(user: Combatant, card: CardData, assigned_dice: Array[DiceData]) -> Variant:
+	var dice_to_spend: Array[DiceData] = []
+
+	if card.dice_required <= 0:
+		return dice_to_spend
+
+	for die in assigned_dice:
+		if dice_to_spend.size() >= card.dice_required:
+			break
+
+		if die != null and user.get_available_dice().has(die):
+			dice_to_spend.append(die)
+
+	if not card.can_use_with_dice(dice_to_spend):
+		return null
+
+	return dice_to_spend
+
+
+func _is_valid_player_target_for_card(card: CardData, target: Combatant) -> bool:
+	match card.target_mode:
+		CardData.TargetMode.NONE:
+			return true
+
+		CardData.TargetMode.SLOT_1_AND_RANDOM_OTHER:
+			return true
+
+		CardData.TargetMode.SINGLE_ENEMY:
+			return target != null and not target.is_dead() and _is_enemy_combatant(target)
+
+		CardData.TargetMode.SINGLE_ALLY:
+			return target != null and not target.is_dead() and _is_player_combatant(target)
+
+	return false
+
+
+func _is_player_combatant(combatant: Combatant) -> bool:
+	for p in players:
+		if p == combatant:
+			return true
+	return false
+
+
+func _is_enemy_combatant(combatant: Combatant) -> bool:
+	for e in enemies:
+		if e == combatant:
+			return true
+	return false
+
+func _resolve_player_card_by_target_mode(card: CardData, user: Combatant, target: Combatant) -> void:
+	match card.target_mode:
+		CardData.TargetMode.NONE:
+			_resolve_card(card, user, user)
+
+		CardData.TargetMode.SINGLE_ENEMY:
+			_resolve_card(card, user, target)
+
+		CardData.TargetMode.SINGLE_ALLY:
+			_resolve_card(card, user, target)
+
+		CardData.TargetMode.SLOT_1_AND_RANDOM_OTHER:
+			var targets := get_enemy_slot_targets_for_cleave()
+
+			if targets.is_empty():
+				combat_log.emit("%s finds no targets for %s." % [
+					user.get_display_name(),
+					card.card_name
+				])
+				return
+
+			for cleave_target in targets:
+				_resolve_card(card, user, cleave_target)
 
 func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 	var damage_amount: int = card.get_final_damage(user)
@@ -309,19 +419,41 @@ func _try_enemy_play_prepared_card(enemy_actor: EnemyCombatant, card: CardData, 
 	if not enemy_actor.hand.has(card):
 		return false
 
-	if not card.can_use_with_dice(assigned_dice):
+	var dice_to_spend : Variant = _get_valid_dice_to_spend(enemy_actor, card, assigned_dice)
+	if dice_to_spend == null:
 		return false
 
-	for die in assigned_dice:
-		if not enemy_actor.get_available_dice().has(die):
-			return false
-
-	for die in assigned_dice:
+	for die in dice_to_spend:
 		enemy_actor.dice_pool.assign_die(die)
 
-	_resolve_card(card, enemy_actor, target)
+	_resolve_enemy_card_by_target_mode(card, enemy_actor, target)
 
 	if enemy_actor.hand.has(card):
 		enemy_actor.discard_card(card)
 
 	return true
+
+func _resolve_enemy_card_by_target_mode(card: CardData, user: EnemyCombatant, target: Combatant) -> void:
+	match card.target_mode:
+		CardData.TargetMode.NONE:
+			_resolve_card(card, user, user)
+
+		CardData.TargetMode.SINGLE_ENEMY:
+			if target != null:
+				_resolve_card(card, user, target)
+
+		CardData.TargetMode.SINGLE_ALLY:
+			_resolve_card(card, user, user)
+
+		CardData.TargetMode.SLOT_1_AND_RANDOM_OTHER:
+			var targets := get_player_slot_targets_for_cleave()
+
+			if targets.is_empty():
+				combat_log.emit("%s finds no targets for %s." % [
+					user.enemy_name,
+					card.card_name
+				])
+				return
+
+			for cleave_target in targets:
+				_resolve_card(card, user, cleave_target)

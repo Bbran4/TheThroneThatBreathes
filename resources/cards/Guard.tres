@@ -8,6 +8,7 @@ card_name = "Guard"
 description = "Gain 5 guard.
 Requires: Any die"
 card_type = 1
+target_mode = 2
 base_guard = 5
 can_target_self = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

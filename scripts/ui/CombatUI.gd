@@ -29,6 +29,12 @@ var result_panel: PanelContainer
 var reward_buttons_container: VBoxContainer
 var hand_refresh_version: int = 0
 
+var pending_card: CardData = null
+var pending_dice: Array[DiceData] = []
+
+var target_button_layer: Control
+var target_buttons_by_combatant: Dictionary = {}
+
 const FAN_ARC_MAX := 50.0
 const CARD_SPREAD := 95.0
 const FAN_SINK := 1.5
@@ -36,6 +42,8 @@ const HOVER_LIFT := 120.0
 const HAND_BOTTOM_CROP := 120.0
 const CARD_WIDTH := 180.0
 const CARD_HEIGHT := 270.0
+
+signal target_selected(target: Combatant)
 
 
 func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
@@ -347,15 +355,62 @@ func _on_player_hand_changed(_hand: Array) -> void:
 func _on_player_dice_changed(_dice: Array[DiceData]) -> void:
 	_refresh_dice()
 
+func _card_can_be_prepared(card: CardData) -> bool:
+	if card == null:
+		return false
+
+	if card.dice_required <= 0:
+		return true
+
+	if selected_dice.size() < card.dice_required:
+		return false
+
+	var dice_to_use: Array[DiceData] = []
+
+	for die in selected_dice:
+		if dice_to_use.size() >= card.dice_required:
+			break
+
+		dice_to_use.append(die)
+
+	return card.can_use_with_dice(dice_to_use)
+
+func _get_dice_for_card(card: CardData) -> Array[DiceData]:
+	var dice_to_use: Array[DiceData] = []
+
+	if card == null:
+		return dice_to_use
+
+	if card.dice_required <= 0:
+		return dice_to_use
+
+	for die in selected_dice:
+		if dice_to_use.size() >= card.dice_required:
+			break
+
+		dice_to_use.append(die)
+
+	return dice_to_use
 
 func _can_selected_dice_play_card(card: CardData) -> bool:
 	if card == null:
 		return false
 
+	if card.dice_required <= 0:
+		return true
+
 	if selected_dice.size() < card.dice_required:
 		return false
 
-	return card.can_use_with_dice(selected_dice)
+	var dice_to_check: Array[DiceData] = []
+
+	for die in selected_dice:
+		if dice_to_check.size() >= card.dice_required:
+			break
+
+		dice_to_check.append(die)
+
+	return card.can_use_with_dice(dice_to_check)
 
 
 func _can_any_card_use_die(die: DiceData) -> bool:
@@ -440,26 +495,39 @@ func _on_card_pressed(card: CardData) -> void:
 	if active_player == null:
 		return
 
-	if selected_dice.size() < card.dice_required:
-		print("Not enough dice selected for ", card.card_name)
+	if not _card_can_be_prepared(card):
+		print("Cannot prepare card: ", card.card_name)
 		return
 
-	if not card.can_use_with_dice(selected_dice):
-		print("Selected dice cannot be used for ", card.card_name)
+	pending_card = card
+	pending_dice = _get_dice_for_card(card)
+
+	if card.requires_manual_target():
+		print("Selected card: ", card.card_name, ". Choose a target.")
 		return
 
-	var target := selected_target
-	if target == null or target.is_dead():
-		target = _get_default_target_for_card(card)
+	_play_pending_card(null)
 
-	var success := combat_manager.play_player_card(card, selected_dice, target)
+func _play_pending_card(target: Combatant) -> void:
+	if pending_card == null:
+		return
+
+	var card := pending_card
+	var dice_to_use := pending_dice.duplicate()
+
+	var success := combat_manager.play_player_card(card, dice_to_use, target)
 
 	if success:
 		print("Played card: ", card.card_name)
-		selected_dice.clear()
+
+		for die in dice_to_use:
+			selected_dice.erase(die)
 
 		if card.effect_type == CardData.CardEffectType.REROLL_DIE:
 			pending_rerolls += 1
+
+		pending_card = null
+		pending_dice.clear()
 
 		if selected_target != null and selected_target.is_dead():
 			selected_target = null
@@ -469,7 +537,6 @@ func _on_card_pressed(card: CardData) -> void:
 		_update_all()
 	else:
 		print("Could not play card: ", card.card_name)
-
 
 func _on_die_pressed(die: DiceData) -> void:
 	if die.is_assigned or not _can_any_card_use_die(die):
@@ -520,6 +587,43 @@ func _on_combat_ended(winner: Combatant) -> void:
 	else:
 		_show_result_panel(false)
 
+func select_target(target: Combatant) -> void:
+	if target == null:
+		return
+
+	if target.is_dead():
+		return
+
+	selected_target = target
+	_update_all()
+	target_selected.emit(target)
+
+	if pending_card == null:
+		return
+
+	if pending_card.target_mode == CardData.TargetMode.SINGLE_ENEMY:
+		if not _is_enemy_combatant(target):
+			print("That card needs an enemy target.")
+			return
+
+		_play_pending_card(target)
+		return
+
+	if pending_card.target_mode == CardData.TargetMode.SINGLE_ALLY:
+		if not _is_player_combatant(target):
+			print("That card needs an ally target.")
+			return
+
+		_play_pending_card(target)
+		return
+
+func clear_target() -> void:
+	selected_target = null
+	_update_all()
+
+func cancel_pending_card() -> void:
+	pending_card = null
+	pending_dice.clear()
 
 func _show_result_panel(player_won: bool) -> void:
 	if result_panel == null:
@@ -732,3 +836,60 @@ func _spawn_floating_text(text_value: String, screen_position: Vector2) -> void:
 	var floating_text: FloatingText = floating_text_scene.instantiate()
 	add_child(floating_text)
 	floating_text.play(text_value, screen_position)
+
+func setup_target_buttons(combatant_visuals: Dictionary) -> void:
+	if target_button_layer == null:
+		target_button_layer = Control.new()
+		target_button_layer.name = "TargetButtonLayer"
+		target_button_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		target_button_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+		add_child(target_button_layer)
+
+	_clear_children(target_button_layer)
+	target_buttons_by_combatant.clear()
+
+	for combatant in combatant_visuals.keys():
+		var visual: Node2D = combatant_visuals[combatant]
+
+		var button := Button.new()
+		button.text = ""
+		button.flat = true
+		button.focus_mode = Control.FOCUS_NONE
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
+		button.modulate = Color(1, 1, 1, 0.12)
+
+		# Adjust these to fit your sprites.
+		var button_size := Vector2(130, 170)
+		button.size = button_size
+		button.global_position = visual.get_global_transform_with_canvas().origin - button_size * 0.5
+
+		button.pressed.connect(func():
+			print("Selected target: ", combatant.get_display_name())
+			select_target(combatant)
+		)
+
+		target_button_layer.add_child(button)
+		target_buttons_by_combatant[combatant] = button
+
+func refresh_target_buttons(combatant_visuals: Dictionary) -> void:
+	for combatant in target_buttons_by_combatant.keys():
+		var button: Button = target_buttons_by_combatant[combatant]
+
+		if combatant == null or combatant.is_dead():
+			button.visible = false
+			continue
+
+		if not combatant_visuals.has(combatant):
+			button.visible = false
+			continue
+
+		var visual: Node2D = combatant_visuals[combatant]
+		var button_size := button.size
+
+		button.visible = true
+		button.global_position = visual.get_global_transform_with_canvas().origin - button_size * 0.5
+
+		if combatant == selected_target:
+			button.modulate = Color(1.0, 0.85, 0.2, 0.28)
+		else:
+			button.modulate = Color(1, 1, 1, 0.08)

@@ -9,5 +9,6 @@ description = "Reroll one available die."
 card_type = 2
 dice_required = 0
 effect_type = 1
+target_mode = 0
 can_target_self = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

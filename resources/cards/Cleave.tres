@@ -9,6 +9,7 @@ description = "Deal 8 damage.
 Requires: Even"
 dice_requirement_type = 4
 required_die_value = 2
+target_mode = 3
 base_damage = 8
 can_target_enemy = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

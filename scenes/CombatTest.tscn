@@ -14,6 +14,7 @@
 script = ExtResource("1_aa5v2")
 player_team_data = Array[ExtResource("3_2nakn")]([ExtResource("3_player")])
 enemy_team_data = Array[ExtResource("3_2nakn")]([ExtResource("4_enemy"), ExtResource("4_enemy"), ExtResource("5_ycf86")])
+click_size = Vector2(120, 250)
 
 [node name="CombatManager" type="Node" parent="." unique_id=1814825218]
 script = ExtResource("2_84fr5")

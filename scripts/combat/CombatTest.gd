@@ -6,6 +6,7 @@ extends Node
 @export var player_combatant_scene: PackedScene
 @export var enemy_combatant_scene: PackedScene
 @export var combatant_visual_scene: PackedScene
+@export var click_size: Vector2 = Vector2(700, 900)
 
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var combat_ui: CombatUI = $CanvasLayer/CombatUI
@@ -15,7 +16,6 @@ extends Node
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
 var combatant_visuals: Dictionary = {}
-
 
 func _ready() -> void:
 	if not _validate_team_data(player_team_data, "Player team"):
@@ -29,7 +29,12 @@ func _ready() -> void:
 
 	combat_manager.setup_combat(players, enemies)
 	combat_ui.setup_ui(combat_manager, players, enemies)
+	combat_ui.setup_target_buttons(combatant_visuals)
 
+	combat_ui.target_selected.connect(func(_target: Combatant):
+		_update_target_visuals()
+	)
+	
 	combat_manager.combat_started.connect(_on_combat_started)
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
@@ -64,6 +69,9 @@ func _ready() -> void:
 
 	combat_manager.start_combat()
 
+func _process(_delta: float) -> void:
+	if combat_ui != null:
+		combat_ui.refresh_target_buttons(combatant_visuals)
 
 func _on_combat_log(message: String) -> void:
 	print(message)
@@ -131,10 +139,15 @@ func _spawn_enemy_team() -> void:
 
 
 func _on_combatant_died(combatant: Combatant) -> void:
+	if combat_ui.selected_target == combatant:
+		combat_ui.clear_target()
+
 	if combatant_visuals.has(combatant):
 		var visual: CombatantVisual = combatant_visuals[combatant]
 		combatant_visuals.erase(combatant)
 		visual.play_death_reaction()
+
+	_update_target_visuals()
 
 
 func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot_parent: Node2D, index: int) -> void:
@@ -145,6 +158,7 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 	var slot := slot_parent.get_child(index)
 
 	var visual := CombatantVisual.new()
+	visual.name = combatant.get_display_name() + "_Visual"
 	visual.scale = Vector2(0.15, 0.15)
 	visual.idle_texture = data.combat_sprite
 
@@ -152,6 +166,14 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 
 	combatant_visuals[combatant] = visual
 
+func _update_target_visuals() -> void:
+	for combatant in combatant_visuals.keys():
+		var visual: CombatantVisual = combatant_visuals[combatant]
+
+		if combatant == combat_ui.selected_target:
+			visual.set_targeted(true)
+		else:
+			visual.set_targeted(false)
 
 func _on_combat_started() -> void:
 	print("Combat started.")
