@@ -53,7 +53,7 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	active_player = combat_manager.active_player
 
 	player_top_hud.setup(active_player, "Exiled Knight")
-
+	
 	_ensure_polish_ui_nodes()
 
 	for p in players:
