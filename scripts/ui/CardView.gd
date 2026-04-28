@@ -17,8 +17,11 @@ signal card_unhovered
 
 var card_data: CardData
 
+var hover_lift_amount = 180.0
 var normal_position: Vector2
-var hover_lift_amount: float = 24.0
+var normal_scale: Vector2 = Vector2.ONE
+var hover_scale: Vector2 = Vector2(1.15, 1.15)
+var hover_tween: Tween
 
 
 func _ready() -> void:
@@ -26,7 +29,7 @@ func _ready() -> void:
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 
-	custom_minimum_size = Vector2(160, 240)
+	custom_minimum_size = Vector2(180, 270)
 	_create_card_styles()
 
 	name_label.add_theme_color_override("font_color", Color(0.95, 0.82, 0.55))
@@ -69,17 +72,32 @@ func _on_pressed() -> void:
 
 
 func _on_mouse_entered() -> void:
+	if hover_tween != null:
+		hover_tween.kill()
+
 	normal_position = position
-	position.y -= hover_lift_amount
+	normal_scale = scale
 	z_index = 100
+
+	hover_tween = create_tween()
+	hover_tween.set_parallel(true)
+	hover_tween.tween_property(self, "position:y", normal_position.y - hover_lift_amount, 0.10)
+	hover_tween.tween_property(self, "scale", hover_scale, 0.10)
 
 	if card_data != null:
 		card_hovered.emit(card_data)
 
 
 func _on_mouse_exited() -> void:
-	position = normal_position
+	if hover_tween != null:
+		hover_tween.kill()
+
 	z_index = 0
+
+	hover_tween = create_tween()
+	hover_tween.set_parallel(true)
+	hover_tween.tween_property(self, "position:y", normal_position.y, 0.08)
+	hover_tween.tween_property(self, "scale", normal_scale, 0.08)
 
 	card_unhovered.emit()
 

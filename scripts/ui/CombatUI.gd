@@ -34,7 +34,8 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	players = new_players
 	enemies = new_enemies
 	active_player = combat_manager.active_player
-
+	hand_container.add_theme_constant_override("separation", -80)
+	
 	for p in players:
 		p.hp_changed.connect(_on_any_combatant_changed)
 		p.guard_changed.connect(_on_any_guard_changed)
@@ -184,7 +185,13 @@ func _refresh_hand() -> void:
 
 	for card in active_player.hand:
 		var card_view: CardView = card_view_scene.instantiate()
-		hand_container.add_child(card_view)
+		var slot := Control.new()
+		slot.custom_minimum_size = Vector2(95, 270)
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hand_container.add_child(slot)
+
+		card_view.position = Vector2(0, 150)
+		slot.add_child(card_view)
 
 		var is_playable := _can_selected_dice_play_card(card)
 
