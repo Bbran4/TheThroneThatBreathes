@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_uvwl0")
-max_hp = 25
+max_hp = 22
 dice_count = 2
 metadata/_custom_type_script = "uid://c04oea2ycr8hr"

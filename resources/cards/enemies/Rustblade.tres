@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://dooes0fcekh4w"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_djanf"]
+
+[resource]
+script = ExtResource("1_djanf")
+card_name = "Rustblade"
+description = "Damage: 7
+Dice: Any
+Target enemy: true"
+base_damage = 7
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

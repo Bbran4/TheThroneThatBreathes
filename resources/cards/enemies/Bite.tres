@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://dykohbf2ijjbm"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_87oil"]
+
+[resource]
+script = ExtResource("1_87oil")
+card_name = "Bite"
+description = "Damage: 5
+Dice: Any
+Target enemy: true"
+base_damage = 5
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

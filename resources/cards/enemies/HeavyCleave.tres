@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://60clvp01nrlb"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_waxys"]
+
+[resource]
+script = ExtResource("1_waxys")
+card_name = "Heavy Cleave"
+description = "Damage: 13
+Dice: 5+
+Target enemy: true"
+dice_required = 5
+dice_requirement_type = 1
+base_damage = 13
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

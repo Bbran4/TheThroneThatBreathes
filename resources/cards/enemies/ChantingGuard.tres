@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://bbwh6hfhnwyuk"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_j60fi"]
+
+[resource]
+script = ExtResource("1_j60fi")
+card_name = "Chanting Guard"
+description = "Guard: 7
+Dice: Any
+Target self: true"
+card_type = 1
+base_guard = 7
+can_target_self = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

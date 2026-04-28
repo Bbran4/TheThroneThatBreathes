@@ -133,6 +133,9 @@ func _get_dice_requirement_icon_text(card: CardData) -> String:
 		CardData.DiceRequirementType.MINIMUM_VALUE:
 			return "🎲" + str(card.required_die_value) + "+"
 
+		CardData.DiceRequirementType.MAXIMUM_VALUE:
+			return "🎲≤" + str(card.required_die_value)
+
 		CardData.DiceRequirementType.EXACT_VALUE:
 			return "🎲" + str(card.required_die_value)
 

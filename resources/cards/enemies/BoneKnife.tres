@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://b8c7o4bktd234"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_cuw34"]
+
+[resource]
+script = ExtResource("1_cuw34")
+card_name = "Bone Knife"
+description = "Damage: 6
+Dice: Any
+Target enemy: true"
+base_damage = 6
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

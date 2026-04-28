@@ -1,14 +1,14 @@
 [gd_resource type="Resource" script_class="CardData" format=3 uid="uid://b85ava5av40jk"]
 
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_r63wa"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_47x4n"]
 
 [resource]
-script = ExtResource("1_r63wa")
+script = ExtResource("1_47x4n")
 card_name = "Precision Guard"
 description = "Gain 10 guard.
 Requires: EXACT 2"
 card_type = 1
-dice_required = 2
-dice_requirement_type = 2
+dice_requirement_type = 3
+required_die_value = 2
 can_target_self = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

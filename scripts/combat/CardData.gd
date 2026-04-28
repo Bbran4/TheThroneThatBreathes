@@ -16,6 +16,7 @@ enum CardType {
 enum DiceRequirementType {
 	ANY,
 	MINIMUM_VALUE,
+	MAXIMUM_VALUE,
 	EXACT_VALUE,
 	EVEN,
 	ODD
@@ -57,15 +58,16 @@ enum CardEffectType {
 @export var can_target_self: bool = false
 
 func can_use_with_die(die_value: int) -> bool:
-	# Checks whether a single die is valid for a card.
-	
 	match dice_requirement_type:
 		DiceRequirementType.ANY:
 			return true
 		
 		DiceRequirementType.MINIMUM_VALUE:
 			return die_value >= required_die_value
-		
+
+		DiceRequirementType.MAXIMUM_VALUE:
+			return die_value <= required_die_value
+
 		DiceRequirementType.EXACT_VALUE:
 			return die_value == required_die_value
 		

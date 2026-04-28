@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://q086nkypn0m1"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_y0h0s"]
+
+[resource]
+script = ExtResource("1_y0h0s")
+card_name = "Dark Prayer"
+description = "Draw 1 card
+Guard: 3
+Dice: 3 or lower
+Target self: true"
+card_type = 2
+dice_required = 3
+dice_requirement_type = 2
+base_guard = 3
+cards_to_draw = 1
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CharacterStats" format=3 uid="uid://c230eqyqxmn0i"]
+
+[ext_resource type="Script" uid="uid://c04oea2ycr8hr" path="res://scripts/combat/CharacterStats.gd" id="1_3t2lh"]
+
+[resource]
+script = ExtResource("1_3t2lh")
+max_hp = 36
+dice_count = 2
+power = 1
+guard = 2
+metadata/_custom_type_script = "uid://c04oea2ycr8hr"

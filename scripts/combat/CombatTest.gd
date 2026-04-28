@@ -17,6 +17,8 @@ extends Node
 @onready var enemy: EnemyCombatant = $EnemyCombatant
 @onready var combat_ui: CombatUI = $CanvasLayer/CombatUI
 
+@export var enemy_name: String = "Rot Wolf"
+
 func _ready() -> void:
 	# Validate exported data before starting combat.
 	# This helps catch missing resources early.
@@ -38,7 +40,7 @@ func _ready() -> void:
 
 	# Setup combatants first.
 	player.setup(player_stats, player_deck)
-	enemy.setup_enemy("Rot Wolf", enemy_stats, enemy_deck)
+	enemy.setup_enemy(enemy_name, enemy_stats, enemy_deck)
 
 	# Then setup the manager.
 	combat_manager.setup_combat(player, enemy)

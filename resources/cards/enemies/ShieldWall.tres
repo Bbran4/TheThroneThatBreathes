@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://fpcubyocjj4x"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_lvcw2"]
+
+[resource]
+script = ExtResource("1_lvcw2")
+card_name = "Shield Wall"
+description = "Guard: 10
+Dice: Any
+Target self: true"
+card_type = 1
+base_guard = 10
+can_target_self = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

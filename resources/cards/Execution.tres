@@ -1,14 +1,14 @@
 [gd_resource type="Resource" script_class="CardData" format=3 uid="uid://chjeca26whnm"]
 
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_8yawm"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_8s2ou"]
 
 [resource]
-script = ExtResource("1_8yawm")
+script = ExtResource("1_8s2ou")
 card_name = "Execution"
 description = "Deal 15 damage.
 Requires: EXACT 6"
-dice_required = 6
-dice_requirement_type = 2
+dice_requirement_type = 3
+required_die_value = 6
 base_damage = 15
 can_target_enemy = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

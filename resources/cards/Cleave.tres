@@ -1,13 +1,14 @@
 [gd_resource type="Resource" script_class="CardData" format=3 uid="uid://bg3w4evgqg7n4"]
 
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_prnu8"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_at3r1"]
 
 [resource]
-script = ExtResource("1_prnu8")
+script = ExtResource("1_at3r1")
 card_name = "Cleave"
 description = "Deal 8 damage.
 Requires: Even"
-dice_requirement_type = 3
+dice_requirement_type = 4
+required_die_value = 2
 base_damage = 8
 can_target_enemy = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

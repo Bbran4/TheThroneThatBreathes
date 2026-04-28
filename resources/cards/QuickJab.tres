@@ -1,15 +1,15 @@
 [gd_resource type="Resource" script_class="CardData" format=3 uid="uid://bvw6exk2jecjx"]
 
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_1gk77"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_v7n4o"]
 
 [resource]
-script = ExtResource("1_1gk77")
+script = ExtResource("1_v7n4o")
 card_name = "Quick Jab"
 description = "Deal 4 damage.
 Draw 1 card.
 Requires: 3 or less"
-dice_required = 3
-dice_requirement_type = 1
+dice_requirement_type = 2
+required_die_value = 3
 base_damage = 4
 cards_to_draw = 1
 can_target_enemy = true
