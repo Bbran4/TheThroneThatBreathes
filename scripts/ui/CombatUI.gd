@@ -1,24 +1,14 @@
 extends Control
 class_name CombatUI
 
-# CombatUI displays the current combat state.
-#
-# Hand layout uses a fan arc — cards are positioned with rotation and Y offset
-# based on index, matching the feel of Slay the Spire / YuGiOh.
-#
-# Hover fix: each card stores its OWN rest transform and always returns to it.
-# No shared mutable state means rapid hover/unhover never drifts.
-#
-# Arc-on-spawn fix: _refresh_hand() is deferred by one frame via call_deferred
-# so hand_container.size is valid before we do any layout math.
-
 @onready var enemy_label: Label = $EnemyInfo/EnemyLabel
 @onready var player_label: Label = $PlayerInfo/PlayerLabel
 @onready var dice_container: HBoxContainer = $Container/DiceContainer
-@onready var hand_container: Control = $Container/HandContainer   # Must be Control, not HBoxContainer
+@onready var hand_container: Control = $Container/HandContainer
 @onready var end_turn_button: Button = $EndTurnButton
-@export var card_view_scene: PackedScene
 @onready var enemy_intent_label: Label = $EnemyIntentLabel
+
+@export var card_view_scene: PackedScene
 @export var floating_text_scene: PackedScene
 
 var combat_manager: CombatManager
@@ -32,15 +22,19 @@ var selected_dice: Array[DiceData] = []
 var pending_rerolls: int = 0
 var hovered_card: CardData = null
 
-# ─── Fan Hand Layout Constants ────────────────────────────────────────────────
+var intent_text_by_enemy: Dictionary = {}
 
-const FAN_ARC_MAX      := 50.0   # Max total spread in degrees across all cards
-const CARD_SPREAD      := 95.0   # Horizontal gap between card centers (px)
-const FAN_SINK         := 1.5    # How much edge cards dip below center (multiplier)
-const HOVER_LIFT       := 120.0  # How far a hovered card rises (px)
-const HAND_BOTTOM_CROP := 120.0  # How many px of the card hide below screen bottom
-const CARD_WIDTH       := 180.0
-const CARD_HEIGHT      := 270.0
+var combat_log_label: Label
+var result_panel: PanelContainer
+var reward_buttons_container: VBoxContainer
+
+const FAN_ARC_MAX := 50.0
+const CARD_SPREAD := 95.0
+const FAN_SINK := 1.5
+const HOVER_LIFT := 120.0
+const HAND_BOTTOM_CROP := 120.0
+const CARD_WIDTH := 180.0
+const CARD_HEIGHT := 270.0
 
 
 func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
@@ -49,38 +43,104 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	enemies = new_enemies
 	active_player = combat_manager.active_player
 
+	_ensure_polish_ui_nodes()
+
 	for p in players:
 		p.hp_changed.connect(_on_any_combatant_changed)
 		p.guard_changed.connect(_on_any_guard_changed)
 		p.hand_changed.connect(_on_player_hand_changed)
 		p.dice_pool.dice_changed.connect(_on_player_dice_changed)
+		p.damage_taken.connect(_on_combatant_damage_taken)
+		p.guard_gained.connect(_on_combatant_guard_gained)
+		p.guard_reset.connect(_on_combatant_guard_reset)
+		p.died.connect(_on_combatant_died)
 
 	for e in enemies:
 		e.hp_changed.connect(_on_any_combatant_changed)
 		e.guard_changed.connect(_on_any_guard_changed)
-		e.intent_changed.connect(_on_enemy_intent_changed)
+		e.intent_changed.connect(func(intent_text: String):
+			_on_enemy_intent_changed(e, intent_text)
+		)
+		e.damage_taken.connect(_on_combatant_damage_taken)
+		e.guard_gained.connect(_on_combatant_guard_gained)
+		e.guard_reset.connect(_on_combatant_guard_reset)
+		e.died.connect(_on_combatant_died)
 
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
+	combat_manager.combat_log.connect(_on_combat_log)
+	combat_manager.enemy_action_started.connect(_on_enemy_action_started)
+	combat_manager.enemy_intent_prepared.connect(_refresh_enemy_intents)
 
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
 	_update_all()
 	_refresh_hand()
 	_refresh_dice()
+	_refresh_enemy_intents()
 
-# ─── Fan Hand ─────────────────────────────────────────────────────────────────
+
+func _ensure_polish_ui_nodes() -> void:
+	combat_log_label = get_node_or_null("CombatLogLabel") as Label
+	if combat_log_label == null:
+		combat_log_label = Label.new()
+		combat_log_label.name = "CombatLogLabel"
+		combat_log_label.position = Vector2(24, 420)
+		combat_log_label.size = Vector2(520, 140)
+		combat_log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		combat_log_label.text = ""
+		add_child(combat_log_label)
+
+	result_panel = get_node_or_null("ResultPanel") as PanelContainer
+	if result_panel == null:
+		result_panel = PanelContainer.new()
+		result_panel.name = "ResultPanel"
+		result_panel.visible = false
+		result_panel.custom_minimum_size = Vector2(420, 260)
+		result_panel.position = Vector2(430, 180)
+		add_child(result_panel)
+
+		var margin := MarginContainer.new()
+		margin.add_theme_constant_override("margin_left", 18)
+		margin.add_theme_constant_override("margin_right", 18)
+		margin.add_theme_constant_override("margin_top", 18)
+		margin.add_theme_constant_override("margin_bottom", 18)
+		result_panel.add_child(margin)
+
+		var vbox := VBoxContainer.new()
+		vbox.name = "ResultVBox"
+		margin.add_child(vbox)
+
+		var title := Label.new()
+		title.name = "TitleLabel"
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.add_theme_font_size_override("font_size", 26)
+		vbox.add_child(title)
+
+		var subtitle := Label.new()
+		subtitle.name = "SubtitleLabel"
+		subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		subtitle.text = "Choose a reward"
+		vbox.add_child(subtitle)
+
+		reward_buttons_container = VBoxContainer.new()
+		reward_buttons_container.name = "RewardButtons"
+		vbox.add_child(reward_buttons_container)
+	else:
+		reward_buttons_container = result_panel.get_node_or_null("MarginContainer/ResultVBox/RewardButtons") as VBoxContainer
+
 
 func _refresh_hand() -> void:
-	# Defer by one frame so hand_container.size is populated.
-	# Without this, size is Vector2.ZERO on the first call and the arc collapses.
 	await get_tree().process_frame
 	call_deferred("_do_refresh_hand")
 
 
 func _do_refresh_hand() -> void:
 	_clear_children(hand_container)
+
+	if active_player == null:
+		return
 
 	if card_view_scene == null:
 		push_error("CombatUI is missing card_view_scene.")
@@ -90,18 +150,17 @@ func _do_refresh_hand() -> void:
 	var n := hand.size()
 	if n == 0:
 		return
-	
+
 	var viewport_size := get_viewport_rect().size
-	
+
 	var container_width := hand_container.size.x
 	if container_width <= 0:
-		# Container still not ready — try again next frame
 		_refresh_hand()
 		return
 
-	var arc        : Variant = min(FAN_ARC_MAX, n * 9.0)
-	var angle_step : Variant = arc / max(n - 1, 1)
-	var start_angle : Variant = -arc / 2.0
+	var arc: Variant = min(FAN_ARC_MAX, n * 9.0)
+	var angle_step: Variant = arc / max(n - 1, 1)
+	var start_angle: Variant = -arc / 2.0
 
 	var center_x := viewport_size.x * 0.5 - hand_container.global_position.x
 	var bottom_y := viewport_size.y - hand_container.global_position.y + HAND_BOTTOM_CROP
@@ -114,32 +173,26 @@ func _do_refresh_hand() -> void:
 		hand_container.add_child(card_view)
 		card_view.setup(card, is_playable)
 
-		# ── Compute this card's resting transform ──
-		var angle_deg    : Variant = start_angle + angle_step * i
-		var offset_x     := (i - (n - 1) / 2.0) * CARD_SPREAD
-		var rest_x       := center_x + offset_x - CARD_WIDTH / 2.0
-		var rest_y       : Variant = bottom_y + abs(angle_deg) * FAN_SINK - CARD_HEIGHT
+		var angle_deg: Variant = start_angle + angle_step * i
+		var offset_x := (i - (n - 1) / 2.0) * CARD_SPREAD
+		var rest_x := center_x + offset_x - CARD_WIDTH / 2.0
+		var rest_y: Variant = bottom_y + abs(angle_deg) * FAN_SINK - CARD_HEIGHT
 
-		# Apply resting transform
-		card_view.position        = Vector2(rest_x, rest_y)
-		card_view.pivot_offset    = Vector2(CARD_WIDTH / 2.0, CARD_HEIGHT * 1.4)
+		card_view.position = Vector2(rest_x, rest_y)
+		card_view.pivot_offset = Vector2(CARD_WIDTH / 2.0, CARD_HEIGHT * 1.4)
 		card_view.rotation_degrees = angle_deg
-		card_view.scale           = Vector2.ONE
-		card_view.z_index         = i
+		card_view.scale = Vector2.ONE
+		card_view.z_index = i
 
-		# ── Connect hover using captured rest values ──
-		# Capture all rest data as local constants so the lambdas are self-contained.
-		# This is the key fix: hover and unhover both know exactly where to go,
-		# regardless of what state the card is currently in.
-		var cap_rest_x     := rest_x
-		var cap_rest_y     : Variant = rest_y
-		var cap_angle      : Variant = angle_deg
-		var cap_z          := i
+		var cap_rest_x := rest_x
+		var cap_rest_y: Variant = rest_y
+		var cap_angle: Variant = angle_deg
+		var cap_z := i
 
-		# Disconnect CardView's built-in hover tweens — we're taking over
 		card_view.mouse_entered.connect(func():
 			_fan_hover(card_view, cap_rest_y, cap_angle)
 		)
+
 		card_view.mouse_exited.connect(func():
 			_fan_unhover(card_view, cap_rest_x, cap_rest_y, cap_angle, cap_z)
 		)
@@ -168,26 +221,9 @@ func _fan_hover(card_view: CardView, rest_y: float, rest_angle: float) -> void:
 	card_view.hover_tween = card_view.create_tween()
 	card_view.hover_tween.set_parallel(true)
 
-	# Lift: move to (rest_y - HOVER_LIFT), always relative to REST not current pos
-	card_view.hover_tween.tween_property(
-		card_view, "position:y",
-		rest_y - HOVER_LIFT,
-		0.13
-	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-
-	# Straighten: partially flatten the fan angle
-	card_view.hover_tween.tween_property(
-		card_view, "rotation_degrees",
-		rest_angle * 0.12,
-		0.13
-	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-
-	# Scale up
-	card_view.hover_tween.tween_property(
-		card_view, "scale",
-		Vector2(1.18, 1.18),
-		0.13
-	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	card_view.hover_tween.tween_property(card_view, "position:y", rest_y - HOVER_LIFT, 0.13).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	card_view.hover_tween.tween_property(card_view, "rotation_degrees", rest_angle * 0.12, 0.13).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	card_view.hover_tween.tween_property(card_view, "scale", Vector2(1.18, 1.18), 0.13).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 
 func _fan_unhover(card_view: CardView, rest_x: float, rest_y: float, rest_angle: float, rest_z: int) -> void:
@@ -199,27 +235,10 @@ func _fan_unhover(card_view: CardView, rest_x: float, rest_y: float, rest_angle:
 	card_view.hover_tween = card_view.create_tween()
 	card_view.hover_tween.set_parallel(true)
 
-	# Always return to the exact resting position, not wherever we currently are
-	card_view.hover_tween.tween_property(
-		card_view, "position",
-		Vector2(rest_x, rest_y),
-		0.10
-	).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	card_view.hover_tween.tween_property(card_view, "position", Vector2(rest_x, rest_y), 0.10).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	card_view.hover_tween.tween_property(card_view, "rotation_degrees", rest_angle, 0.10).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	card_view.hover_tween.tween_property(card_view, "scale", Vector2.ONE, 0.10).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 
-	card_view.hover_tween.tween_property(
-		card_view, "rotation_degrees",
-		rest_angle,
-		0.10
-	).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-
-	card_view.hover_tween.tween_property(
-		card_view, "scale",
-		Vector2.ONE,
-		0.10
-	).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-
-
-# ─── Rest of CombatUI (unchanged) ────────────────────────────────────────────
 
 func _on_any_combatant_changed(_current_hp: int, _max_hp: int) -> void:
 	_update_all()
@@ -236,59 +255,63 @@ func _refresh_active_player() -> void:
 func _update_all() -> void:
 	_update_player_info()
 	_update_enemy_info()
+	_refresh_enemy_intents()
 
 
 func _update_player_info() -> void:
 	var lines: Array[String] = []
+
 	for p in players:
 		if p == null:
 			continue
+
 		var prefix := "> " if p == active_player else ""
-		lines.append("%sPlayer  HP: %s/%s  Guard: %s" % [
-			prefix, p.current_hp, p.stats.max_hp, p.current_guard
-		])
+		var status := "DEAD" if p.is_dead() else "HP: %s/%s  Guard: %s" % [
+			p.current_hp,
+			p.stats.max_hp,
+			p.current_guard
+		]
+
+		lines.append("%sPlayer  %s" % [prefix, status])
+
 	player_label.text = "\n".join(lines)
-
-
-func _get_default_target_for_card(card: CardData) -> Combatant:
-	if card.can_target_enemy:
-		for e in enemies:
-			if e != null and not e.is_dead():
-				return e
-	if card.can_target_self:
-		return active_player
-	return null
 
 
 func _update_enemy_info() -> void:
 	var lines: Array[String] = []
+
 	for e in enemies:
 		if e == null:
 			continue
-		lines.append("%s  HP: %s/%s  Guard: %s" % [
-			e.enemy_name, e.current_hp, e.stats.max_hp, e.current_guard
-		])
+
+		if e.is_dead():
+			lines.append("%s  DEFEATED" % e.enemy_name)
+		else:
+			var marker := " <TARGET>" if selected_target == e else ""
+			lines.append("%s%s  HP: %s/%s  Guard: %s" % [
+				e.enemy_name,
+				marker,
+				e.current_hp,
+				e.stats.max_hp,
+				e.current_guard
+			])
+
 	enemy_label.text = "\n".join(lines)
 
 
-func _on_player_hp_changed(_current_hp: int, _max_hp: int) -> void:
-	_update_all()
-	_spawn_floating_text("HP " + str(_current_hp), player_label.global_position + Vector2(0, -20))
+func _get_default_target_for_card(card: CardData) -> Combatant:
+	if card.can_target_enemy:
+		if selected_target != null and not selected_target.is_dead():
+			return selected_target
 
+		for e in enemies:
+			if e != null and not e.is_dead():
+				return e
 
-func _on_player_guard_changed(_current_guard: int) -> void:
-	_update_all()
-	_spawn_floating_text("🛡 " + str(_current_guard), player_label.global_position + Vector2(0, 20))
+	if card.can_target_self:
+		return active_player
 
-
-func _on_enemy_hp_changed(_current_hp: int, _max_hp: int) -> void:
-	_update_all()
-	_spawn_floating_text("HP " + str(_current_hp), enemy_label.global_position + Vector2(0, -20))
-
-
-func _on_enemy_guard_changed(_current_guard: int) -> void:
-	_update_all()
-	_spawn_floating_text("🛡 " + str(_current_guard), enemy_label.global_position + Vector2(0, 20))
+	return null
 
 
 func _on_player_hand_changed(_hand: Array) -> void:
@@ -300,29 +323,43 @@ func _on_player_dice_changed(_dice: Array[DiceData]) -> void:
 
 
 func _can_selected_dice_play_card(card: CardData) -> bool:
+	if card == null:
+		return false
+
 	if selected_dice.size() < card.dice_required:
 		return false
+
 	return card.can_use_with_dice(selected_dice)
 
 
 func _can_any_card_use_die(die: DiceData) -> bool:
+	if active_player == null:
+		return false
+
 	if die == null or die.is_assigned:
 		return false
+
 	for card in active_player.hand:
 		if card.can_use_with_die(die.current_value):
 			return true
+
 	return false
 
 
 func _clear_invalid_selected_dice() -> void:
 	var valid: Array[DiceData] = []
+
 	for die in selected_dice:
 		if die != null and not die.is_assigned and _can_any_card_use_die(die):
 			valid.append(die)
+
 	selected_dice = valid
 
 
 func _refresh_dice() -> void:
+	if active_player == null:
+		return
+
 	_clear_invalid_selected_dice()
 	_clear_children(dice_container)
 
@@ -361,33 +398,46 @@ func _refresh_dice() -> void:
 func _on_reroll_pressed(die: DiceData) -> void:
 	if pending_rerolls <= 0 or die == null or die.is_assigned:
 		return
+
 	die.reroll()
 	pending_rerolls -= 1
 	selected_dice.clear()
+
 	print("Rerolled die. New value: ", die.current_value)
+
 	_refresh_dice()
 	_refresh_hand()
 	_update_all()
 
 
 func _on_card_pressed(card: CardData) -> void:
+	if active_player == null:
+		return
+
 	if selected_dice.size() < card.dice_required:
 		print("Not enough dice selected for ", card.card_name)
 		return
+
 	if not card.can_use_with_dice(selected_dice):
 		print("Selected dice cannot be used for ", card.card_name)
 		return
 
 	var target := selected_target
-	if target == null:
+	if target == null or target.is_dead():
 		target = _get_default_target_for_card(card)
 
 	var success := combat_manager.play_player_card(card, selected_dice, target)
+
 	if success:
 		print("Played card: ", card.card_name)
 		selected_dice.clear()
+
 		if card.effect_type == CardData.CardEffectType.REROLL_DIE:
 			pending_rerolls += 1
+
+		if selected_target != null and selected_target.is_dead():
+			selected_target = null
+
 		_refresh_hand()
 		_refresh_dice()
 		_update_all()
@@ -398,10 +448,12 @@ func _on_card_pressed(card: CardData) -> void:
 func _on_die_pressed(die: DiceData) -> void:
 	if die.is_assigned or not _can_any_card_use_die(die):
 		return
+
 	if selected_dice.has(die):
 		selected_dice.erase(die)
 	else:
 		selected_dice.append(die)
+
 	_clear_invalid_selected_dice()
 	_refresh_dice()
 	_refresh_hand()
@@ -415,9 +467,11 @@ func _on_end_turn_pressed() -> void:
 
 func _on_player_turn_started() -> void:
 	_refresh_active_player()
+
 	end_turn_button.disabled = false
 	selected_dice.clear()
 	pending_rerolls = 0
+
 	_refresh_hand()
 	_refresh_dice()
 	_update_all()
@@ -427,16 +481,215 @@ func _on_enemy_turn_started() -> void:
 	end_turn_button.disabled = true
 	selected_dice.clear()
 	pending_rerolls = 0
+
 	_update_all()
 
 
 func _on_combat_ended(winner: Combatant) -> void:
 	end_turn_button.disabled = true
 	enemy_intent_label.text = ""
-	if winner == active_player:
-		player_label.text += "\nVictory."
+
+	if players.has(winner):
+		_show_result_panel(true)
 	else:
-		player_label.text += "\nDefeat."
+		_show_result_panel(false)
+
+
+func _show_result_panel(player_won: bool) -> void:
+	if result_panel == null:
+		return
+
+	result_panel.visible = true
+
+	var title := result_panel.get_node_or_null("MarginContainer/ResultVBox/TitleLabel") as Label
+	var subtitle := result_panel.get_node_or_null("MarginContainer/ResultVBox/SubtitleLabel") as Label
+
+	if title != null:
+		title.text = "VICTORY" if player_won else "DEFEAT"
+
+	if subtitle != null:
+		subtitle.text = "Choose a reward" if player_won else "The throne keeps breathing."
+
+	if reward_buttons_container == null:
+		return
+
+	_clear_children(reward_buttons_container)
+
+	if not player_won:
+		var close_button := Button.new()
+		close_button.text = "Return"
+		reward_buttons_container.add_child(close_button)
+		return
+
+	var reward_cards := _get_reward_card_options(3)
+
+	for card in reward_cards:
+		var button := Button.new()
+		button.text = "+ " + card.card_name
+		button.custom_minimum_size = Vector2(320, 42)
+		button.pressed.connect(func():
+			_on_reward_card_chosen(card)
+		)
+		reward_buttons_container.add_child(button)
+
+
+func _get_reward_card_options(amount: int) -> Array[CardData]:
+	var options: Array[CardData] = []
+
+	if active_player != null:
+		var source_cards: Array = []
+		source_cards.append_array(active_player.deck)
+		source_cards.append_array(active_player.discard_pile)
+		source_cards.append_array(active_player.hand)
+		source_cards.shuffle()
+
+		for card in source_cards:
+			if card != null and not options.has(card):
+				options.append(card)
+
+			if options.size() >= amount:
+				return options
+
+	while options.size() < amount:
+		var placeholder := CardData.new()
+		placeholder.card_name = "Reward Card %s" % (options.size() + 1)
+		placeholder.description = "Placeholder reward."
+		placeholder.base_damage = 4 + options.size() * 2
+		placeholder.can_target_enemy = true
+		options.append(placeholder)
+
+	return options
+
+
+func _on_reward_card_chosen(card: CardData) -> void:
+	print("Reward chosen: ", card.card_name)
+
+	if active_player != null:
+		active_player.discard_pile.append(card)
+		active_player.deck_changed.emit(active_player.deck.size(), active_player.discard_pile.size())
+
+	if reward_buttons_container != null:
+		_clear_children(reward_buttons_container)
+
+		var chosen_label := Label.new()
+		chosen_label.text = "Chosen: " + card.card_name
+		chosen_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		reward_buttons_container.add_child(chosen_label)
+
+
+func _on_combat_log(message: String) -> void:
+	if combat_log_label == null:
+		return
+
+	var existing: Array[String] = []
+
+	for line in combat_log_label.text.split("\n", false):
+		existing.append(line)
+
+	existing.append(message)
+
+	while existing.size() > 7:
+		existing.remove_at(0)
+
+	combat_log_label.text = "\n".join(existing)
+
+
+func _on_enemy_action_started(enemy: EnemyCombatant, card: CardData, target: Combatant) -> void:
+	_spawn_floating_text(
+		"%s: %s" % [enemy.enemy_name, card.card_name],
+		enemy_label.global_position + Vector2(0, 24)
+	)
+
+
+func _on_combatant_damage_taken(
+	combatant: Combatant,
+	incoming_damage: int,
+	blocked_damage: int,
+	hp_damage: int,
+	_guard_before: int,
+	_guard_after: int,
+	_hp_before: int,
+	_hp_after: int
+) -> void:
+	var position := _get_floating_text_position_for_combatant(combatant)
+
+	if blocked_damage > 0:
+		_spawn_floating_text("Blocked " + str(blocked_damage), position + Vector2(0, 18))
+
+	if hp_damage > 0:
+		_spawn_floating_text("-" + str(hp_damage), position)
+	elif incoming_damage > 0:
+		_spawn_floating_text("Blocked", position)
+
+
+func _on_combatant_guard_gained(
+	combatant: Combatant,
+	amount: int,
+	_guard_before: int,
+	_guard_after: int
+) -> void:
+	var position := _get_floating_text_position_for_combatant(combatant)
+	_spawn_floating_text("🛡 +" + str(amount), position + Vector2(0, 20))
+
+
+func _on_combatant_guard_reset(
+	combatant: Combatant,
+	guard_before: int,
+	_guard_after: int
+) -> void:
+	if guard_before <= 0:
+		return
+
+	var position := _get_floating_text_position_for_combatant(combatant)
+	_spawn_floating_text("Guard reset", position + Vector2(0, 36))
+
+
+func _get_floating_text_position_for_combatant(combatant: Combatant) -> Vector2:
+	if players.has(combatant):
+		return player_label.global_position + Vector2(0, -20)
+
+	if enemies.has(combatant):
+		return enemy_label.global_position + Vector2(0, -20)
+
+	return global_position + Vector2(300, 300)
+
+
+func _on_combatant_died(combatant: Combatant) -> void:
+	if selected_target == combatant:
+		selected_target = null
+
+	intent_text_by_enemy.erase(combatant)
+
+	_spawn_floating_text("DEFEATED", _get_floating_text_position_for_combatant(combatant))
+
+	_update_all()
+
+
+func _on_enemy_intent_changed(enemy: EnemyCombatant, intent_text: String) -> void:
+	if enemy == null:
+		return
+
+	if enemy.is_dead() or intent_text == "":
+		intent_text_by_enemy.erase(enemy)
+	else:
+		intent_text_by_enemy[enemy] = intent_text
+
+	_refresh_enemy_intents()
+
+
+func _refresh_enemy_intents() -> void:
+	var lines: Array[String] = []
+
+	for e in enemies:
+		if e == null or e.is_dead():
+			continue
+
+		if intent_text_by_enemy.has(e):
+			lines.append(intent_text_by_enemy[e])
+		else:
+			lines.append("%s: ..." % e.enemy_name)
+
+	enemy_intent_label.text = "\n".join(lines)
 
 
 func _clear_children(container: Node) -> void:
@@ -444,13 +697,10 @@ func _clear_children(container: Node) -> void:
 		child.queue_free()
 
 
-func _on_enemy_intent_changed(intent_text: String) -> void:
-	enemy_intent_label.text = intent_text
-
-
 func _spawn_floating_text(text_value: String, screen_position: Vector2) -> void:
 	if floating_text_scene == null:
 		return
+
 	var floating_text: FloatingText = floating_text_scene.instantiate()
 	add_child(floating_text)
 	floating_text.play(text_value, screen_position)

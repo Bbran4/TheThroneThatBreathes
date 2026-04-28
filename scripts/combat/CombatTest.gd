@@ -1,11 +1,5 @@
 extends Node
 
-# CombatTest is a temporary scene controller.
-#
-# Its job is to create a playable test combat quickly.
-# Later, this will be replaced by proper scene loading,
-# character selection, enemy spawning, and UI.
-
 @export var player_team_data: Array[CombatantData] = []
 @export var enemy_team_data: Array[CombatantData] = []
 
@@ -21,6 +15,7 @@ extends Node
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
 var combatant_visuals: Dictionary = {}
+
 
 func _ready() -> void:
 	if not _validate_team_data(player_team_data, "Player team"):
@@ -39,19 +34,40 @@ func _ready() -> void:
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
+	combat_manager.combat_log.connect(_on_combat_log)
 
 	for combatant in players + enemies:
 		combatant.died.connect(_on_combatant_died)
 
-		combatant.hp_changed.connect(func(_current_hp: int, _max_hp: int):
-			_on_combatant_visual_hp_changed(combatant)
+		combatant.damage_taken.connect(func(
+			_changed_combatant: Combatant,
+			_incoming_damage: int,
+			_blocked_damage: int,
+			hp_damage: int,
+			_guard_before: int,
+			_guard_after: int,
+			_hp_before: int,
+			_hp_after: int
+		):
+			if hp_damage > 0:
+				_on_combatant_visual_hp_changed(combatant)
 		)
 
-		combatant.guard_changed.connect(func(_current_guard: int):
+		combatant.guard_gained.connect(func(
+			_changed_combatant: Combatant,
+			_amount: int,
+			_guard_before: int,
+			_guard_after: int
+		):
 			_on_combatant_visual_guard_changed(combatant)
 		)
 
 	combat_manager.start_combat()
+
+
+func _on_combat_log(message: String) -> void:
+	print(message)
+
 
 func _on_combatant_visual_hp_changed(combatant: Combatant) -> void:
 	if combatant_visuals.has(combatant):
@@ -61,6 +77,7 @@ func _on_combatant_visual_hp_changed(combatant: Combatant) -> void:
 func _on_combatant_visual_guard_changed(combatant: Combatant) -> void:
 	if combatant_visuals.has(combatant):
 		combatant_visuals[combatant].play_guard_reaction()
+
 
 func _validate_team_data(team_data: Array[CombatantData], label: String) -> bool:
 	if team_data.is_empty():
@@ -81,6 +98,7 @@ func _validate_team_data(team_data: Array[CombatantData], label: String) -> bool
 			return false
 
 	return true
+
 
 func _spawn_player_team() -> void:
 	players.clear()
@@ -111,11 +129,13 @@ func _spawn_enemy_team() -> void:
 		enemies.append(combatant)
 		_spawn_visual_for_combatant(combatant, data, enemy_slots, i)
 
+
 func _on_combatant_died(combatant: Combatant) -> void:
 	if combatant_visuals.has(combatant):
-		var visual: Node = combatant_visuals[combatant]
+		var visual: CombatantVisual = combatant_visuals[combatant]
 		combatant_visuals.erase(combatant)
-		visual.queue_free()
+		visual.play_death_reaction()
+
 
 func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot_parent: Node2D, index: int) -> void:
 	if index >= slot_parent.get_child_count():
@@ -132,6 +152,7 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 
 	combatant_visuals[combatant] = visual
 
+
 func _on_combat_started() -> void:
 	print("Combat started.")
 
@@ -147,6 +168,7 @@ func _on_player_turn_started() -> void:
 		print("Active Player dice: ", _dice_values_to_text(active_player.get_dice()))
 
 	print("Living enemies: ", combat_manager.get_living_enemies().size())
+
 
 func _on_enemy_turn_started() -> void:
 	print("--- Enemy Turn ---")
@@ -168,6 +190,7 @@ func _on_player_hand_changed(hand: Array) -> void:
 func _on_player_dice_rolled(dice: Array[DiceData]) -> void:
 	print("Player rolled: ", _dice_values_to_text(dice))
 
+
 func _dice_values_to_text(dice: Array[DiceData]) -> String:
 	var values: Array[String] = []
 
@@ -175,6 +198,7 @@ func _dice_values_to_text(dice: Array[DiceData]) -> String:
 		values.append(str(die.current_value))
 
 	return ", ".join(values)
+
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_play_card"):

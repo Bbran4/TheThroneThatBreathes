@@ -17,14 +17,15 @@ func setup_enemy(new_name: String, new_stats: CharacterStats, starting_deck: Arr
 
 
 func prepare_intent() -> void:
-	# Enemy chooses what it wants to do next.
-	# This does NOT resolve the card yet.
-
 	selected_card = null
 	selected_dice.clear()
 
+	if is_dead():
+		intent_changed.emit("")
+		return
+
 	if hand.is_empty():
-		intent_changed.emit("No action")
+		intent_changed.emit("%s: No action" % enemy_name)
 		return
 
 	for card in hand:
@@ -36,7 +37,7 @@ func prepare_intent() -> void:
 			intent_changed.emit(_get_intent_text(card))
 			return
 
-	intent_changed.emit("No playable card")
+	intent_changed.emit("%s: No playable card" % enemy_name)
 
 
 func get_selected_card() -> CardData:
@@ -70,13 +71,22 @@ func _get_intent_text(card: CardData) -> String:
 	var damage_amount := card.get_final_damage(self)
 	var guard_amount := card.get_final_guard(self)
 
+	var parts: Array[String] = []
+
 	if damage_amount > 0 and card.can_target_enemy:
-		return "⚔ " + str(damage_amount) + "  " + card.card_name
+		parts.append("⚔ %s damage" % damage_amount)
 
 	if guard_amount > 0:
-		return "🛡 " + str(guard_amount) + "  " + card.card_name
+		parts.append("🛡 %s guard" % guard_amount)
 
 	if card.cards_to_draw > 0:
-		return "📜 Draw " + str(card.cards_to_draw)
+		parts.append("📜 draw %s" % card.cards_to_draw)
 
-	return "❔ " + card.card_name
+	if parts.is_empty():
+		parts.append("❔ effect")
+
+	return "%s: %s — %s" % [
+		enemy_name,
+		card.card_name,
+		", ".join(parts)
+	]
