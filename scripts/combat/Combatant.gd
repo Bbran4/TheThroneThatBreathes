@@ -25,6 +25,8 @@ var stats: CharacterStats
 var current_hp: int = 0
 var current_guard: int = 0
 
+var dice_pool: DicePool
+
 var deck: Array = []
 var hand: Array = []
 var discard_pile: Array = []
@@ -42,6 +44,8 @@ func setup(new_stats: CharacterStats, starting_deck: Array) -> void:
 	
 	hand.clear()
 	discard_pile.clear()
+	
+	_create_dice_pool()
 	
 	_emit_all_state_changes()
 
@@ -144,6 +148,32 @@ func get_control() -> int:
 
 func get_luck() -> int:
 	return stats.luck
+
+func _create_dice_pool() -> void:
+	# Creates a DicePool node owned by this combatant.
+	dice_pool = DicePool.new()
+	add_child(dice_pool)
+	
+	dice_pool.create_dice_pool(get_dice_count())
+
+func roll_dice() -> void:
+	# Rolls all dice owned by this combatant.
+	if dice_pool == null:
+		_create_dice_pool()
+	
+	dice_pool.roll_all()
+
+func get_dice() -> Array[DiceData]:
+	if dice_pool == null:
+		return []
+	
+	return dice_pool.dice
+
+func get_available_dice() -> Array[DiceData]:
+	if dice_pool == null:
+		return []
+	
+	return dice_pool.get_available_dice()
 
 func _emit_all_state_changes() -> void:
 	# Helper function used after setup so UI can refresh everything.

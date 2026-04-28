@@ -68,6 +68,21 @@ func can_use_with_die(die_value: int) -> bool:
 	
 	return false
 
+func can_use_with_dice(assigned_dice: Array[DiceData]) -> bool:
+	# First check if the card received enough dice.
+	if assigned_dice.size() < dice_required:
+		return false
+
+	# Every assigned die must satisfy this card's requirement.
+	for die in assigned_dice:
+		if die == null:
+			return false
+
+		if not can_use_with_die(die.current_value):
+			return false
+
+	return true
+
 func get_final_damage(user: Combatant) -> int:
 	# Damage scales with user's Power stat
 	return base_damage + user.get_power()
