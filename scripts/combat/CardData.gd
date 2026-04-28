@@ -21,9 +21,13 @@ enum DiceRequirementType {
 	ODD
 }
 
+@export var card_art: Texture2D
+
 @export var card_name: String = "Unnamed Card"
 
 @export_multiline var description: String = ""
+
+@export var flavor_text: String = ""
 
 @export var card_type: CardType = CardType.ATTACK
 

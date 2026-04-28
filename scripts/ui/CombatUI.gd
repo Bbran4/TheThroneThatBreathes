@@ -14,6 +14,7 @@ class_name CombatUI
 @onready var dice_container: HBoxContainer = $Container/DiceContainer
 @onready var hand_container: HBoxContainer = $Container/HandContainer
 @onready var end_turn_button: Button = $EndTurnButton
+@export var card_view_scene: PackedScene
 
 var combat_manager: CombatManager
 var player: PlayerCombatant
@@ -40,7 +41,10 @@ func setup_ui(new_combat_manager: CombatManager, new_player: PlayerCombatant, ne
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
-
+	
+	hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	hand_container.add_theme_constant_override("separation", -55)
+	
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
 	_update_all()
@@ -126,21 +130,21 @@ func _clear_invalid_selected_dice() -> void:
 func _refresh_hand() -> void:
 	_clear_children(hand_container)
 
+	if card_view_scene == null:
+		push_error("CombatUI is missing card_view_scene.")
+		return
+
 	for card in player.hand:
-		var button := Button.new()
-		button.text = _get_card_button_text(card)
-		button.custom_minimum_size = Vector2(140, 90)
+		var card_view: CardView = card_view_scene.instantiate()
+		hand_container.add_child(card_view)
 
-		# Cards are only playable if the selected dice satisfy the card.
-		# No dice selected = card disabled, because dice must be selected first.
-		button.disabled = not _can_selected_dice_play_card(card)
+		var is_playable := _can_selected_dice_play_card(card)
 
-		button.pressed.connect(func():
-			_on_card_pressed(card)
+		card_view.setup(card, is_playable)
+
+		card_view.card_selected.connect(func(selected_card: CardData):
+			_on_card_pressed(selected_card)
 		)
-
-		hand_container.add_child(button)
-
 
 func _refresh_dice() -> void:
 	_clear_invalid_selected_dice()
