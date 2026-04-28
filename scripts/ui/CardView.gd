@@ -7,6 +7,8 @@ class_name CardView
 # It only displays card data and notifies the UI when clicked.
 
 signal card_selected(card: CardData)
+signal card_hovered(card: CardData)
+signal card_unhovered
 
 @onready var name_label: Label = $MarginContainer/VBoxContainer/Header/NameLabel
 @onready var art_texture: TextureRect = $MarginContainer/VBoxContainer/ArtTexture
@@ -67,19 +69,19 @@ func _on_pressed() -> void:
 
 
 func _on_mouse_entered() -> void:
-	# Store current position so the card can return correctly.
 	normal_position = position
-
-	# Raise the card visually.
 	position.y -= hover_lift_amount
-
-	# Bring hovered card in front of overlapping cards.
 	z_index = 100
+
+	if card_data != null:
+		card_hovered.emit(card_data)
 
 
 func _on_mouse_exited() -> void:
 	position = normal_position
 	z_index = 0
+
+	card_unhovered.emit()
 
 
 func _create_card_styles() -> void:

@@ -16,6 +16,7 @@ class_name CombatUI
 @onready var end_turn_button: Button = $EndTurnButton
 @export var card_view_scene: PackedScene
 @onready var enemy_intent_label: Label = $EnemyIntentLabel
+@export var floating_text_scene: PackedScene
 
 var combat_manager: CombatManager
 var player: PlayerCombatant
@@ -23,6 +24,7 @@ var enemy: EnemyCombatant
 
 var selected_dice: Array[DiceData] = []
 var pending_rerolls: int = 0
+var hovered_card: CardData = null
 
 func setup_ui(new_combat_manager: CombatManager, new_player: PlayerCombatant, new_enemy: EnemyCombatant) -> void:
 	# Store references to the combat objects.
@@ -58,7 +60,7 @@ func _update_all() -> void:
 
 
 func _update_player_info() -> void:
-	player_label.text = "Player HP: %s / %s\nGuard: %s" % [
+	player_label.text = "Player\nHP: %s / %s\nGuard: %s" % [
 		player.current_hp,
 		player.stats.max_hp,
 		player.current_guard
@@ -66,7 +68,8 @@ func _update_player_info() -> void:
 
 
 func _update_enemy_info() -> void:
-	enemy_label.text = "Enemy HP: %s / %s\nGuard: %s" % [
+	enemy_label.text = "%s\nHP: %s / %s\nGuard: %s" % [
+		enemy.enemy_name,
 		enemy.current_hp,
 		enemy.stats.max_hp,
 		enemy.current_guard
@@ -74,21 +77,23 @@ func _update_enemy_info() -> void:
 
 
 func _on_player_hp_changed(_current_hp: int, _max_hp: int) -> void:
-	# We ignore the signal values for now and refresh the full UI.
 	_update_all()
+	_spawn_floating_text("HP " + str(_current_hp), player_label.global_position + Vector2(0, -20))
 
 
 func _on_player_guard_changed(_current_guard: int) -> void:
-	# Guard signal sends one value, so this wrapper receives it safely.
 	_update_all()
+	_spawn_floating_text("🛡 " + str(_current_guard), player_label.global_position + Vector2(0, 20))
 
 
 func _on_enemy_hp_changed(_current_hp: int, _max_hp: int) -> void:
 	_update_all()
+	_spawn_floating_text("HP " + str(_current_hp), enemy_label.global_position + Vector2(0, -20))
 
 
 func _on_enemy_guard_changed(_current_guard: int) -> void:
 	_update_all()
+	_spawn_floating_text("🛡 " + str(_current_guard), enemy_label.global_position + Vector2(0, 20))
 
 func _on_player_hand_changed(hand: Array) -> void:
 	_refresh_hand()
@@ -147,6 +152,16 @@ func _refresh_hand() -> void:
 		card_view.card_selected.connect(func(selected_card: CardData):
 			_on_card_pressed(selected_card)
 		)
+		
+		card_view.card_hovered.connect(func(card: CardData):
+			hovered_card = card
+			_refresh_dice()
+		)
+
+		card_view.card_unhovered.connect(func():
+			hovered_card = null
+			_refresh_dice()
+		)
 
 func _refresh_dice() -> void:
 	_clear_invalid_selected_dice()
@@ -173,7 +188,13 @@ func _refresh_dice() -> void:
 		)
 
 		die_slot.add_child(die_button)
-
+			
+		if hovered_card != null:
+			if hovered_card.can_use_with_die(die.current_value):
+				die_button.text = "✓ " + die_button.text
+			else:
+				die_button.text = "✕ " + die_button.text
+			
 		if pending_rerolls > 0 and not die.is_assigned:
 			var reroll_button := Button.new()
 			reroll_button.text = "Reroll"
@@ -297,3 +318,12 @@ func _clear_children(container: Node) -> void:
 
 func _on_enemy_intent_changed(intent_text: String) -> void:
 	enemy_intent_label.text = intent_text
+
+func _spawn_floating_text(text_value: String, screen_position: Vector2) -> void:
+	if floating_text_scene == null:
+		return
+
+	var floating_text: FloatingText = floating_text_scene.instantiate()
+	add_child(floating_text)
+
+	floating_text.play(text_value, screen_position)

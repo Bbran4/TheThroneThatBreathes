@@ -71,9 +71,12 @@ func _get_intent_text(card: CardData) -> String:
 	var guard_amount := card.get_final_guard(self)
 
 	if damage_amount > 0 and card.can_target_enemy:
-		return "Intent: Attack " + str(damage_amount)
+		return "⚔ " + str(damage_amount) + "  " + card.card_name
 
 	if guard_amount > 0:
-		return "Intent: Guard " + str(guard_amount)
+		return "🛡 " + str(guard_amount) + "  " + card.card_name
 
-	return "Intent: " + card.card_name
+	if card.cards_to_draw > 0:
+		return "📜 Draw " + str(card.cards_to_draw)
+
+	return "❔ " + card.card_name

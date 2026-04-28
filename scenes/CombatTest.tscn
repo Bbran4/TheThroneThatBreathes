@@ -6,6 +6,7 @@
 [ext_resource type="Resource" uid="uid://cihmxdwhbg2la" path="res://resources/enemies/HollowAcolyte.tres" id="3_gaico"]
 [ext_resource type="Script" uid="uid://cui60d7oj1du7" path="res://scripts/combat/PlayerCombatant.gd" id="3_psff3"]
 [ext_resource type="Script" uid="uid://lmhct1c1dyfj" path="res://scripts/combat/EnemyCombatant.gd" id="4_uvkbr"]
+[ext_resource type="PackedScene" uid="uid://curcwunumwlcv" path="res://scenes/ui/FloatingText.tscn" id="9_ycf86"]
 [ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="11_qqmgp"]
 [ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="12_8equi"]
 
@@ -28,3 +29,4 @@ script = ExtResource("4_uvkbr")
 
 [node name="CombatUI" parent="CanvasLayer" unique_id=1242325184 instance=ExtResource("11_qqmgp")]
 card_view_scene = ExtResource("12_8equi")
+floating_text_scene = ExtResource("9_ycf86")
