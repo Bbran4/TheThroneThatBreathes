@@ -11,8 +11,8 @@ class_name CombatUI
 
 @onready var enemy_label: Label = $EnemyInfo/EnemyLabel
 @onready var player_label: Label = $PlayerInfo/PlayerLabel
-@onready var dice_container: HBoxContainer = $DiceContainer
-@onready var hand_container: HBoxContainer = $HandContainer
+@onready var dice_container: HBoxContainer = $Container/DiceContainer
+@onready var hand_container: HBoxContainer = $Container/HandContainer
 @onready var end_turn_button: Button = $EndTurnButton
 
 var combat_manager: CombatManager
@@ -91,6 +91,37 @@ func _on_player_hand_changed(hand: Array) -> void:
 func _on_player_dice_changed(dice: Array[DiceData]) -> void:
 	_refresh_dice()
 
+func _can_selected_dice_play_card(card: CardData) -> bool:
+	if selected_dice.size() < card.dice_required:
+		return false
+
+	return card.can_use_with_dice(selected_dice)
+
+
+func _can_any_card_use_die(die: DiceData) -> bool:
+	if die == null:
+		return false
+
+	if die.is_assigned:
+		return false
+
+	for card in player.hand:
+		if card.can_use_with_die(die.current_value):
+			return true
+
+	return false
+
+
+func _clear_invalid_selected_dice() -> void:
+	# Removes dice from selection if they are no longer usable.
+	# This protects against stale selections after cards are played.
+	var valid_selection: Array[DiceData] = []
+
+	for die in selected_dice:
+		if die != null and not die.is_assigned and _can_any_card_use_die(die):
+			valid_selection.append(die)
+
+	selected_dice = valid_selection
 
 func _refresh_hand() -> void:
 	_clear_children(hand_container)
@@ -100,6 +131,10 @@ func _refresh_hand() -> void:
 		button.text = _get_card_button_text(card)
 		button.custom_minimum_size = Vector2(140, 90)
 
+		# Cards are only playable if the selected dice satisfy the card.
+		# No dice selected = card disabled, because dice must be selected first.
+		button.disabled = not _can_selected_dice_play_card(card)
+
 		button.pressed.connect(func():
 			_on_card_pressed(card)
 		)
@@ -108,6 +143,7 @@ func _refresh_hand() -> void:
 
 
 func _refresh_dice() -> void:
+	_clear_invalid_selected_dice()
 	_clear_children(dice_container)
 
 	for die in player.get_dice():
@@ -119,7 +155,12 @@ func _refresh_dice() -> void:
 		else:
 			button.text = str(die.current_value)
 
+		# Disable dice that are already spent.
 		if die.is_assigned:
+			button.disabled = true
+
+		# Disable dice if no card in hand could use it.
+		elif not _can_any_card_use_die(die):
 			button.disabled = true
 
 		button.pressed.connect(func():
@@ -159,6 +200,9 @@ func _on_die_pressed(die: DiceData) -> void:
 	if die.is_assigned:
 		return
 
+	if not _can_any_card_use_die(die):
+		return
+
 	if selected_dice.has(die):
 		selected_dice.erase(die)
 		print("Unselected die: ", die.current_value)
@@ -166,7 +210,9 @@ func _on_die_pressed(die: DiceData) -> void:
 		selected_dice.append(die)
 		print("Selected die: ", die.current_value)
 
+	_clear_invalid_selected_dice()
 	_refresh_dice()
+	_refresh_hand()
 
 
 func _on_end_turn_pressed() -> void:
