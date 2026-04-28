@@ -14,6 +14,9 @@ extends Node
 @onready var enemy_slots: Node2D = $Battlefield/EnemySlots
 @export var combatant_status_ui_scene: PackedScene
 
+@export var status_ui_y_offset: float = 90.0
+@export var status_ui_x_offset: float = 0.0
+
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
 var combatant_visuals: Dictionary = {}
@@ -102,9 +105,16 @@ func _process(_delta: float) -> void:
 			continue
 
 		var screen_pos := visual.get_global_transform_with_canvas().origin
-		var sprite_half_height := 90.0
 
-		status_ui.global_position = screen_pos + Vector2(-100, sprite_half_height)
+		var status_width := status_ui.size.x
+		if status_width <= 0:
+			status_width = status_ui.custom_minimum_size.x
+
+		status_ui.global_position = screen_pos + Vector2(
+			-status_width * 0.5 + status_ui_x_offset,
+			status_ui_y_offset
+		)
+
 		status_ui.visible = true
 
 	for combatant in dead_entries:

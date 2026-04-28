@@ -14,7 +14,7 @@
 [node name="CombatTest" type="Node" unique_id=204473287]
 script = ExtResource("1_aa5v2")
 player_team_data = Array[ExtResource("3_2nakn")]([ExtResource("3_player")])
-enemy_team_data = Array[ExtResource("3_2nakn")]([ExtResource("4_enemy"), ExtResource("4_enemy"), ExtResource("5_ycf86")])
+enemy_team_data = Array[ExtResource("3_2nakn")]([ExtResource("5_ycf86"), ExtResource("4_enemy"), ExtResource("4_enemy")])
 click_size = Vector2(120, 250)
 combatant_status_ui_scene = ExtResource("6_mvvgd")
 
@@ -28,13 +28,13 @@ script = ExtResource("2_84fr5")
 [node name="PlayerSlots" type="Node2D" parent="Battlefield" unique_id=1218945332]
 
 [node name="Slot1" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=112249003]
-position = Vector2(200, 360)
+position = Vector2(200, 340)
 
 [node name="Slot2" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=1091353013]
-position = Vector2(330, 360)
+position = Vector2(330, 340)
 
 [node name="Slot3" type="Node2D" parent="Battlefield/PlayerSlots" unique_id=1059053817]
-position = Vector2(460, 360)
+position = Vector2(460, 340)
 
 [node name="EnemySlots" type="Node2D" parent="Battlefield" unique_id=463775274]
 
