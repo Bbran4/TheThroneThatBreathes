@@ -2,6 +2,12 @@
 
 [ext_resource type="Script" uid="uid://c1dfm8k8i5gch" path="res://scripts/ui/combatant_status_ui.gd" id="1_523mr"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_582iq"]
+bg_color = Color(0.011087578, 0.01108758, 0.011087572, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_523mr"]
+bg_color = Color(0.48222125, 0, 0.18046418, 1)
+
 [node name="CombatantStatusUi" type="Control" unique_id=30555654]
 layout_mode = 3
 anchors_preset = 0
@@ -14,36 +20,68 @@ offset_bottom = 46.0
 theme_override_constants/separation = 2
 
 [node name="StatusLabel" type="Label" parent="VBoxContainer" unique_id=740278126]
-layout_mode = 2
-horizontal_alignment = 1
 custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
 theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
 
 [node name="BarRow" type="HBoxContainer" parent="VBoxContainer" unique_id=1249110600]
-layout_mode = 2
 custom_minimum_size = Vector2(120, 14)
+layout_mode = 2
 theme_override_constants/separation = 2
 
 [node name="GuardLabel" type="Label" parent="VBoxContainer/BarRow" unique_id=1049283001]
-layout_mode = 2
 custom_minimum_size = Vector2(34, 0)
-vertical_alignment = 1
-theme_override_font_sizes/font_size = 9
-
-[node name="HealthBar" type="ProgressBar" parent="VBoxContainer/BarRow" unique_id=1979834218]
 layout_mode = 2
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+
+[node name="HealthBarContainer" type="Control" parent="VBoxContainer/BarRow" unique_id=1336265391]
+custom_minimum_size = Vector2(120, 14)
+layout_mode = 2
+
+[node name="HealthBar" type="ProgressBar" parent="VBoxContainer/BarRow/HealthBarContainer" unique_id=1790743945]
+custom_minimum_size = Vector2(120, 14)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -7.0
+offset_right = 60.0
+offset_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3
-custom_minimum_size = Vector2(48, 14)
+theme_override_styles/background = SubResource("StyleBoxFlat_582iq")
+theme_override_styles/fill = SubResource("StyleBoxFlat_523mr")
 show_percentage = false
 
-[node name="HpValueLabel" type="Label" parent="VBoxContainer/BarRow" unique_id=2084567890]
-layout_mode = 2
+[node name="HealthValueLabel" type="Label" parent="VBoxContainer/BarRow/HealthBarContainer" unique_id=1071733420]
 custom_minimum_size = Vector2(28, 0)
-vertical_alignment = 1
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -6.5
+offset_right = 14.0
+offset_bottom = 6.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="IntentLabel" type="Label" parent="VBoxContainer" unique_id=1878229960]
-layout_mode = 2
-autowrap_mode = 3
 custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
 theme_override_font_sizes/font_size = 9
+autowrap_mode = 3

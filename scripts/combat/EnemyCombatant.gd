@@ -71,22 +71,16 @@ func _get_intent_text(card: CardData) -> String:
 	var damage_amount := card.get_final_damage(self)
 	var guard_amount := card.get_final_guard(self)
 
-	var parts: Array[String] = []
+	var lines: Array[String] = []
+	lines.append(card.card_name)
 
 	if damage_amount > 0 and card.can_target_enemy:
-		parts.append("⚔ %s damage" % damage_amount)
+		lines.append("⚔ %s" % damage_amount)
+	elif guard_amount > 0:
+		lines.append("🛡 %s" % guard_amount)
+	elif card.cards_to_draw > 0:
+		lines.append("📜 +%s" % card.cards_to_draw)
+	else:
+		lines.append("❔")
 
-	if guard_amount > 0:
-		parts.append("🛡 %s guard" % guard_amount)
-
-	if card.cards_to_draw > 0:
-		parts.append("📜 draw %s" % card.cards_to_draw)
-
-	if parts.is_empty():
-		parts.append("❔ effect")
-
-	return "%s: %s — %s" % [
-		enemy_name,
-		card.card_name,
-		", ".join(parts)
-	]
+	return "\n".join(lines)

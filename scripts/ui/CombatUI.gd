@@ -1,10 +1,8 @@
 extends Control
 class_name CombatUI
 
-@onready var enemy_label: Label = $EnemyInfo/EnemyLabel
 @onready var dice_container: HBoxContainer = $Container/DiceContainer
 @onready var hand_container: Control = $Container/HandContainer
-@onready var enemy_intent_label: Label = $EnemyIntentLabel
 
 @export var card_view_scene: PackedScene
 @export var floating_text_scene: PackedScene
@@ -22,9 +20,6 @@ var selected_dice: Array[DiceData] = []
 var pending_rerolls: int = 0
 var hovered_card: CardData = null
 
-var intent_text_by_enemy: Dictionary = {}
-
-var combat_log_label: Label
 var result_panel: PanelContainer
 var reward_buttons_container: VBoxContainer
 var hand_refresh_version: int = 0
@@ -35,7 +30,7 @@ var pending_dice: Array[DiceData] = []
 var target_button_layer: Control
 var target_buttons_by_combatant: Dictionary = {}
 
-const FAN_ARC_MAX := 50.0
+const FAN_ARC_MAX := 20.0
 const CARD_SPREAD := 95.0
 const FAN_SINK := 1.5
 const HOVER_LIFT := 120.0
@@ -69,9 +64,6 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	for e in enemies:
 		e.hp_changed.connect(_on_any_combatant_changed)
 		e.guard_changed.connect(_on_any_guard_changed)
-		e.intent_changed.connect(func(intent_text: String):
-			_on_enemy_intent_changed(e, intent_text)
-		)
 		e.damage_taken.connect(_on_combatant_damage_taken)
 		e.guard_gained.connect(_on_combatant_guard_gained)
 		e.guard_reset.connect(_on_combatant_guard_reset)
@@ -80,29 +72,15 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
-	combat_manager.combat_log.connect(_on_combat_log)
-	combat_manager.enemy_action_started.connect(_on_enemy_action_started)
-	combat_manager.enemy_intent_prepared.connect(_refresh_enemy_intents)
 
 	player_top_hud.end_turn_pressed.connect(_on_end_turn_pressed)
 
 	_update_all()
 	_refresh_hand()
 	_refresh_dice()
-	_refresh_enemy_intents()
 
 
 func _ensure_polish_ui_nodes() -> void:
-	combat_log_label = get_node_or_null("CombatLogLabel") as Label
-	if combat_log_label == null:
-		combat_log_label = Label.new()
-		combat_log_label.name = "CombatLogLabel"
-		combat_log_label.position = Vector2(24, 420)
-		combat_log_label.size = Vector2(520, 140)
-		combat_log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		combat_log_label.text = ""
-		add_child(combat_log_label)
-
 	result_panel = get_node_or_null("ResultPanel") as PanelContainer
 	if result_panel == null:
 		result_panel = PanelContainer.new()
@@ -140,7 +118,6 @@ func _ensure_polish_ui_nodes() -> void:
 		vbox.add_child(reward_buttons_container)
 	else:
 		reward_buttons_container = result_panel.get_node_or_null("MarginContainer/ResultVBox/RewardButtons") as VBoxContainer
-
 
 func _refresh_hand() -> void:
 	hand_refresh_version += 1
@@ -289,8 +266,6 @@ func _refresh_active_player() -> void:
 
 func _update_all() -> void:
 	_update_player_info()
-	_update_enemy_info()
-	_refresh_enemy_intents()
 
 
 func _update_player_info() -> void:
@@ -298,27 +273,6 @@ func _update_player_info() -> void:
 		return
 
 	player_top_hud.set_player(active_player, "Exiled Knight")
-
-func _update_enemy_info() -> void:
-	var lines: Array[String] = []
-
-	for e in enemies:
-		if e == null:
-			continue
-
-		if e.is_dead():
-			lines.append("%s  DEFEATED" % e.enemy_name)
-		else:
-			var marker := " <TARGET>" if selected_target == e else ""
-			lines.append("%s%s  HP: %s/%s  Guard: %s" % [
-				e.enemy_name,
-				marker,
-				e.current_hp,
-				e.stats.max_hp,
-				e.current_guard
-			])
-
-	enemy_label.text = "\n".join(lines)
 
 
 func _get_default_target_for_card(card: CardData) -> Combatant:
@@ -577,7 +531,6 @@ func _on_enemy_turn_started() -> void:
 
 func _on_combat_ended(winner: Combatant) -> void:
 	player_top_hud.set_end_turn_enabled(false)
-	enemy_intent_label.text = ""
 
 	if _is_player_combatant(winner):
 		player_top_hud.set_status_text("Victory")
@@ -705,31 +658,6 @@ func _on_reward_card_chosen(card: CardData) -> void:
 		chosen_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		reward_buttons_container.add_child(chosen_label)
 
-
-func _on_combat_log(message: String) -> void:
-	if combat_log_label == null:
-		return
-
-	var existing: Array[String] = []
-
-	for line in combat_log_label.text.split("\n", false):
-		existing.append(line)
-
-	existing.append(message)
-
-	while existing.size() > 7:
-		existing.remove_at(0)
-
-	combat_log_label.text = "\n".join(existing)
-
-
-func _on_enemy_action_started(enemy: EnemyCombatant, card: CardData, target: Combatant) -> void:
-	_spawn_floating_text(
-		"%s: %s" % [enemy.enemy_name, card.card_name],
-		enemy_label.global_position + Vector2(0, 24)
-	)
-
-
 func _on_combatant_damage_taken(
 	combatant: Combatant,
 	incoming_damage: int,
@@ -778,49 +706,19 @@ func _get_floating_text_position_for_combatant(combatant: Combatant) -> Vector2:
 		if p == combatant:
 			return player_top_hud.global_position + Vector2(120, 36)
 
-	for e in enemies:
-		if e == combatant:
-			return enemy_label.global_position + Vector2(0, -20)
+	if target_buttons_by_combatant.has(combatant):
+		var button: Button = target_buttons_by_combatant[combatant]
+		return button.global_position + button.size * 0.5 + Vector2(0, -40)
 
 	return global_position + Vector2(300, 300)
-
 
 func _on_combatant_died(combatant: Combatant) -> void:
 	if selected_target == combatant:
 		selected_target = null
 
-	intent_text_by_enemy.erase(combatant)
-
 	_spawn_floating_text("DEFEATED", _get_floating_text_position_for_combatant(combatant))
 
 	_update_all()
-
-
-func _on_enemy_intent_changed(enemy: EnemyCombatant, intent_text: String) -> void:
-	if enemy == null:
-		return
-
-	if enemy.is_dead() or intent_text == "":
-		intent_text_by_enemy.erase(enemy)
-	else:
-		intent_text_by_enemy[enemy] = intent_text
-
-	_refresh_enemy_intents()
-
-
-func _refresh_enemy_intents() -> void:
-	var lines: Array[String] = []
-
-	for e in enemies:
-		if e == null or e.is_dead():
-			continue
-
-		if intent_text_by_enemy.has(e):
-			lines.append(intent_text_by_enemy[e])
-		else:
-			lines.append("%s: ..." % e.enemy_name)
-
-	enemy_intent_label.text = "\n".join(lines)
 
 
 func _clear_children(container: Node) -> void:
@@ -842,6 +740,7 @@ func setup_target_buttons(combatant_visuals: Dictionary) -> void:
 		target_button_layer.name = "TargetButtonLayer"
 		target_button_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		target_button_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+		target_button_layer.z_index = -1
 		add_child(target_button_layer)
 
 	_clear_children(target_button_layer)
@@ -871,18 +770,37 @@ func setup_target_buttons(combatant_visuals: Dictionary) -> void:
 		target_buttons_by_combatant[combatant] = button
 
 func refresh_target_buttons(combatant_visuals: Dictionary) -> void:
+	var stale_combatants: Array = []
+
 	for combatant in target_buttons_by_combatant.keys():
 		var button: Button = target_buttons_by_combatant[combatant]
 
-		if combatant == null or combatant.is_dead():
-			button.visible = false
+		if combatant == null or not is_instance_valid(combatant):
+			if is_instance_valid(button):
+				button.queue_free()
+			stale_combatants.append(combatant)
+			continue
+
+		if combatant.is_dead():
+			if is_instance_valid(button):
+				button.queue_free()
+			stale_combatants.append(combatant)
 			continue
 
 		if not combatant_visuals.has(combatant):
-			button.visible = false
+			if is_instance_valid(button):
+				button.queue_free()
+			stale_combatants.append(combatant)
 			continue
 
 		var visual: Node2D = combatant_visuals[combatant]
+
+		if visual == null or not is_instance_valid(visual):
+			if is_instance_valid(button):
+				button.queue_free()
+			stale_combatants.append(combatant)
+			continue
+
 		var button_size := button.size
 
 		button.visible = true
@@ -892,3 +810,6 @@ func refresh_target_buttons(combatant_visuals: Dictionary) -> void:
 			button.modulate = Color(1.0, 0.85, 0.2, 0.28)
 		else:
 			button.modulate = Color(1, 1, 1, 0.08)
+
+	for combatant in stale_combatants:
+		target_buttons_by_combatant.erase(combatant)

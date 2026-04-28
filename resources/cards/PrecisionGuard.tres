@@ -11,5 +11,6 @@ card_type = 1
 dice_requirement_type = 3
 required_die_value = 2
 target_mode = 2
+base_guard = 10
 can_target_self = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

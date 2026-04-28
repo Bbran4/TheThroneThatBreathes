@@ -2,8 +2,8 @@ extends Control
 class_name CombatantStatusUI
 
 @onready var guard_label: Label = $VBoxContainer/BarRow/GuardLabel
-@onready var health_bar: ProgressBar = $VBoxContainer/BarRow/HealthBar
-@onready var hp_value_label: Label = $VBoxContainer/BarRow/HpValueLabel
+@onready var health_bar: ProgressBar = $VBoxContainer/BarRow/HealthBarContainer/HealthBar
+@onready var health_value_label: Label = $VBoxContainer/BarRow/HealthBarContainer/HealthValueLabel
 @onready var status_label: Label = $VBoxContainer/StatusLabel
 @onready var intent_label: Label = $VBoxContainer/IntentLabel
 
@@ -20,6 +20,9 @@ func setup(new_combatant: Combatant) -> void:
 	if combatant is EnemyCombatant:
 		var enemy := combatant as EnemyCombatant
 		enemy.intent_changed.connect(_on_intent_changed)
+		intent_label.visible = true
+	else:
+		intent_label.visible = false
 
 	_refresh_all()
 
@@ -30,25 +33,26 @@ func _refresh_all() -> void:
 
 	health_bar.max_value = combatant.stats.max_hp
 	health_bar.value = combatant.current_hp
-	hp_value_label.text = "%s/%s" % [combatant.current_hp, combatant.stats.max_hp]
-	guard_label.text = "🛡 %s" % combatant.current_guard
-	status_label.text = ""
+	health_value_label.text = "%s / %s" % [
+		combatant.current_hp,
+		combatant.stats.max_hp
+	]
 
-	if combatant is EnemyCombatant:
-		intent_label.visible = true
-		intent_label.text = ""
-	else:
-		intent_label.visible = false
+	guard_label.text = "🛡 " + str(combatant.current_guard)
+	status_label.text = ""
 
 
 func _on_hp_changed(current_hp: int, max_hp: int) -> void:
 	health_bar.max_value = max_hp
 	health_bar.value = current_hp
-	hp_value_label.text = "%s/%s" % [current_hp, max_hp]
+	health_value_label.text = "%s / %s" % [
+		current_hp,
+		max_hp
+	]
 
 
 func _on_guard_changed(current_guard: int) -> void:
-	guard_label.text = "🛡 %s" % current_guard
+	guard_label.text = "🛡 " + str(current_guard)
 
 
 func _on_intent_changed(intent_text: String) -> void:

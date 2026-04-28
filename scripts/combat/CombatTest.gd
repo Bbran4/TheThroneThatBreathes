@@ -77,25 +77,39 @@ func _process(_delta: float) -> void:
 	if combat_ui != null:
 		combat_ui.refresh_target_buttons(combatant_visuals)
 
+	var dead_entries: Array[Combatant] = []
+
 	for combatant in combatant_status_uis.keys():
 		var entry: Dictionary = combatant_status_uis[combatant]
 		var status_ui: Control = entry["ui"]
 		var visual: Node2D = entry["visual"]
 
-		if combatant == null or combatant.is_dead():
+		if combatant == null or not is_instance_valid(combatant):
+			dead_entries.append(combatant)
+			continue
+
+		if status_ui == null or not is_instance_valid(status_ui):
+			dead_entries.append(combatant)
+			continue
+
+		if visual == null or not is_instance_valid(visual):
+			dead_entries.append(combatant)
+			continue
+
+		if combatant.is_dead():
 			status_ui.visible = false
+			dead_entries.append(combatant)
 			continue
 
 		var screen_pos := visual.get_global_transform_with_canvas().origin
-
-		# For all combatants: status UI sits just below the sprite.
-		# StatusLabel (status effects) sits above the bar row, so the whole widget
-		# is placed so the bar appears underneath the sprite feet.
-		# We offset by half the sprite display height (sprites use scale 0.15, adjust as needed).
-		var sprite_half_height := 90.0  # tweak to match your sprite display size
+		var sprite_half_height := 90.0
 
 		status_ui.global_position = screen_pos + Vector2(-100, sprite_half_height)
 		status_ui.visible = true
+
+	for combatant in dead_entries:
+		if combatant_status_uis.has(combatant):
+			combatant_status_uis.erase(combatant)
 
 func _on_combat_log(message: String) -> void:
 	print(message)
@@ -166,10 +180,21 @@ func _on_combatant_died(combatant: Combatant) -> void:
 	if combat_ui.selected_target == combatant:
 		combat_ui.clear_target()
 
+	if combatant_status_uis.has(combatant):
+		var entry: Dictionary = combatant_status_uis[combatant]
+		var status_ui: Control = entry["ui"]
+
+		combatant_status_uis.erase(combatant)
+
+		if is_instance_valid(status_ui):
+			status_ui.queue_free()
+
 	if combatant_visuals.has(combatant):
 		var visual: CombatantVisual = combatant_visuals[combatant]
 		combatant_visuals.erase(combatant)
-		visual.play_death_reaction()
+
+		if is_instance_valid(visual):
+			visual.play_death_reaction()
 
 	_update_target_visuals()
 
