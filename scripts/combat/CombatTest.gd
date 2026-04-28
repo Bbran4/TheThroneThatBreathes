@@ -12,10 +12,12 @@ extends Node
 @onready var combat_ui: CombatUI = $CanvasLayer/CombatUI
 @onready var player_slots: Node2D = $Battlefield/PlayerSlots
 @onready var enemy_slots: Node2D = $Battlefield/EnemySlots
+@export var combatant_status_ui_scene: PackedScene
 
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
 var combatant_visuals: Dictionary = {}
+var combatant_status_uis: Dictionary = {}
 
 func _ready() -> void:
 	if not _validate_team_data(player_team_data, "Player team"):
@@ -34,7 +36,9 @@ func _ready() -> void:
 	combat_ui.target_selected.connect(func(_target: Combatant):
 		_update_target_visuals()
 	)
-	
+	combat_ui.pending_card_changed.connect(func(_card: CardData):
+		_update_target_visuals()
+	)
 	combat_manager.combat_started.connect(_on_combat_started)
 	combat_manager.player_turn_started.connect(_on_player_turn_started)
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
@@ -72,6 +76,22 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if combat_ui != null:
 		combat_ui.refresh_target_buttons(combatant_visuals)
+
+	for combatant in combatant_status_uis.keys():
+		var entry: Dictionary = combatant_status_uis[combatant]
+		var status_ui: Control = entry["ui"]
+		var visual: Node2D = entry["visual"]
+
+		if combatant == null or combatant.is_dead():
+			status_ui.visible = false
+			continue
+
+		var screen_pos := visual.get_global_transform_with_canvas().origin
+
+		if combatant is EnemyCombatant:
+			status_ui.global_position = screen_pos + Vector2(-80, 85)
+		else:
+			status_ui.visible = false
 
 func _on_combat_log(message: String) -> void:
 	print(message)
@@ -165,15 +185,58 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 	slot.add_child(visual)
 
 	combatant_visuals[combatant] = visual
+	_spawn_status_ui_for_combatant(combatant, visual)
+
+func _spawn_status_ui_for_combatant(combatant: Combatant, visual: CombatantVisual) -> void:
+	if combatant_status_ui_scene == null:
+		return
+
+	var status_ui: CombatantStatusUI = combatant_status_ui_scene.instantiate()
+	combat_ui.add_child(status_ui)
+	status_ui.setup(combatant)
+
+	combatant_status_uis[combatant] = {
+		"ui": status_ui,
+		"visual": visual
+	}
 
 func _update_target_visuals() -> void:
 	for combatant in combatant_visuals.keys():
 		var visual: CombatantVisual = combatant_visuals[combatant]
 
-		if combatant == combat_ui.selected_target:
-			visual.set_targeted(true)
-		else:
-			visual.set_targeted(false)
+		if combatant.is_dead():
+			continue
+
+		if combat_ui.pending_card == null:
+			if combatant == combat_ui.selected_target:
+				visual.set_target_state("selected")
+			else:
+				visual.set_target_state("normal")
+			continue
+
+		var card := combat_ui.pending_card
+
+		match card.target_mode:
+			CardData.TargetMode.SINGLE_ENEMY:
+				if combatant is EnemyCombatant:
+					visual.set_target_state("valid")
+				else:
+					visual.set_target_state("invalid")
+
+			CardData.TargetMode.SINGLE_ALLY:
+				if combatant is PlayerCombatant:
+					visual.set_target_state("valid")
+				else:
+					visual.set_target_state("invalid")
+
+			CardData.TargetMode.SLOT_1_AND_RANDOM_OTHER:
+				if combatant is EnemyCombatant:
+					visual.set_target_state("cleave")
+				else:
+					visual.set_target_state("invalid")
+
+			_:
+				visual.set_target_state("normal")
 
 func _on_combat_started() -> void:
 	print("Combat started.")

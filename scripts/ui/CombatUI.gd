@@ -2,14 +2,14 @@ extends Control
 class_name CombatUI
 
 @onready var enemy_label: Label = $EnemyInfo/EnemyLabel
-@onready var player_label: Label = $PlayerInfo/PlayerLabel
 @onready var dice_container: HBoxContainer = $Container/DiceContainer
 @onready var hand_container: Control = $Container/HandContainer
-@onready var end_turn_button: Button = $EndTurnButton
 @onready var enemy_intent_label: Label = $EnemyIntentLabel
 
 @export var card_view_scene: PackedScene
 @export var floating_text_scene: PackedScene
+@onready var player_top_hud: PlayerTopHUD = $PlayerTopHUD
+@onready var player_label_fallback_position: Control = $PlayerTopHUD
 
 var combat_manager: CombatManager
 var players: Array[PlayerCombatant] = []
@@ -44,13 +44,15 @@ const CARD_WIDTH := 180.0
 const CARD_HEIGHT := 270.0
 
 signal target_selected(target: Combatant)
-
+signal pending_card_changed(card: CardData)
 
 func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
 	combat_manager = new_combat_manager
 	players = new_players
 	enemies = new_enemies
 	active_player = combat_manager.active_player
+
+	player_top_hud.setup(active_player, "Exiled Knight")
 
 	_ensure_polish_ui_nodes()
 
@@ -82,7 +84,7 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 	combat_manager.enemy_action_started.connect(_on_enemy_action_started)
 	combat_manager.enemy_intent_prepared.connect(_refresh_enemy_intents)
 
-	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	player_top_hud.end_turn_pressed.connect(_on_end_turn_pressed)
 
 	_update_all()
 	_refresh_hand()
@@ -285,7 +287,6 @@ func _on_any_guard_changed(_current_guard: int) -> void:
 func _refresh_active_player() -> void:
 	active_player = combat_manager.active_player
 
-
 func _update_all() -> void:
 	_update_player_info()
 	_update_enemy_info()
@@ -293,23 +294,10 @@ func _update_all() -> void:
 
 
 func _update_player_info() -> void:
-	var lines: Array[String] = []
+	if player_top_hud == null:
+		return
 
-	for p in players:
-		if p == null:
-			continue
-
-		var prefix := "> " if p == active_player else ""
-		var status := "DEAD" if p.is_dead() else "HP: %s/%s  Guard: %s" % [
-			p.current_hp,
-			p.stats.max_hp,
-			p.current_guard
-		]
-
-		lines.append("%sPlayer  %s" % [prefix, status])
-
-	player_label.text = "\n".join(lines)
-
+	player_top_hud.set_player(active_player, "Exiled Knight")
 
 func _update_enemy_info() -> void:
 	var lines: Array[String] = []
@@ -501,7 +489,9 @@ func _on_card_pressed(card: CardData) -> void:
 
 	pending_card = card
 	pending_dice = _get_dice_for_card(card)
-
+	
+	pending_card_changed.emit(pending_card)
+	
 	if card.requires_manual_target():
 		print("Selected card: ", card.card_name, ". Choose a target.")
 		return
@@ -528,7 +518,9 @@ func _play_pending_card(target: Combatant) -> void:
 
 		pending_card = null
 		pending_dice.clear()
-
+		
+		pending_card_changed.emit(null)
+		
 		if selected_target != null and selected_target.is_dead():
 			selected_target = null
 
@@ -561,7 +553,10 @@ func _on_end_turn_pressed() -> void:
 func _on_player_turn_started() -> void:
 	_refresh_active_player()
 
-	end_turn_button.disabled = false
+	player_top_hud.set_player(active_player, "Exiled Knight")
+	player_top_hud.set_end_turn_enabled(true)
+	player_top_hud.set_status_text("Your turn")
+
 	selected_dice.clear()
 	pending_rerolls = 0
 
@@ -571,7 +566,9 @@ func _on_player_turn_started() -> void:
 
 
 func _on_enemy_turn_started() -> void:
-	end_turn_button.disabled = true
+	player_top_hud.set_end_turn_enabled(false)
+	player_top_hud.set_status_text("Enemy turn")
+
 	selected_dice.clear()
 	pending_rerolls = 0
 
@@ -579,12 +576,14 @@ func _on_enemy_turn_started() -> void:
 
 
 func _on_combat_ended(winner: Combatant) -> void:
-	end_turn_button.disabled = true
+	player_top_hud.set_end_turn_enabled(false)
 	enemy_intent_label.text = ""
 
 	if _is_player_combatant(winner):
+		player_top_hud.set_status_text("Victory")
 		_show_result_panel(true)
 	else:
+		player_top_hud.set_status_text("Defeat")
 		_show_result_panel(false)
 
 func select_target(target: Combatant) -> void:
@@ -777,7 +776,7 @@ func _on_combatant_guard_reset(
 func _get_floating_text_position_for_combatant(combatant: Combatant) -> Vector2:
 	for p in players:
 		if p == combatant:
-			return player_label.global_position + Vector2(0, -20)
+			return player_top_hud.global_position + Vector2(120, 36)
 
 	for e in enemies:
 		if e == combatant:

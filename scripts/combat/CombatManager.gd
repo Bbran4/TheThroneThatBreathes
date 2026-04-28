@@ -14,7 +14,8 @@ signal enemy_action_started(enemy: EnemyCombatant, card: CardData, target: Comba
 
 @export var starting_hand_size: int = 5
 @export var cards_drawn_per_turn: int = 1
-
+@export var action_delay: float = 0.35
+@export var enemy_action_delay: float = 0.55
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
 
@@ -164,20 +165,15 @@ func start_enemy_turn() -> void:
 
 		e.reset_guard()
 
+		await get_tree().create_timer(enemy_action_delay).timeout
+
 		var selected_card := e.get_selected_card()
 		var selected_dice := e.get_selected_dice()
 		var target := _get_enemy_target_for_card(selected_card)
 
-		if selected_card != null and target != null:
+		if selected_card != null:
 			enemy_action_started.emit(e, selected_card, target)
-			combat_log.emit("%s uses %s on %s." % [
-				e.enemy_name,
-				selected_card.card_name,
-				target.get_display_name()
-			])
 			_try_enemy_play_prepared_card(e, selected_card, selected_dice, target)
-		else:
-			combat_log.emit("%s has no action." % e.enemy_name)
 
 		e.clear_selected_card()
 
@@ -187,9 +183,9 @@ func start_enemy_turn() -> void:
 			return
 
 	if combat_is_active:
+		await get_tree().create_timer(action_delay).timeout
 		_prepare_enemy_intents()
 		start_player_turn()
-
 func _get_enemy_target_for_card(card: CardData) -> Combatant:
 	if card == null:
 		return null

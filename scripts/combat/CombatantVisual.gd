@@ -55,6 +55,25 @@ func set_targeted(is_targeted: bool) -> void:
 
 	sprite.modulate = Color(1.0, 0.85, 0.35) if is_targeted else Color.WHITE
 
+func set_target_state(state: String) -> void:
+	if is_dying or sprite == null:
+		return
+
+	match state:
+		"normal":
+			sprite.modulate = Color.WHITE
+
+		"valid":
+			sprite.modulate = Color(0.75, 1.0, 0.75)
+
+		"invalid":
+			sprite.modulate = Color(0.45, 0.45, 0.45)
+
+		"selected":
+			sprite.modulate = Color(1.0, 0.85, 0.35)
+
+		"cleave":
+			sprite.modulate = Color(1.0, 0.55, 0.25)
 
 func play_death_reaction() -> void:
 	if is_dying:

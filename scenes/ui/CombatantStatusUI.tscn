@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://dh7rjavsrrbyi"]
+
+[ext_resource type="Script" uid="uid://c1dfm8k8i5gch" path="res://scripts/ui/combatant_status_ui.gd" id="1_523mr"]
+
+[node name="CombatantStatusUi" type="Control" unique_id=30555654]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_523mr")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=389209209]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1249110600]
+layout_mode = 2
+
+[node name="GuardLabel" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1049283001]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="VBoxContainer/HBoxContainer" unique_id=1979834218]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer" unique_id=740278126]
+layout_mode = 2
+
+[node name="IntentLabel" type="Label" parent="VBoxContainer" unique_id=1878229960]
+layout_mode = 2

@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://brw3wrwd3psdl"]
+
+[ext_resource type="Script" uid="uid://dcwfhw2prwiop" path="res://scripts/ui/player_top_hud.gd" id="1_1tcc5"]
+
+[node name="PlayerTopHud" type="Control" unique_id=288534297]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("1_1tcc5")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1785905755]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="PlayerNameLabel" type="Label" parent="HBoxContainer" unique_id=753462214]
+layout_mode = 2
+text = "Exiled Knight"
+
+[node name="HealthBar" type="ProgressBar" parent="HBoxContainer" unique_id=1951356201]
+layout_mode = 2
+value = 100.0
+
+[node name="GuardLabel" type="Label" parent="HBoxContainer" unique_id=454823958]
+layout_mode = 2
+text = "5"
+
+[node name="StatusLabel" type="Label" parent="HBoxContainer" unique_id=1047804451]
+layout_mode = 2
+
+[node name="EndTurnButton" type="Button" parent="HBoxContainer" unique_id=939273223]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "End Turn"
