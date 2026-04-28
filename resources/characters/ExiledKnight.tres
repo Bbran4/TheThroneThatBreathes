@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="CombatantData" format=3 uid="uid://wuq22glnh27c"]
+
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_8sdo4"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_jr1e6"]
+[ext_resource type="Resource" uid="uid://dfh04h2nyx7wo" path="res://resources/characters/ExiledKnightStats.tres" id="3_jr1e6"]
+[ext_resource type="Resource" uid="uid://dwtgw0nqbdy5p" path="res://resources/cards/Strike.tres" id="3_n0e86"]
+[ext_resource type="Resource" uid="uid://bg3w4evgqg7n4" path="res://resources/cards/Cleave.tres" id="4_e5qh0"]
+[ext_resource type="Resource" uid="uid://wbp2t40kpxby" path="res://resources/cards/DarkRitual.tres" id="5_gspro"]
+[ext_resource type="Resource" uid="uid://chjeca26whnm" path="res://resources/cards/Execution.tres" id="6_cbna0"]
+[ext_resource type="Resource" uid="uid://bjd605pctd2tj" path="res://resources/cards/FateTwist.tres" id="7_3gqma"]
+[ext_resource type="Resource" uid="uid://clbraadrbyb5u" path="res://resources/cards/Guard.tres" id="8_4x3cc"]
+[ext_resource type="Resource" uid="uid://cjbc63iwfx7it" path="res://resources/cards/HeavyBlow.tres" id="9_uvyxt"]
+[ext_resource type="Resource" uid="uid://b85ava5av40jk" path="res://resources/cards/PrecisionGuard.tres" id="10_1oks2"]
+[ext_resource type="Resource" uid="uid://bvw6exk2jecjx" path="res://resources/cards/QuickJab.tres" id="11_fnvj0"]
+[ext_resource type="Resource" uid="uid://c44i5167vmuk5" path="res://resources/cards/TwinStrike.tres" id="12_kox51"]
+
+[resource]
+script = ExtResource("1_8sdo4")
+display_name = "Exiled Knight"
+stats = ExtResource("3_jr1e6")
+starting_deck = Array[ExtResource("2_jr1e6")]([ExtResource("3_n0e86"), ExtResource("4_e5qh0"), ExtResource("5_gspro"), ExtResource("6_cbna0"), ExtResource("7_3gqma"), ExtResource("8_4x3cc"), ExtResource("9_uvyxt"), ExtResource("10_1oks2"), ExtResource("11_fnvj0"), ExtResource("3_n0e86"), ExtResource("12_kox51")])
+metadata/_custom_type_script = "uid://0vgymfy4egw4"

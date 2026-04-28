@@ -6,11 +6,8 @@ extends Node
 # Later, this will be replaced by proper scene loading,
 # character selection, enemy spawning, and UI.
 
-@export var player_stats: CharacterStats
-@export var enemy_stats: CharacterStats
-
-@export var player_deck: Array[CardData]
-@export var enemy_deck: Array[CardData]
+@export var player_data: CombatantData
+@export var enemy_data: CombatantData
 
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var player: PlayerCombatant = $PlayerCombatant
@@ -22,25 +19,33 @@ extends Node
 func _ready() -> void:
 	# Validate exported data before starting combat.
 	# This helps catch missing resources early.
-	if player_stats == null:
-		push_error("CombatTest is missing player_stats.")
+	if player_data == null:
+		push_error("CombatTest is missing player_data.")
 		return
 
-	if enemy_stats == null:
-		push_error("CombatTest is missing enemy_stats.")
+	if enemy_data == null:
+		push_error("CombatTest is missing enemy_data.")
 		return
 
-	if player_deck.is_empty():
-		push_error("CombatTest is missing player_deck.")
+	if player_data.stats == null:
+		push_error("Player data is missing stats.")
 		return
 
-	if enemy_deck.is_empty():
-		push_error("CombatTest is missing enemy_deck.")
+	if enemy_data.stats == null:
+		push_error("Enemy data is missing stats.")
+		return
+
+	if player_data.starting_deck.is_empty():
+		push_error("Player data is missing starting deck.")
+		return
+
+	if enemy_data.starting_deck.is_empty():
+		push_error("Enemy data is missing starting deck.")
 		return
 
 	# Setup combatants first.
-	player.setup(player_stats, player_deck)
-	enemy.setup_enemy(enemy_name, enemy_stats, enemy_deck)
+	player.setup(player_data.stats, player_data.starting_deck)
+	enemy.setup_enemy(enemy_data.display_name, enemy_data.stats, enemy_data.starting_deck)
 
 	# Then setup the manager.
 	combat_manager.setup_combat(player, enemy)

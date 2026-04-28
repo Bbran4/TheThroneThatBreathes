@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CombatantData" format=3 uid="uid://cihmxdwhbg2la"]
+
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_gt3fr"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_spysg"]
+[ext_resource type="Resource" uid="uid://bbwh6hfhnwyuk" path="res://resources/cards/enemies/ChantingGuard.tres" id="3_6wrml"]
+[ext_resource type="Resource" uid="uid://b8c7o4bktd234" path="res://resources/cards/enemies/BoneKnife.tres" id="4_wxm5t"]
+[ext_resource type="Resource" uid="uid://q086nkypn0m1" path="res://resources/cards/enemies/DarkPrayer.tres" id="5_pj8vh"]
+[ext_resource type="Resource" uid="uid://c0epol8boxooy" path="res://resources/enemies/HollowAcolyteStats.tres" id="6_tldyn"]
+
+[resource]
+script = ExtResource("1_gt3fr")
+display_name = "Hollow Acolyte"
+stats = ExtResource("6_tldyn")
+starting_deck = Array[ExtResource("2_spysg")]([ExtResource("3_6wrml"), ExtResource("3_6wrml"), ExtResource("4_wxm5t"), ExtResource("5_pj8vh")])
+metadata/_custom_type_script = "uid://0vgymfy4egw4"

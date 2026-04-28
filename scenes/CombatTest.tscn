@@ -2,33 +2,18 @@
 
 [ext_resource type="Script" uid="uid://ccwada60nx028" path="res://scripts/combat/CombatTest.gd" id="1_aa5v2"]
 [ext_resource type="Script" uid="uid://ca0wwrvp3wqly" path="res://scripts/combat/CombatManager.gd" id="2_84fr5"]
-[ext_resource type="Resource" uid="uid://ckuoywb7m42ga" path="res://resources/test/PlayerStats.tres" id="2_mvvgd"]
-[ext_resource type="Resource" uid="uid://c230eqyqxmn0i" path="res://resources/enemies/CrownboundGuardStats.tres" id="3_ifsdk"]
+[ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="2_gaico"]
+[ext_resource type="Resource" uid="uid://cihmxdwhbg2la" path="res://resources/enemies/HollowAcolyte.tres" id="3_gaico"]
 [ext_resource type="Script" uid="uid://cui60d7oj1du7" path="res://scripts/combat/PlayerCombatant.gd" id="3_psff3"]
-[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="4_8equi"]
 [ext_resource type="Script" uid="uid://lmhct1c1dyfj" path="res://scripts/combat/EnemyCombatant.gd" id="4_uvkbr"]
-[ext_resource type="Resource" uid="uid://dwtgw0nqbdy5p" path="res://resources/cards/Strike.tres" id="5_2nakn"]
-[ext_resource type="Resource" uid="uid://clbraadrbyb5u" path="res://resources/cards/Guard.tres" id="6_e14ux"]
-[ext_resource type="Resource" uid="uid://cjbc63iwfx7it" path="res://resources/cards/HeavyBlow.tres" id="7_qf82r"]
-[ext_resource type="Resource" uid="uid://bvw6exk2jecjx" path="res://resources/cards/QuickJab.tres" id="8_5tqi3"]
-[ext_resource type="Resource" uid="uid://bg3w4evgqg7n4" path="res://resources/cards/Cleave.tres" id="9_xve5x"]
-[ext_resource type="Resource" uid="uid://chjeca26whnm" path="res://resources/cards/Execution.tres" id="10_28vxc"]
-[ext_resource type="Resource" uid="uid://b85ava5av40jk" path="res://resources/cards/PrecisionGuard.tres" id="11_bugva"]
 [ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="11_qqmgp"]
 [ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="12_8equi"]
-[ext_resource type="Resource" uid="uid://c44i5167vmuk5" path="res://resources/cards/TwinStrike.tres" id="12_ifsdk"]
-[ext_resource type="Resource" uid="uid://wbp2t40kpxby" path="res://resources/cards/DarkRitual.tres" id="13_plbue"]
-[ext_resource type="Resource" uid="uid://bjd605pctd2tj" path="res://resources/cards/FateTwist.tres" id="14_xve5x"]
-[ext_resource type="Resource" uid="uid://fpcubyocjj4x" path="res://resources/cards/enemies/ShieldWall.tres" id="15_plbue"]
-[ext_resource type="Resource" uid="uid://dooes0fcekh4w" path="res://resources/cards/enemies/Rustblade.tres" id="16_1eg2t"]
-[ext_resource type="Resource" uid="uid://60clvp01nrlb" path="res://resources/cards/enemies/HeavyCleave.tres" id="17_qb3xo"]
 
 [node name="CombatTest" type="Node" unique_id=1986889536]
 script = ExtResource("1_aa5v2")
-player_stats = ExtResource("2_mvvgd")
-enemy_stats = ExtResource("3_ifsdk")
-player_deck = Array[ExtResource("4_8equi")]([ExtResource("5_2nakn"), ExtResource("5_2nakn"), ExtResource("6_e14ux"), ExtResource("7_qf82r"), ExtResource("8_5tqi3"), ExtResource("9_xve5x"), ExtResource("10_28vxc"), ExtResource("11_bugva"), ExtResource("12_ifsdk"), ExtResource("13_plbue"), ExtResource("14_xve5x")])
-enemy_deck = Array[ExtResource("4_8equi")]([ExtResource("15_plbue"), ExtResource("15_plbue"), ExtResource("16_1eg2t"), ExtResource("17_qb3xo")])
+player_data = ExtResource("2_gaico")
+enemy_data = ExtResource("3_gaico")
+enemy_name = "Hollow Acolyte"
 
 [node name="CombatManager" type="Node" parent="." unique_id=1843945017]
 script = ExtResource("2_84fr5")

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CombatantData" format=3 uid="uid://bpnfmkbsa56jq"]
+
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_gx1gd"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_nyl34"]
+[ext_resource type="Resource" uid="uid://dykohbf2ijjbm" path="res://resources/cards/enemies/Bite.tres" id="3_8ixno"]
+[ext_resource type="Resource" uid="uid://dcf3m8olk7a1g" path="res://resources/cards/enemies/Claw.tres" id="4_2g0nk"]
+[ext_resource type="Resource" uid="uid://clbraadrbyb5u" path="res://resources/cards/Guard.tres" id="5_qyu34"]
+[ext_resource type="Resource" uid="uid://nvhpyf5ynn16" path="res://resources/enemies/RotWolfStats.tres" id="6_nhsdm"]
+
+[resource]
+script = ExtResource("1_gx1gd")
+display_name = "Rot Wolf"
+stats = ExtResource("6_nhsdm")
+starting_deck = Array[ExtResource("2_nyl34")]([ExtResource("3_8ixno"), ExtResource("3_8ixno"), ExtResource("4_2g0nk"), ExtResource("5_qyu34")])
+metadata/_custom_type_script = "uid://0vgymfy4egw4"

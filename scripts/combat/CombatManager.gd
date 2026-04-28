@@ -21,7 +21,7 @@ signal combat_ended(winner: Combatant)
 signal enemy_intent_prepared
 
 @export var starting_hand_size: int = 5
-@export var cards_drawn_per_turn: int = 5
+@export var cards_drawn_per_turn: int = 1
 
 var player: PlayerCombatant
 var enemy: EnemyCombatant
@@ -49,6 +49,9 @@ func start_combat() -> void:
 	combat_is_active = true
 	combat_started.emit()
 
+	player.draw_cards(starting_hand_size)
+	enemy.draw_cards(starting_hand_size)
+
 	_prepare_enemy_intent()
 	start_player_turn()
 
@@ -61,6 +64,8 @@ func start_player_turn() -> void:
 
 	player.reset_guard()
 	player.roll_dice()
+
+	# Player keeps their hand and draws only one new card per turn.
 	player.draw_cards(cards_drawn_per_turn)
 
 	player_turn_started.emit()
@@ -73,13 +78,9 @@ func end_player_turn() -> void:
 	if not is_player_turn:
 		return
 
-	# If the enemy is already dead, end combat instead of passing turn.
 	if enemy == null or enemy.is_dead():
 		_end_combat(player)
 		return
-
-	# Discard remaining player hand at end of turn.
-	player.discard_hand()
 
 	is_player_turn = false
 	start_enemy_turn()
@@ -103,7 +104,6 @@ func start_enemy_turn() -> void:
 	if selected_card != null:
 		_try_enemy_play_prepared_card(selected_card, selected_dice)
 
-	enemy.discard_hand()
 	enemy.clear_selected_card()
 
 	_check_combat_end()
@@ -245,9 +245,6 @@ func _on_combatant_died(dead_combatant: Combatant) -> void:
 	_check_combat_end()
 
 func _prepare_enemy_intent() -> void:
-	# Enemy prepares its next action before the player acts.
-	# This gives the player tactical information.
-
 	enemy.roll_dice()
 	enemy.draw_cards(cards_drawn_per_turn)
 	enemy.prepare_intent()
@@ -272,5 +269,7 @@ func _try_enemy_play_prepared_card(card: CardData, assigned_dice: Array[DiceData
 		enemy.dice_pool.assign_die(die)
 
 	_resolve_card(card, enemy, player)
+
+	enemy.discard_card(card)
 
 	return true
