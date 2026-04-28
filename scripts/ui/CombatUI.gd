@@ -19,7 +19,6 @@ var combat_manager: CombatManager
 var player: PlayerCombatant
 var enemy: EnemyCombatant
 
-var selected_card: CardData = null
 var selected_dice: Array[DiceData] = []
 
 
@@ -113,8 +112,12 @@ func _refresh_dice() -> void:
 
 	for die in player.get_dice():
 		var button := Button.new()
-		button.text = str(die.current_value)
 		button.custom_minimum_size = Vector2(60, 60)
+
+		if selected_dice.has(die):
+			button.text = "[" + str(die.current_value) + "]"
+		else:
+			button.text = str(die.current_value)
 
 		if die.is_assigned:
 			button.disabled = true
@@ -125,58 +128,53 @@ func _refresh_dice() -> void:
 
 		dice_container.add_child(button)
 
-
 func _on_card_pressed(card: CardData) -> void:
-	# Select the clicked card.
-	selected_card = card
-	selected_dice.clear()
+	# Cards resolve immediately when clicked.
+	# The player must already have selected enough valid dice.
 
-	print("Selected card: ", card.card_name)
-
-
-func _on_die_pressed(die: DiceData) -> void:
-	if selected_card == null:
-		print("Select a card first.")
+	if selected_dice.size() < card.dice_required:
+		print("Not enough dice selected for ", card.card_name)
 		return
 
+	if not card.can_use_with_dice(selected_dice):
+		print("Selected dice cannot be used for ", card.card_name)
+		return
+
+	var success := combat_manager.play_player_card(card, selected_dice)
+
+	if success:
+		print("Played card: ", card.card_name)
+
+		# Clear dice selection after spending dice.
+		selected_dice.clear()
+
+		# Refresh UI immediately after card resolution.
+		_refresh_hand()
+		_refresh_dice()
+		_update_all()
+	else:
+		print("Could not play card: ", card.card_name)
+
+func _on_die_pressed(die: DiceData) -> void:
 	if die.is_assigned:
 		return
 
-	if not selected_card.can_use_with_die(die.current_value):
-		print("This die cannot be used for ", selected_card.card_name)
-		return
-
-	selected_dice.append(die)
-
-	print("Selected die: ", die.current_value)
-
-	if selected_dice.size() >= selected_card.dice_required:
-		_try_play_selected_card()
-
-
-func _try_play_selected_card() -> void:
-	if selected_card == null:
-		return
-
-	var success := combat_manager.play_player_card(selected_card, selected_dice)
-
-	if success:
-		selected_card = null
-		selected_dice.clear()
+	if selected_dice.has(die):
+		selected_dice.erase(die)
+		print("Unselected die: ", die.current_value)
 	else:
-		print("Could not play selected card.")
+		selected_dice.append(die)
+		print("Selected die: ", die.current_value)
+
+	_refresh_dice()
 
 
 func _on_end_turn_pressed() -> void:
-	selected_card = null
 	selected_dice.clear()
-
 	combat_manager.end_player_turn()
-
 
 func _on_player_turn_started() -> void:
 	end_turn_button.disabled = false
-	selected_card = null
 	selected_dice.clear()
 
 	_refresh_hand()
@@ -186,7 +184,6 @@ func _on_player_turn_started() -> void:
 
 func _on_enemy_turn_started() -> void:
 	end_turn_button.disabled = true
-	selected_card = null
 	selected_dice.clear()
 
 	_update_all()
