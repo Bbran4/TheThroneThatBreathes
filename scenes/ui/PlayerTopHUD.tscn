@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dcwfhw2prwiop" path="res://scripts/ui/player_top_hud.gd" id="1_1tcc5"]
 
-[node name="PlayerTopHud" type="Control" unique_id=288534297]
+[node name="PlayerTopHUD" type="Control" unique_id=288534297]
 layout_mode = 3
 anchors_preset = 10
 anchor_right = 1.0
