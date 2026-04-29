@@ -11,6 +11,7 @@ signal choice_result_finished_without_next_node
 @onready var player: LocationPlayer = $Player
 @onready var player_spawn: Marker2D = $PlayerSpawn
 @onready var interactables_root: Node2D = $Interactables
+@onready var location_title_label: Label = $CanvasLayer/UI/LocationTitleLabel
 @onready var subtitle_label: RichTextLabel = $CanvasLayer/UI/SubtitleLabel
 @onready var prompt_label: Label = $CanvasLayer/UI/PromptLabel
 
@@ -38,24 +39,30 @@ func setup(location: LocationData, node_data: RunNodeData, new_run_state: RunSta
 	current_node = node_data
 	run_state = new_run_state
 
-	if subtitle_label != null:
-		var location_text := ""
+	if location_title_label != null:
 		if current_location != null:
-			location_text = "[b]%s[/b]\n%s\n\n" % [
-				current_location.location_name,
-				current_location.description
-			]
+			location_title_label.text = current_location.location_name
+		else:
+			location_title_label.text = ""
 
-		var node_text := ""
+	if subtitle_label != null:
 		if current_node != null:
-			node_text = "[b]%s[/b]\n%s" % [
-				current_node.node_name,
-				current_node.scene_text
-			]
-
-		subtitle_label.text = location_text + node_text
+			subtitle_label.text = current_node.scene_text
+		elif current_location != null:
+			subtitle_label.text = current_location.description
+		else:
+			subtitle_label.text = ""
 
 	_setup_manual_interactables()
+
+func set_location_title(title_text: String) -> void:
+	if location_title_label != null:
+		location_title_label.text = title_text
+
+
+func set_subtitle(text_value: String) -> void:
+	if subtitle_label != null:
+		subtitle_label.text = text_value
 
 func _setup_manual_interactables() -> void:
 	for child in interactables_root.get_children():
@@ -250,6 +257,8 @@ func _show_result_overlay(title_text: String, result_text: String, reward_card: 
 		push_error("SideViewLocation missing interaction_result_view_scene.")
 		return
 
+	set_subtitle("")
+
 	if active_result_view != null and is_instance_valid(active_result_view):
 		active_result_view.queue_free()
 
@@ -267,6 +276,9 @@ func _on_result_continue_pressed() -> void:
 		active_result_view.queue_free()
 
 	active_result_view = null
+
+	if current_node != null:
+		set_subtitle(current_node.scene_text)
 
 	if current_result_interactable != null:
 		if current_result_interactable.becomes_used_after_interaction:
