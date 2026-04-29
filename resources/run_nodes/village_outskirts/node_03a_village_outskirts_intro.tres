@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://dm3xyq7kippee"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_ptuyd"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="2_lyuir"]
+[ext_resource type="Resource" uid="uid://2knwhal02ewv" path="res://resources/run_choice/village_outskirts/01_enter_house.tres" id="2_ybqy4"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="3_4hjlv"]
+[ext_resource type="Resource" uid="uid://di55104hnom4j" path="res://resources/run_choice/village_outskirts/02_speak_to_survivors.tres" id="3_n5knu"]
+[ext_resource type="Resource" uid="uid://dj4g37qncrvsk" path="res://resources/run_choice/village_outskirts/03_avoide_village.tres" id="4_hnyvs"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="4_ybqy4"]
+
+[resource]
+script = ExtResource("4_ybqy4")
+node_name = "Village Outskirts"
+scene_text = "Smoke rises from cookfires with no voices around them.
+
+The houses lean inward, doors barred from the outside.
+A bell rings once, though no wind moves.
+
+Where do you go?"
+choices = Array[ExtResource("1_ptuyd")]([ExtResource("2_ybqy4"), ExtResource("3_n5knu"), ExtResource("4_hnyvs")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

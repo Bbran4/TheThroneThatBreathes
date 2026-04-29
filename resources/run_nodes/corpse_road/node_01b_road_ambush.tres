@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://dxhlhc0ptgonh"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_5tfyp"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="2_l5i1i"]
+[ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="3_seoof"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="4_n4lxu"]
+[ext_resource type="Resource" uid="uid://dwtgw0nqbdy5p" path="res://resources/cards/Strike.tres" id="5_5ipl4"]
+[ext_resource type="Resource" uid="uid://clbraadrbyb5u" path="res://resources/cards/Guard.tres" id="6_r0r87"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="7_ibhro"]
+
+[resource]
+script = ExtResource("7_ibhro")
+node_name = "Road Ambush"
+node_type = 2
+scene_text = "Rot-sick things crawl from the ditch.
+The beasts lunge from the mud."
+enemy_team_data = Array[ExtResource("2_l5i1i")]([ExtResource("3_seoof"), ExtResource("3_seoof")])
+reward_cards = Array[ExtResource("4_n4lxu")]([ExtResource("5_5ipl4"), ExtResource("6_r0r87")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

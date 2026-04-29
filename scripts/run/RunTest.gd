@@ -6,6 +6,14 @@ class_name RunTest
 
 @export var combat_test_scene: PackedScene
 
+@export var starting_location: LocationData
+@export var route_locations: Array[LocationData] = []
+@export var location_view_scene: PackedScene
+
+var current_location: LocationData
+var active_location_view: LocationView
+var pending_choice: RunChoiceData
+
 var run_state: RunState
 
 var current_node_index: int = -1
@@ -25,8 +33,141 @@ func _ready() -> void:
 	add_child(run_state)
 	run_state.setup_from_player_data(player_data)
 
-	_show_route_screen()
+	if starting_location != null:
+		current_location = starting_location
 
+	_show_location_route_screen()
+
+func _show_location_route_screen() -> void:
+	_cleanup_active_combat()
+
+	route_ui.visible = true
+	route_title.text = "The Road Ahead"
+
+	_clear_children(node_button_container)
+
+	route_status.text = "HP: %s / %s\nChoose your path." % [
+		run_state.current_hp,
+		run_state.max_hp
+	]
+
+	if run_state.is_dead():
+		var dead_label := Label.new()
+		dead_label.text = "You died on the road."
+		node_button_container.add_child(dead_label)
+		return
+
+	if route_locations.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "No locations assigned."
+		node_button_container.add_child(empty_label)
+		return
+
+	for location in route_locations:
+		var button := Button.new()
+		button.text = location.location_name
+		button.pressed.connect(func():
+			_enter_location(location)
+		)
+		node_button_container.add_child(button)
+
+func _enter_location(location: LocationData) -> void:
+	if location == null:
+		return
+
+	if location.entry_node == null:
+		push_error("Location has no entry node: " + location.location_name)
+		return
+
+	current_location = location
+	route_ui.visible = false
+
+	_open_location_view(location, location.entry_node)
+
+func _open_location_view(location: LocationData, node_data: RunNodeData) -> void:
+	_cleanup_location_view()
+
+	if location_view_scene == null:
+		push_error("RunTest missing location_view_scene.")
+		return
+
+	active_location_view = location_view_scene.instantiate() as LocationView
+	add_child(active_location_view)
+
+	active_location_view.choice_selected.connect(_on_location_choice_selected)
+	active_location_view.continue_requested.connect(_on_location_continue_requested)
+	active_location_view.leave_location_requested.connect(_on_location_leave_requested)
+
+	active_location_view.show_location(location, node_data)
+
+func _cleanup_location_view() -> void:
+	if active_location_view != null and is_instance_valid(active_location_view):
+		active_location_view.queue_free()
+
+	active_location_view = null
+	pending_choice = null
+
+func _on_location_choice_selected(choice: RunChoiceData) -> void:
+	if choice == null:
+		return
+
+	pending_choice = choice
+
+	run_state.apply_choice(choice)
+
+	if choice.result_text != "":
+		active_location_view.show_result_text(choice.choice_text, choice.result_text, "Continue")
+	else:
+		_resolve_choice_continuation(choice)
+
+func _on_location_continue_requested() -> void:
+	if pending_choice != null:
+		_resolve_choice_continuation(pending_choice)
+		return
+
+	active_location_view.show_location_complete()
+
+func _resolve_choice_continuation(choice: RunChoiceData) -> void:
+	if choice == null:
+		active_location_view.show_location_complete()
+		return
+
+	pending_choice = null
+
+	if choice.next_node != null:
+		_start_location_node(choice.next_node)
+	else:
+		active_location_view.show_location_complete()
+
+func _start_location_node(node_data: RunNodeData) -> void:
+	if node_data == null:
+		active_location_view.show_location_complete()
+		return
+
+	match node_data.node_type:
+		RunNodeData.RunNodeType.STORY:
+			active_location_view.show_node(node_data)
+
+		RunNodeData.RunNodeType.CHOICE:
+			active_location_view.show_node(node_data)
+
+		RunNodeData.RunNodeType.COMBAT:
+			_start_combat_from_location(node_data)
+
+		RunNodeData.RunNodeType.ELITE:
+			_start_combat_from_location(node_data)
+
+		RunNodeData.RunNodeType.BOSS:
+			_start_combat_from_location(node_data)
+
+func _on_location_leave_requested() -> void:
+	_complete_current_node()
+
+func _start_combat_from_location(node_data: RunNodeData) -> void:
+	if active_location_view != null:
+		active_location_view.visible = false
+
+	_start_combat_node(node_data)
 
 func _build_route_ui() -> void:
 	route_ui = Control.new()
@@ -64,14 +205,16 @@ func _build_route_ui() -> void:
 
 func _show_route_screen() -> void:
 	_cleanup_active_combat()
+	_cleanup_location_view()
 
 	route_ui.visible = true
+	route_title.text = "The Road Ahead"
 
-	route_status.text = "HP: %s / %s\nCompleted: %s / %s" % [
+	route_status.text = "HP: %s / %s\nCompleted Locations: %s / %s" % [
 		run_state.current_hp,
 		run_state.max_hp,
 		run_state.completed_nodes,
-		run_nodes.size()
+		route_locations.size()
 	]
 
 	_clear_children(node_button_container)
@@ -82,27 +225,32 @@ func _show_route_screen() -> void:
 		node_button_container.add_child(dead_label)
 		return
 
-	if run_state.completed_nodes >= run_nodes.size():
+	if route_locations.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "No locations assigned."
+		node_button_container.add_child(empty_label)
+		return
+
+	if run_state.completed_nodes >= route_locations.size():
 		var complete_label := Label.new()
 		complete_label.text = "Run complete. The road continues..."
 		node_button_container.add_child(complete_label)
 		return
 
-	for i in run_nodes.size():
-		var node_data := run_nodes[i]
+	for i in route_locations.size():
+		var location := route_locations[i]
 		var button := Button.new()
 
 		var prefix := "✓ " if i < run_state.completed_nodes else ""
-		button.text = "%s%s — %s" % [
+		button.text = "%s%s" % [
 			prefix,
-			node_data.node_name,
-			_get_node_type_text(node_data.node_type)
+			location.location_name
 		]
 
 		button.disabled = i != run_state.completed_nodes
 
 		button.pressed.connect(func():
-			_start_node(i)
+			_enter_location(location)
 		)
 
 		node_button_container.add_child(button)

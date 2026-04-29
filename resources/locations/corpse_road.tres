@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="LocationData" format=3 uid="uid://lnaurr0cvusj"]
+
+[ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="1_nyo6s"]
+[ext_resource type="Resource" uid="uid://cwn7cq3yq8p7q" path="res://resources/run_nodes/corpse_road/node_01a_corpse_road_intro.tres" id="2_cco3t"]
+
+[resource]
+script = ExtResource("1_nyo6s")
+location_name = "Corpse Road"
+description = "A road of broken carts, ash, and carrion birds.
+The dead lie where they fell, but something has been moving among them."
+entry_node = ExtResource("2_cco3t")
+metadata/_custom_type_script = "uid://byl0426pkhvcv"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://di55104hnom4j"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_fygnw"]
+
+[resource]
+script = ExtResource("1_fygnw")
+choice_text = "Speak to the hidden survivor"
+result_text = "For a long moment, no one answers.
+
+Then a child's voice whispers from behind the stones:
+\"Do not sleep when the bells ring.\"
+
+Heal Amount:
+5"
+effect_type = 1
+heal_amount = 5
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

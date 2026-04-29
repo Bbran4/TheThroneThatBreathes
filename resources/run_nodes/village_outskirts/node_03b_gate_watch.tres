@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://bmfi5axihlskp"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_jyhwn"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="2_stgwe"]
+[ext_resource type="Resource" uid="uid://dcw5eigaq2x3m" path="res://resources/enemies/CrownboundGuard.tres" id="3_4tt6v"]
+[ext_resource type="Resource" uid="uid://cihmxdwhbg2la" path="res://resources/enemies/HollowAcolyte.tres" id="4_j3l66"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="5_nbhat"]
+[ext_resource type="Resource" uid="uid://cjbc63iwfx7it" path="res://resources/cards/HeavyBlow.tres" id="6_udgxy"]
+[ext_resource type="Resource" uid="uid://chjeca26whnm" path="res://resources/cards/Execution.tres" id="7_jdh67"]
+[ext_resource type="Resource" uid="uid://wbp2t40kpxby" path="res://resources/cards/DarkRitual.tres" id="8_irgt6"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="9_5c36w"]
+
+[resource]
+script = ExtResource("9_5c36w")
+node_name = "Under the Burned House"
+node_type = 2
+scene_text = "The floor gives way.
+
+Hands reach up through the ash."
+enemy_team_data = Array[ExtResource("2_stgwe")]([ExtResource("3_4tt6v"), ExtResource("4_j3l66")])
+reward_cards = Array[ExtResource("5_nbhat")]([ExtResource("6_udgxy"), ExtResource("7_jdh67"), ExtResource("8_irgt6")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

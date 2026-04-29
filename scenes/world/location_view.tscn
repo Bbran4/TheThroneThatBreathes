@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://c1jeqwho8kh0m"]
+
+[ext_resource type="Script" uid="uid://dvtm6ldn2iffu" path="res://scripts/world/location_view.gd" id="1_q33wl"]
+
+[node name="LocationView" type="Control" unique_id=2028762871]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_q33wl")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1072775336]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DarkOverlay" type="ColorRect" parent="." unique_id=743066583]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.35000002)
+
+[node name="ContentPanel" type="PanelContainer" parent="." unique_id=1909429241]
+layout_mode = 1
+offset_left = 60.0
+offset_top = 80.0
+offset_right = 620.0
+offset_bottom = 600.0
+
+[node name="MarginContainer" type="MarginContainer" parent="ContentPanel" unique_id=1479983206]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ContentPanel/MarginContainer" unique_id=1616882513]
+layout_mode = 2
+
+[node name="LocationTitleLabel" type="Label" parent="ContentPanel/MarginContainer/VBoxContainer" unique_id=1156332528]
+layout_mode = 2
+text = "Location TItle"
+
+[node name="LocationDescriptionLabel" type="Label" parent="ContentPanel/MarginContainer/VBoxContainer" unique_id=1612629816]
+layout_mode = 2
+text = "Location Description"
+
+[node name="Separator" type="HSeparator" parent="ContentPanel/MarginContainer/VBoxContainer" unique_id=861745871]
+layout_mode = 2
+
+[node name="NodeTitleLabel" type="Label" parent="ContentPanel/MarginContainer/VBoxContainer" unique_id=119827138]
+layout_mode = 2
+text = "Node Title"
+
+[node name="SceneTextLabel" type="RichTextLabel" parent="ContentPanel/MarginContainer/VBoxContainer" unique_id=1868185091]
+layout_mode = 2
+text = "Scene Text"
+fit_content = true
+
+[node name="ChoicesContainer" type="VBoxContainer" parent="ContentPanel/MarginContainer/VBoxContainer" unique_id=993799760]
+layout_mode = 2

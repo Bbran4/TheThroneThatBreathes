@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_eyk5o")
-choice_text = "Press On"
-result_text = "You leave the altar behind. For a while, you feel watched."
+choice_text = "Keep to the ditch and move on"
+result_text = "You leave the cart and its dead behind.
+The birds do not follow."
 metadata/_custom_type_script = "uid://bgjkr3elvy71k"

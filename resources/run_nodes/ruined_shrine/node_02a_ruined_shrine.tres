@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://cxbh4qpukv1o5"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_p51lp"]
+[ext_resource type="Resource" uid="uid://bcqwklhtptdmv" path="res://resources/run_choice/ruined_shrine/01_rest.tres" id="2_4ntyg"]
+[ext_resource type="Resource" uid="uid://cxu1a2q1xkxur" path="res://resources/run_choice/ruined_shrine/02_kneel_at_the_alter.tres" id="3_dfgmn"]
+[ext_resource type="Resource" uid="uid://0f1jfw3uxad0" path="res://resources/run_choice/ruined_shrine/03_press_on.tres" id="4_gkk8j"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="5_tvvks"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="6_e658y"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="7_0hwv5"]
+
+[resource]
+script = ExtResource("7_0hwv5")
+node_name = "Ruined Shrine"
+scene_text = "The road sinks into black mud.
+
+A broken altar waits beneath the trees.
+Its basin is dry, but the stone still smells of iron.
+
+Will you rest, kneel, or press on?"
+choices = Array[ExtResource("1_p51lp")]([ExtResource("2_4ntyg"), ExtResource("3_dfgmn"), ExtResource("4_gkk8j")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

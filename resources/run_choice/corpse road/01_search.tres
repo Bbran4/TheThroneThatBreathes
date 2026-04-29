@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://def67ifrmly4p"]
+
+[ext_resource type="Resource" uid="uid://bvw6exk2jecjx" path="res://resources/cards/QuickJab.tres" id="1_5l0xs"]
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_iu4nr"]
+
+[resource]
+script = ExtResource("1_iu4nr")
+choice_text = "Search the corpse-cart"
+result_text = "You pick through the dead with a blade in one hand.
+
+Most have already been stripped.
+Beneath a torn cloak, your fingers close around something useful."
+effect_type = 2
+card_reward = ExtResource("1_5l0xs")
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

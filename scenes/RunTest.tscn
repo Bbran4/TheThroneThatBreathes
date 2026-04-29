@@ -3,13 +3,20 @@
 [ext_resource type="Script" uid="uid://xbbs8rj3rrok" path="res://scripts/run/RunTest.gd" id="1_f3lfm"]
 [ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="2_og16b"]
 [ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="3_y1tdi"]
-[ext_resource type="Resource" uid="uid://dxhlhc0ptgonh" path="res://resources/run_nodes/node_01_road_ambush.tres" id="4_lpb5k"]
-[ext_resource type="Resource" uid="uid://cxbh4qpukv1o5" path="res://resources/run_nodes/node_02_ruined_shrine.tres" id="5_gsv04"]
-[ext_resource type="Resource" uid="uid://bmfi5axihlskp" path="res://resources/run_nodes/node_03_gate_watch.tres" id="6_qjajn"]
+[ext_resource type="Resource" uid="uid://dxhlhc0ptgonh" path="res://resources/run_nodes/corpse_road/node_01b_road_ambush.tres" id="4_lpb5k"]
+[ext_resource type="Resource" uid="uid://cxbh4qpukv1o5" path="res://resources/run_nodes/ruined_shrine/node_02a_ruined_shrine.tres" id="5_gsv04"]
+[ext_resource type="Resource" uid="uid://bmfi5axihlskp" path="res://resources/run_nodes/village_outskirts/node_03b_gate_watch.tres" id="6_qjajn"]
+[ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="8_qjajn"]
+[ext_resource type="Resource" uid="uid://lnaurr0cvusj" path="res://resources/locations/corpse_road.tres" id="9_q444b"]
 [ext_resource type="PackedScene" uid="uid://ceqfbta17oxn3" path="res://scenes/CombatTest.tscn" id="9_y1tdi"]
+[ext_resource type="Resource" uid="uid://4pvaf3bum0vw" path="res://resources/locations/ruined_shrine.tres" id="10_qh46i"]
+[ext_resource type="Resource" uid="uid://pr388ohs0uh7" path="res://resources/locations/village_outskirts.tres" id="11_c5mia"]
+[ext_resource type="PackedScene" uid="uid://c1jeqwho8kh0m" path="res://scenes/world/location_view.tscn" id="12_kvbvn"]
 
 [node name="RunTest" type="Node" unique_id=1512471838]
 script = ExtResource("1_f3lfm")
 player_data = ExtResource("2_og16b")
 run_nodes = Array[ExtResource("3_y1tdi")]([ExtResource("4_lpb5k"), ExtResource("5_gsv04"), ExtResource("6_qjajn")])
 combat_test_scene = ExtResource("9_y1tdi")
+route_locations = Array[ExtResource("8_qjajn")]([ExtResource("9_q444b"), ExtResource("10_qh46i"), ExtResource("11_c5mia")])
+location_view_scene = ExtResource("12_kvbvn")

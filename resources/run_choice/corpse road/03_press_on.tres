@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://b7tppt135wb22"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_d814j"]
+
+[resource]
+script = ExtResource("1_d814j")
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

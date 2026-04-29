@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LocationData" format=3 uid="uid://4pvaf3bum0vw"]
+
+[ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="1_rx6kw"]
+[ext_resource type="Resource" uid="uid://cxbh4qpukv1o5" path="res://resources/run_nodes/ruined_shrine/node_02a_ruined_shrine.tres" id="2_xyevo"]
+
+[resource]
+script = ExtResource("1_rx6kw")
+location_name = "Ruined Shrine"
+location_type = 4
+description = "A broken altar waits beneath dead trees.
+Its stones remember blood."
+entry_node = ExtResource("2_xyevo")
+metadata/_custom_type_script = "uid://byl0426pkhvcv"

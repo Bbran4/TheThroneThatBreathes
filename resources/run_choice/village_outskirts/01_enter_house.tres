@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://2knwhal02ewv"]
+
+[ext_resource type="Resource" uid="uid://bmfi5axihlskp" path="res://resources/run_nodes/village_outskirts/node_03b_gate_watch.tres" id="1_hgd4n"]
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="2_fq3uh"]
+
+[resource]
+script = ExtResource("2_fq3uh")
+choice_text = "Enter the burned house"
+result_text = "Inside, soot covers the walls in handprints.
+
+Something breathes beneath the floorboards."
+next_node = ExtResource("1_hgd4n")
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"
