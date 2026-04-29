@@ -41,9 +41,12 @@ func _ready() -> void:
 	run_state = RunState.new()
 	add_child(run_state)
 	run_state.setup_from_player_data(player_data)
-	
+
 	if starting_location != null:
 		current_location = starting_location
+		route_ui.visible = false
+		_enter_location(starting_location)
+		return
 
 	_show_location_route_screen()
 
@@ -92,7 +95,9 @@ func _enter_location(location: LocationData) -> void:
 		return
 
 	current_location = location
-	route_ui.visible = false
+
+	if route_ui != null:
+		route_ui.visible = false
 
 	_open_side_view_location(location, location.entry_node)
 
