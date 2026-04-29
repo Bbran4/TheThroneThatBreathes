@@ -192,13 +192,18 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 
 	var visual: CombatantVisual
 
-	if combatant_visual_scene != null:
+	if data.combat_visual_scene != null:
+		visual = data.combat_visual_scene.instantiate() as CombatantVisual
+	elif combatant_visual_scene != null:
 		visual = combatant_visual_scene.instantiate() as CombatantVisual
 	else:
 		visual = CombatantVisual.new()
 
+	if visual == null:
+		push_error("Combat visual scene does not extend CombatantVisual for: " + data.display_name)
+		return
+
 	visual.name = combatant.get_display_name() + "_Visual"
-	visual.scale = Vector2(1, 1)
 
 	slot.add_child(visual)
 

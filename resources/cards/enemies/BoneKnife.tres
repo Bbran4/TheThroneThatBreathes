@@ -10,4 +10,5 @@ Dice: Any
 Target enemy: true"
 base_damage = 6
 can_target_enemy = true
+animation_name = "attack_1"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

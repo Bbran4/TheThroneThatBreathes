@@ -11,4 +11,5 @@ Target self: true"
 card_type = 1
 base_guard = 7
 can_target_self = true
+animation_name = "protect"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

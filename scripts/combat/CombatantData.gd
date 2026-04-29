@@ -15,3 +15,4 @@ class_name CombatantData
 @export var stats: CharacterStats
 @export var starting_deck: Array[CardData] = []
 @export var combat_sprite: Texture2D
+@export var combat_visual_scene: PackedScene

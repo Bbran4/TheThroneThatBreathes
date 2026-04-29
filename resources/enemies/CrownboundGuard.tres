@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://do77c187tnnqb" path="res://assets/CrownboundGuard.png" id="1_nnx6x"]
 [ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_q6s5n"]
 [ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_ejcgt"]
+[ext_resource type="PackedScene" uid="uid://cxipuocrhb8ns" path="res://scenes/combat/visuals/crownbound_guard_visual.tscn" id="2_sb0g1"]
 [ext_resource type="Resource" uid="uid://fpcubyocjj4x" path="res://resources/cards/enemies/ShieldWall.tres" id="3_87fhj"]
 [ext_resource type="Resource" uid="uid://dooes0fcekh4w" path="res://resources/cards/enemies/Rustblade.tres" id="4_nnx6x"]
 [ext_resource type="Resource" uid="uid://60clvp01nrlb" path="res://resources/cards/enemies/HeavyCleave.tres" id="5_sb0g1"]
@@ -14,4 +15,5 @@ display_name = "Crownbound Guard"
 stats = ExtResource("6_uul51")
 starting_deck = Array[ExtResource("2_ejcgt")]([ExtResource("3_87fhj"), ExtResource("3_87fhj"), ExtResource("4_nnx6x"), ExtResource("5_sb0g1")])
 combat_sprite = ExtResource("1_nnx6x")
+combat_visual_scene = ExtResource("2_sb0g1")
 metadata/_custom_type_script = "uid://0vgymfy4egw4"
