@@ -3,6 +3,8 @@ class_name SideViewLocation
 
 signal choice_selected(choice: RunChoiceData)
 signal location_exit_requested
+signal choice_result_finished_with_next_node(node_data: RunNodeData)
+signal choice_result_finished_without_next_node
 
 @export var interactable_scene: PackedScene
 
@@ -12,9 +14,16 @@ signal location_exit_requested
 @onready var subtitle_label: RichTextLabel = $CanvasLayer/UI/SubtitleLabel
 @onready var prompt_label: Label = $CanvasLayer/UI/PromptLabel
 
+@export var interaction_result_view_scene: PackedScene
+
+var run_state: RunState
 var current_location: LocationData
 var current_node: RunNodeData
 var nearby_interactable: LocationInteractable
+var active_result_view: InteractionResultView
+var current_result_choice: RunChoiceData
+var current_result_interactable: LocationInteractable
+
 
 
 func _ready() -> void:
@@ -24,9 +33,10 @@ func _ready() -> void:
 		player.global_position = player_spawn.global_position
 
 
-func setup(location: LocationData, node_data: RunNodeData) -> void:
+func setup(location: LocationData, node_data: RunNodeData, new_run_state: RunState) -> void:
 	current_location = location
 	current_node = node_data
+	run_state = new_run_state
 
 	if subtitle_label != null:
 		var location_text := ""
@@ -52,6 +62,9 @@ func _setup_manual_interactables() -> void:
 		if child is LocationInteractable:
 			var interactable := child as LocationInteractable
 
+			if run_state != null:
+				interactable.setup_used_state(run_state.has_used_interactable(interactable.interactable_id))
+
 			if not interactable.interaction_requested.is_connected(_on_interactable_requested):
 				interactable.interaction_requested.connect(_on_interactable_requested)
 
@@ -76,7 +89,7 @@ func _show_prompt_for_interactable(interactable: LocationInteractable) -> void:
 		return
 
 	prompt_label.visible = true
-	prompt_label.text = interactable.prompt_text
+	prompt_label.text = interactable.get_current_prompt_text()
 	prompt_label.global_position = interactable.get_prompt_position()
 
 
@@ -199,11 +212,80 @@ func _on_interactable_requested(interactable: LocationInteractable) -> void:
 	if interactable == null:
 		return
 
+	if interactable.is_used:
+		_show_used_interactable_result(interactable)
+		return
+
 	if interactable.linked_choice == null:
 		return
 
 	choice_selected.emit(interactable.linked_choice)
 
+func show_choice_result(interactable: LocationInteractable, choice: RunChoiceData) -> void:
+	current_result_choice = choice
+	current_result_interactable = interactable
+
+	var reward_card: CardData = null
+	if choice != null:
+		reward_card = choice.card_reward
+
+	_show_result_overlay(
+		choice.choice_text,
+		choice.result_text,
+		reward_card
+	)
+
+func _show_used_interactable_result(interactable: LocationInteractable) -> void:
+	current_result_choice = null
+	current_result_interactable = null
+
+	_show_result_overlay(
+		interactable.interaction_name,
+		interactable.used_result_text,
+		null
+	)
+
+func _show_result_overlay(title_text: String, result_text: String, reward_card: CardData) -> void:
+	if interaction_result_view_scene == null:
+		push_error("SideViewLocation missing interaction_result_view_scene.")
+		return
+
+	if active_result_view != null and is_instance_valid(active_result_view):
+		active_result_view.queue_free()
+
+	active_result_view = interaction_result_view_scene.instantiate() as InteractionResultView
+	$CanvasLayer.add_child(active_result_view)
+
+	active_result_view.show_result(title_text, result_text, reward_card)
+
+	active_result_view.continue_pressed.connect(func():
+		_on_result_continue_pressed()
+	)
+
+func _on_result_continue_pressed() -> void:
+	if active_result_view != null and is_instance_valid(active_result_view):
+		active_result_view.queue_free()
+
+	active_result_view = null
+
+	if current_result_interactable != null:
+		if current_result_interactable.becomes_used_after_interaction:
+			current_result_interactable.is_used = true
+
+			if run_state != null:
+				run_state.mark_interactable_used(current_result_interactable.interactable_id)
+
+	current_result_interactable = null
+
+	if current_result_choice != null:
+		var choice := current_result_choice
+		current_result_choice = null
+
+		if choice.next_node != null:
+			choice_result_finished_with_next_node.emit(choice.next_node)
+			return
+
+	choice_result_finished_without_next_node.emit()
 
 func _update_nearby_interactable() -> void:
 	nearby_interactable = null

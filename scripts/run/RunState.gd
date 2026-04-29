@@ -5,7 +5,7 @@ var player_data: CombatantData
 var current_hp: int = 0
 var max_hp: int = 0
 var deck: Array[CardData] = []
-
+var used_interactable_ids: Dictionary = {}
 var completed_nodes: int = 0
 
 var max_hp_modifier: int = 0
@@ -99,6 +99,18 @@ func add_card(card: CardData) -> void:
 func heal(amount: int) -> void:
 	current_hp = min(current_hp + max(amount, 0), max_hp)
 
+func has_used_interactable(interactable_id: String) -> bool:
+	if interactable_id == "":
+		return false
 
+	return used_interactable_ids.has(interactable_id)
+
+
+func mark_interactable_used(interactable_id: String) -> void:
+	if interactable_id == "":
+		return
+
+	used_interactable_ids[interactable_id] = true
+	
 func is_dead() -> bool:
 	return current_hp <= 0

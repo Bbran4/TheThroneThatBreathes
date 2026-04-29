@@ -18,6 +18,8 @@ enum LocationType {
 @export var background_art: Texture2D
 @export var entry_node: RunNodeData
 
+@export var side_view_scene: PackedScene
+
 @export var connected_locations: Array[LocationData] = []
 
 @export var entry_roll_difficulty: int = 0

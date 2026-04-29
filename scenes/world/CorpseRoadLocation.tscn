@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dlofsiel3rtrm"]
 
 [ext_resource type="Script" uid="uid://8ab5k7ddcvn0" path="res://scripts/world/SideViewLocation.gd" id="1_viajb"]
+[ext_resource type="PackedScene" uid="uid://c354sbdwds3m7" path="res://scenes/world/InteractionResultView.tscn" id="2_blcmk"]
 [ext_resource type="Script" uid="uid://cnjuslky0wu3a" path="res://scripts/world/LocationPlayer.gd" id="2_h25c2"]
 [ext_resource type="Texture2D" uid="uid://chby2hohg0khx" path="res://assets/sprites/player/exiled_knight/Attack 1.png" id="3_gb0if"]
 [ext_resource type="Texture2D" uid="uid://jm3pkbexd4jy" path="res://assets/sprites/player/exiled_knight/Attack 2.png" id="4_pndl3"]
@@ -436,6 +437,7 @@ radius = 39.012817
 
 [node name="SideViewLocation" type="Node2D" unique_id=1589068925]
 script = ExtResource("1_viajb")
+interaction_result_view_scene = ExtResource("2_blcmk")
 
 [node name="Background" type="ColorRect" parent="." unique_id=972835728]
 anchors_preset = 15
@@ -473,6 +475,7 @@ autoplay = "idle"
 [node name="CorpseCart" type="Area2D" parent="Interactables" unique_id=1231703639]
 position = Vector2(551, 542)
 script = ExtResource("13_pndl3")
+interactable_id = "CorpseCart"
 linked_choice = ExtResource("14_3aacm")
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 

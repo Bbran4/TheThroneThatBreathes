@@ -1,0 +1,63 @@
+[gd_scene format=3 uid="uid://c354sbdwds3m7"]
+
+[ext_resource type="Script" uid="uid://8fg7oy4g3gjj" path="res://scripts/world/InteractionResultView.gd" id="1_3ycub"]
+
+[node name="InteractionResultView" type="Control" unique_id=272985776]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3ycub")
+
+[node name="DarkOverlay" type="ColorRect" parent="." unique_id=487857657]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=1410893596]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=1175458974]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer" unique_id=1580691124]
+layout_mode = 2
+
+[node name="SceneVisual" type="TextureRect" parent="Panel/MarginContainer/HBoxContainer" unique_id=1994789194]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/HBoxContainer" unique_id=1073409194]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=594933031]
+layout_mode = 2
+text = "Title Label"
+
+[node name="ResultTextLabel" type="RichTextLabel" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1341914040]
+layout_mode = 2
+text = "Text"
+fit_content = true
+
+[node name="RewardCardPanel" type="PanelContainer" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=304239674]
+layout_mode = 2
+
+[node name="RewardCardLabel" type="Label" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer/RewardCardPanel" unique_id=2057306049]
+layout_mode = 2
+text = "Reward"
+
+[node name="ContinueButton" type="Button" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=299512490]
+layout_mode = 2
+text = "Continue"

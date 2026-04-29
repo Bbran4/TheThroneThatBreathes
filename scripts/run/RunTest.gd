@@ -17,7 +17,6 @@ var pending_choice: RunChoiceData
 var active_side_view_location: SideViewLocation
 var pending_location_choice: RunChoiceData
 var run_state: RunState
-
 var current_node_index: int = -1
 
 var route_ui: Control
@@ -34,7 +33,7 @@ func _ready() -> void:
 	run_state = RunState.new()
 	add_child(run_state)
 	run_state.setup_from_player_data(player_data)
-
+	
 	if starting_location != null:
 		current_location = starting_location
 
@@ -89,29 +88,43 @@ func _enter_location(location: LocationData) -> void:
 func _open_side_view_location(location: LocationData, node_data: RunNodeData) -> void:
 	_cleanup_side_view_location()
 
-	if side_view_location_scene == null:
-		push_error("RunTest missing side_view_location_scene.")
+	var scene_to_load: PackedScene = null
+
+	if location != null and location.side_view_scene != null:
+		scene_to_load = location.side_view_scene
+	else:
+		scene_to_load = side_view_location_scene
+
+	if scene_to_load == null:
+		push_error("No side view scene assigned.")
 		return
 
-	active_side_view_location = side_view_location_scene.instantiate() as SideViewLocation
+	active_side_view_location = scene_to_load.instantiate() as SideViewLocation
 	add_child(active_side_view_location)
 
 	active_side_view_location.choice_selected.connect(_on_side_view_choice_selected)
 	active_side_view_location.location_exit_requested.connect(_on_side_view_location_exit_requested)
+	active_side_view_location.choice_result_finished_with_next_node.connect(_on_side_view_choice_result_next_node)
+	active_side_view_location.choice_result_finished_without_next_node.connect(_on_side_view_choice_result_no_next_node)
 
-	active_side_view_location.setup(location, node_data)
+	active_side_view_location.setup(location, node_data, run_state)
 
 func _on_side_view_choice_selected(choice: RunChoiceData) -> void:
 	if choice == null:
 		return
 
-	pending_location_choice = choice
 	run_state.apply_choice(choice)
 
-	if choice.result_text != "":
-		active_side_view_location.show_result_text(choice.choice_text, choice.result_text)
-	else:
-		_resolve_side_view_choice_continuation(choice)
+	var interactable := active_side_view_location.nearby_interactable
+	active_side_view_location.show_choice_result(interactable, choice)
+
+func _on_side_view_choice_result_next_node(node_data: RunNodeData) -> void:
+	_start_side_view_node(node_data)
+
+func _on_side_view_choice_result_no_next_node() -> void:
+	# Stay in the same location.
+	# The used interactable has already been marked.
+	pass
 
 func _on_side_view_location_exit_requested() -> void:
 	if pending_location_choice != null:
@@ -139,11 +152,11 @@ func _start_side_view_node(node_data: RunNodeData) -> void:
 	match node_data.node_type:
 		RunNodeData.RunNodeType.STORY:
 			if active_side_view_location != null:
-				active_side_view_location.setup(current_location, node_data)
+				active_side_view_location.setup(current_location, node_data, run_state)
 
 		RunNodeData.RunNodeType.CHOICE:
 			if active_side_view_location != null:
-				active_side_view_location.setup(current_location, node_data)
+				active_side_view_location.setup(current_location, node_data, run_state)
 
 		RunNodeData.RunNodeType.COMBAT:
 			_start_combat_from_side_view(node_data)
