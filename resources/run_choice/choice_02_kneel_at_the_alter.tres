@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://cxu1a2q1xkxur"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_61s2n"]
+[ext_resource type="Resource" uid="uid://ck58y2peksvkd" path="res://resources/run_nodes/altar_blood_cutscene.tres" id="1_p85sq"]
+
+[resource]
+script = ExtResource("1_61s2n")
+choice_text = "Kneel at the Altar"
+result_text = "You kneel before the dead stone. Your blade opens your palm. Blood coils into the basin, and something beneath the altar remembers your name."
+next_node = ExtResource("1_p85sq")
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

@@ -237,7 +237,12 @@ func play_player_card(card: CardData, assigned_dice: Array[DiceData], target: Co
 	_resolve_player_card_by_target_mode(card, active_player, target)
 
 	if active_player.hand.has(card):
-		active_player.discard_card(card)
+		if card.exhausts_after_use:
+			active_player.hand.erase(card)
+			active_player.hand_changed.emit(active_player.hand)
+			active_player.deck_changed.emit(active_player.deck.size(), active_player.discard_pile.size())
+		else:
+			active_player.discard_card(card)
 
 	_check_combat_end()
 
@@ -318,12 +323,14 @@ func _resolve_player_card_by_target_mode(card: CardData, user: Combatant, target
 
 func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 	var damage_amount: int = card.get_final_damage(user)
+	var self_damage_amount: int = card.get_final_self_damage(user)
 	var guard_amount: int = card.get_final_guard(user)
 
 	print("--- Resolving Card ---")
 	print("User: ", user.get_display_name())
 	print("Card: ", card.card_name)
 	print("Base damage: ", card.base_damage)
+	print("Self damage: ", self_damage_amount)
 	print("User power: ", user.get_power())
 	print("Final damage: ", damage_amount)
 	print("Can target enemy: ", card.can_target_enemy)
@@ -361,15 +368,15 @@ func _resolve_card(card: CardData, user: Combatant, target: Combatant) -> void:
 		])
 		user.draw_cards(card.cards_to_draw)
 
-	if card.can_target_self and damage_amount > 0:
-		print("%s damages themselves for %s." % [
+	if self_damage_amount > 0:
+		print("%s loses %s HP from %s." % [
 			user.get_display_name(),
-			damage_amount
+			self_damage_amount,
+			card.card_name
 		])
-		user.take_damage(damage_amount)
+		user.take_damage(self_damage_amount)
 
 	card_resolved.emit(card, user, target, damage_amount, guard_amount)
-
 
 func _check_combat_end() -> void:
 	if get_living_players().is_empty():
@@ -425,7 +432,12 @@ func _try_enemy_play_prepared_card(enemy_actor: EnemyCombatant, card: CardData, 
 	_resolve_enemy_card_by_target_mode(card, enemy_actor, target)
 
 	if enemy_actor.hand.has(card):
-		enemy_actor.discard_card(card)
+		if card.exhausts_after_use:
+			enemy_actor.hand.erase(card)
+			enemy_actor.hand_changed.emit(enemy_actor.hand)
+			enemy_actor.deck_changed.emit(enemy_actor.deck.size(), enemy_actor.discard_pile.size())
+		else:
+			enemy_actor.discard_card(card)
 
 	return true
 

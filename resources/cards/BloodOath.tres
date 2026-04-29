@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://cyacoic85gdoc"]
+
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="1_hiiwb"]
+
+[resource]
+script = ExtResource("1_hiiwb")
+card_name = "Blood Oath"
+description = "Deal 18 damage.
+Lose 3 HP.
+Exhaust.
+Permanent -3 Guard from the altar curse."
+card_type = 3
+dice_required = 0
+base_damage = 18
+self_damage = 3
+exhausts_after_use = true
+can_target_enemy = true
+metadata/_custom_type_script = "uid://c6v6cyclnv500"

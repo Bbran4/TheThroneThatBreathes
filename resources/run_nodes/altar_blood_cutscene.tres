@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://ck58y2peksvkd"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_o72eq"]
+[ext_resource type="Resource" uid="uid://51rbv8ddi6qp" path="res://resources/run_choice/Continue.tres" id="2_6ycvc"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="2_d13rq"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="3_6ycvc"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="4_5e7j2"]
+
+[resource]
+script = ExtResource("4_5e7j2")
+node_name = "The Altar Drinks"
+node_type = 0
+scene_text = "The blood does not spill.
+
+It crawls.
+
+It threads itself through the cracks in the altar and vanishes below the earth.
+
+Your shield arm grows cold.
+
+Gained: Blood Oath
+Curse: -3 Guard"
+choices = Array[ExtResource("1_o72eq")]([ExtResource("2_6ycvc")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://0f1jfw3uxad0"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_eyk5o"]
+
+[resource]
+script = ExtResource("1_eyk5o")
+choice_text = "Press On"
+result_text = "You leave the altar behind. For a while, you feel watched."
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

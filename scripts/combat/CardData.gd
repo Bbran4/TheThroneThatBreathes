@@ -57,6 +57,7 @@ enum TargetMode {
 @export var target_mode: TargetMode = TargetMode.SINGLE_ENEMY
 # Base combat values.
 @export var base_damage: int = 0
+@export var self_damage: int = 0
 @export var base_guard: int = 0
 @export var cards_to_draw: int = 0
 
@@ -133,6 +134,9 @@ func targets_enemies() -> bool:
 
 func targets_allies() -> bool:
 	return target_mode == TargetMode.SINGLE_ALLY
+
+func get_final_self_damage(_user: Combatant) -> int:
+	return max(self_damage, 0)
 
 func get_final_damage(user: Combatant) -> int:
 	# Only cards with base damage should scale with Power.

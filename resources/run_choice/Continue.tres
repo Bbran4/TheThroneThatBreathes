@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://51rbv8ddi6qp"]
+
+[ext_resource type="Resource" uid="uid://cyacoic85gdoc" path="res://resources/cards/BloodOath.tres" id="1_0v1l6"]
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_8mise"]
+
+[resource]
+script = ExtResource("1_8mise")
+result_text = "The altar is silent again."
+effect_type = 2
+card_reward = ExtResource("1_0v1l6")
+guard_modifier = -3
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

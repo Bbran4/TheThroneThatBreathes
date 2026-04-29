@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://dxhlhc0ptgonh"]
 
 [ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_8s0mm"]
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_11afx"]
 [ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_qbfmf"]
 [ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="2_wcbcj"]
 [ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="3_jfa0b"]
@@ -10,7 +11,8 @@
 [resource]
 script = ExtResource("3_jfa0b")
 node_name = "Road Ambush"
-description = "Rot-sick things crawl from the ditch."
+node_type = 2
+scene_text = "Rot-sick things crawl from the ditch."
 enemy_team_data = Array[ExtResource("1_8s0mm")]([ExtResource("2_wcbcj"), ExtResource("2_wcbcj")])
 reward_cards = Array[ExtResource("2_qbfmf")]([ExtResource("4_11afx"), ExtResource("5_2xvcq")])
 metadata/_custom_type_script = "uid://vkhv86qo74ca"

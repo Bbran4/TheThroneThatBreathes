@@ -125,31 +125,88 @@ func _start_node(index: int) -> void:
 		RunNodeData.RunNodeType.BOSS:
 			_start_combat_node(node_data)
 
-		RunNodeData.RunNodeType.EVENT:
+		RunNodeData.RunNodeType.STORY:
+			_start_event_node(node_data)
+
+		RunNodeData.RunNodeType.CHOICE:
 			_start_event_node(node_data)
 
 
 func _start_event_node(node_data: RunNodeData) -> void:
+	print("Starting run node: ", node_data.node_name)
+	print("Node type: ", node_data.node_type)
+	print("Choices count: ", node_data.choices.size())
+
 	_clear_children(node_button_container)
 
+	route_ui.visible = true
 	route_title.text = node_data.node_name
-	route_status.text = node_data.description
+	route_status.text = node_data.scene_text
 
-	var heal_button := Button.new()
-	heal_button.text = "Rest: Heal %s HP" % max(node_data.heal_amount, 3)
-	heal_button.pressed.connect(func():
-		run_state.heal(max(node_data.heal_amount, 3))
-		_complete_current_node()
+	if node_data.choices.is_empty():
+		var continue_button := Button.new()
+		continue_button.text = "Continue"
+		continue_button.pressed.connect(func():
+			_complete_current_node()
+		)
+		node_button_container.add_child(continue_button)
+		return
+
+	for choice in node_data.choices:
+		var button := Button.new()
+		button.text = choice.choice_text
+		button.pressed.connect(func():
+			_apply_run_choice(choice)
+		)
+		node_button_container.add_child(button)
+
+func _apply_run_choice(choice: RunChoiceData) -> void:
+	_clear_children(node_button_container)
+
+	print("Applying run choice: ", choice.choice_text)
+
+	if choice.card_reward != null:
+		print("Choice has reward card: ", choice.card_reward.card_name)
+	else:
+		print("Choice has no reward card.")
+
+	print("Choice guard modifier: ", choice.guard_modifier)
+
+	run_state.apply_choice(choice)
+
+	if choice.result_text != "":
+		route_status.text = choice.result_text
+
+	var continue_button := Button.new()
+	continue_button.text = "Continue"
+
+	continue_button.pressed.connect(func():
+		if choice.next_node != null:
+			print("Going to next linked node: ", choice.next_node.node_name)
+			_start_dynamic_node(choice.next_node)
+		else:
+			print("No linked node. Completing current route node.")
+			_complete_current_node()
 	)
-	node_button_container.add_child(heal_button)
 
-	var power_button := Button.new()
-	power_button.text = "Press onward: Gain no reward"
-	power_button.pressed.connect(func():
-		_complete_current_node()
-	)
-	node_button_container.add_child(power_button)
+	node_button_container.add_child(continue_button)
 
+func _start_dynamic_node(node_data: RunNodeData) -> void:
+	match node_data.node_type:
+		RunNodeData.RunNodeType.STORY:
+			_start_event_node(node_data)
+
+		RunNodeData.RunNodeType.CHOICE:
+			_start_event_node(node_data)
+
+		RunNodeData.RunNodeType.COMBAT:
+			_start_combat_node(node_data)
+
+		RunNodeData.RunNodeType.ELITE:
+			_start_combat_node(node_data)
+
+		RunNodeData.RunNodeType.BOSS:
+			_start_combat_node(node_data)
 
 func _start_combat_node(node_data: RunNodeData) -> void:
 	if combat_test_scene == null:
@@ -173,7 +230,7 @@ func _start_combat_node(node_data: RunNodeData) -> void:
 	player_team_for_combat.append(player_data)
 
 	active_combat_root.setup_from_run(player_team_for_combat, node_data.enemy_team_data)
-	active_combat_root.apply_run_player_state(run_state.current_hp, run_state.deck)
+	active_combat_root.apply_run_state(run_state)
 
 	if active_combat_root.has_signal("combat_finished"):
 		active_combat_root.combat_finished.connect(_on_run_combat_finished)
@@ -254,8 +311,10 @@ func _get_node_type_text(node_type: RunNodeData.RunNodeType) -> String:
 	match node_type:
 		RunNodeData.RunNodeType.COMBAT:
 			return "Combat"
-		RunNodeData.RunNodeType.EVENT:
-			return "Event"
+		RunNodeData.RunNodeType.STORY:
+			return "Story"
+		RunNodeData.RunNodeType.CHOICE:
+			return "Choice"
 		RunNodeData.RunNodeType.ELITE:
 			return "Elite"
 		RunNodeData.RunNodeType.BOSS:

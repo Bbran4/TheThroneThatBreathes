@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://bcqwklhtptdmv"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_2pc18"]
+
+[resource]
+script = ExtResource("1_2pc18")
+choice_text = "Rest for the night"
+result_text = "You sleep in the lee of the altar. The dreams are foul, but your wounds close."
+effect_type = 1
+heal_amount = 15
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

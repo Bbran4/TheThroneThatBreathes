@@ -9,7 +9,6 @@ description = "Draw 2 cards.
 Lose 3 HP.
 Requires: Any die"
 target_mode = 0
-base_damage = 3
+self_damage = 3
 cards_to_draw = 2
-can_target_self = true
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

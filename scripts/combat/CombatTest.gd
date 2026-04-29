@@ -29,6 +29,9 @@ var combat_has_started: bool = false
 
 var override_player_hp: int = -1
 var override_player_deck: Array[CardData] = []
+var run_state: RunState = null
+var launched_from_run: bool = false
+
 
 func _ready() -> void:
 	_start_combat_test()	
@@ -123,18 +126,20 @@ func _spawn_player_team() -> void:
 		add_child(combatant)
 		combatant.name = "PlayerCombatant_%s" % i
 		combatant.setup(data.stats, data.starting_deck)
-		
-		if not override_player_deck.is_empty():
-			combatant.deck = override_player_deck.duplicate()
+
+		if run_state != null:
+			var run_deck: Array[CardData] = []
+			for card in run_state.deck:
+				run_deck.append(card)
+
+			combatant.deck = run_deck
 			combatant.deck.shuffle()
 			combatant.hand.clear()
 			combatant.discard_pile.clear()
 			combatant.hand_changed.emit(combatant.hand)
 			combatant.deck_changed.emit(combatant.deck.size(), combatant.discard_pile.size())
 
-		if override_player_hp >= 0:
-			combatant.current_hp = clamp(override_player_hp, 0, combatant.stats.max_hp)
-			combatant.hp_changed.emit(combatant.current_hp, combatant.stats.max_hp)
+			run_state.apply_to_player_combatant(combatant)
 		
 		players.append(combatant)
 		_spawn_visual_for_combatant(combatant, data, player_slots, i)
@@ -367,6 +372,7 @@ func _try_play_first_card() -> void:
 
 func setup_from_run(new_player_team_data: Array[CombatantData], new_enemy_team_data: Array[CombatantData]) -> void:
 	has_external_setup = true
+	launched_from_run = true
 	player_team_data = new_player_team_data
 	enemy_team_data = new_enemy_team_data
 
@@ -387,6 +393,8 @@ func _start_combat_test() -> void:
 
 	combat_manager.setup_combat(players, enemies)
 	combat_ui.setup_ui(combat_manager, players, enemies)
+	if launched_from_run:
+		combat_ui.show_builtin_result_panel = false
 	combat_ui.setup_target_buttons(combatant_visuals)
 
 	combat_ui.target_selected.connect(func(_target: Combatant):
@@ -431,6 +439,5 @@ func _start_combat_test() -> void:
 
 	combat_manager.start_combat()
 
-func apply_run_player_state(current_hp: int, run_deck: Array[CardData]) -> void:
-	override_player_hp = current_hp
-	override_player_deck = run_deck.duplicate()
+func apply_run_state(new_run_state: RunState) -> void:
+	run_state = new_run_state
