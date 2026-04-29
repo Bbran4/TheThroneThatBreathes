@@ -11,4 +11,5 @@ dice_requirement_type = 1
 required_die_value = 4
 base_damage = 12
 can_target_enemy = true
+animation_name = "attack_2"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

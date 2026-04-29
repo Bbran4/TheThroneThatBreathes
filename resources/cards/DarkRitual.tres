@@ -11,4 +11,5 @@ Requires: Any die"
 target_mode = 0
 self_damage = 3
 cards_to_draw = 2
+animation_name = "protect"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

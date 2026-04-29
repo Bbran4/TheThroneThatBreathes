@@ -10,4 +10,5 @@ Requires: 2 dice (any)"
 dice_required = 2
 base_damage = 10
 can_target_enemy = true
+animation_name = "attack_1"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

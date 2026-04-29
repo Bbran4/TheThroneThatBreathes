@@ -15,4 +15,5 @@ base_damage = 18
 self_damage = 3
 exhausts_after_use = true
 can_target_enemy = true
+animation_name = "attack_2"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

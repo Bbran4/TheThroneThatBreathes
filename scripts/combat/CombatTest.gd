@@ -190,10 +190,15 @@ func _spawn_visual_for_combatant(combatant: Combatant, data: CombatantData, slot
 
 	var slot := slot_parent.get_child(index)
 
-	var visual := CombatantVisual.new()
+	var visual: CombatantVisual
+
+	if combatant_visual_scene != null:
+		visual = combatant_visual_scene.instantiate() as CombatantVisual
+	else:
+		visual = CombatantVisual.new()
+
 	visual.name = combatant.get_display_name() + "_Visual"
-	visual.scale = Vector2(0.12, 0.12)
-	visual.idle_texture = data.combat_sprite
+	visual.scale = Vector2(1, 1)
 
 	slot.add_child(visual)
 
@@ -413,7 +418,7 @@ func _start_combat_test() -> void:
 	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
 	combat_manager.combat_ended.connect(_on_combat_ended)
 	combat_manager.combat_log.connect(_on_combat_log)
-
+	combat_manager.card_resolved.connect(_on_card_resolved)
 	for combatant in players + enemies:
 		combatant.died.connect(_on_combatant_died)
 
@@ -441,6 +446,42 @@ func _start_combat_test() -> void:
 		)
 
 	combat_manager.start_combat()
+
+func _on_card_resolved(card: CardData, user: Combatant, target: Combatant, damage_amount: int, guard_amount: int) -> void:
+	if not combatant_visuals.has(user):
+		return
+
+	var visual: CombatantVisual = combatant_visuals[user]
+
+	if not is_instance_valid(visual):
+		return
+
+	if damage_amount > 0 and card.can_target_enemy:
+		visual.play_attack(_get_attack_animation_for_card(card))
+	elif guard_amount > 0:
+		visual.play_defend()
+
+func _get_attack_animation_for_card(card: CardData) -> String:
+	match card.card_name:
+		"Strike":
+			return "attack_1"
+
+		"Twin Strike":
+			return "attack_2"
+
+		"Heavy Blow":
+			return "attack_3"
+
+		"Cleave":
+			return "attack_3"
+
+		"Execution":
+			return "attack_3"
+
+		"Blood Oath":
+			return "attack_2"
+
+	return "attack_1"
 
 func apply_run_state(new_run_state: RunState) -> void:
 	run_state = new_run_state

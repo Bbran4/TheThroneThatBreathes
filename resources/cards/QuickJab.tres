@@ -13,4 +13,5 @@ required_die_value = 3
 base_damage = 4
 cards_to_draw = 1
 can_target_enemy = true
+animation_name = "attack_3"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

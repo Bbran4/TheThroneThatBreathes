@@ -11,4 +11,5 @@ card_type = 1
 target_mode = 2
 base_guard = 5
 can_target_self = true
+animation_name = "defend"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

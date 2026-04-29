@@ -13,4 +13,5 @@ required_die_value = 2
 target_mode = 2
 base_guard = 10
 can_target_self = true
+animation_name = "protect"
 metadata/_custom_type_script = "uid://c6v6cyclnv500"

@@ -66,6 +66,20 @@ enum TargetMode {
 @export var can_target_enemy: bool = false
 @export var can_target_self: bool = false
 
+@export var animation_name: String = ""
+
+func _get_attack_animation_for_card(card: CardData) -> String:
+	if card.animation_name != "":
+		return card.animation_name
+
+	if card.base_damage > 0:
+		return "attack_1"
+
+	if card.base_guard > 0:
+		return "defend"
+
+	return "idle"
+
 func can_use_with_die(die_value: int) -> bool:
 	match dice_requirement_type:
 		DiceRequirementType.ANY:

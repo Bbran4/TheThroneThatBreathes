@@ -7,12 +7,14 @@
 [ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="4_enemy"]
 [ext_resource type="Resource" uid="uid://cihmxdwhbg2la" path="res://resources/enemies/HollowAcolyte.tres" id="5_ycf86"]
 [ext_resource type="PackedScene" uid="uid://dh7rjavsrrbyi" path="res://scenes/ui/CombatantStatusUI.tscn" id="6_mvvgd"]
+[ext_resource type="PackedScene" uid="uid://hm6xjdnuqq17" path="res://scenes/combat/AnimatedCombatantVisual.tscn" id="6_ycf86"]
 [ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="8_ui"]
 
 [node name="CombatTest" type="Node" unique_id=204473287]
 script = ExtResource("1_aa5v2")
 player_team_data = Array[ExtResource("3_2nakn")]([ExtResource("3_player")])
 enemy_team_data = Array[ExtResource("3_2nakn")]([ExtResource("5_ycf86"), ExtResource("4_enemy"), ExtResource("4_enemy")])
+combatant_visual_scene = ExtResource("6_ycf86")
 click_size = Vector2(120, 250)
 combatant_status_ui_scene = ExtResource("6_mvvgd")
 
