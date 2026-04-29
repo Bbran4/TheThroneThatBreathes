@@ -28,8 +28,6 @@ func setup(location: LocationData, node_data: RunNodeData) -> void:
 	current_location = location
 	current_node = node_data
 
-	_clear_interactables()
-
 	if subtitle_label != null:
 		var location_text := ""
 		if current_location != null:
@@ -47,11 +45,53 @@ func setup(location: LocationData, node_data: RunNodeData) -> void:
 
 		subtitle_label.text = location_text + node_text
 
-	_spawn_interactables_for_node(node_data)
+	_setup_manual_interactables()
+
+func _setup_manual_interactables() -> void:
+	for child in interactables_root.get_children():
+		if child is LocationInteractable:
+			var interactable := child as LocationInteractable
+
+			if not interactable.interaction_requested.is_connected(_on_interactable_requested):
+				interactable.interaction_requested.connect(_on_interactable_requested)
+
+			if not interactable.player_entered_interactable.is_connected(_on_player_entered_interactable):
+				interactable.player_entered_interactable.connect(_on_player_entered_interactable)
+
+			if not interactable.player_exited_interactable.is_connected(_on_player_exited_interactable):
+				interactable.player_exited_interactable.connect(_on_player_exited_interactable)
+
+func _on_player_entered_interactable(interactable: LocationInteractable) -> void:
+	nearby_interactable = interactable
+	_show_prompt_for_interactable(interactable)
+
+
+func _on_player_exited_interactable(interactable: LocationInteractable) -> void:
+	if nearby_interactable == interactable:
+		nearby_interactable = null
+		_hide_prompt()
+
+func _show_prompt_for_interactable(interactable: LocationInteractable) -> void:
+	if prompt_label == null:
+		return
+
+	prompt_label.visible = true
+	prompt_label.text = interactable.prompt_text
+	prompt_label.global_position = interactable.get_prompt_position()
+
+
+func _hide_prompt() -> void:
+	if prompt_label == null:
+		return
+
+	prompt_label.visible = false
+
 
 
 func _process(_delta: float) -> void:
-	_update_nearby_interactable()
+	if nearby_interactable != null:
+		if is_instance_valid(nearby_interactable):
+			prompt_label.global_position = nearby_interactable.get_prompt_position()
 
 	if Input.is_action_just_pressed("interact"):
 		if nearby_interactable != null:

@@ -12,6 +12,10 @@
 [ext_resource type="Texture2D" uid="uid://b1kq8v84an1ln" path="res://assets/sprites/player/exiled_knight/Protect.png" id="10_5kjrd"]
 [ext_resource type="Texture2D" uid="uid://cwfmmammkj2g7" path="res://assets/sprites/player/exiled_knight/Run.png" id="11_m3mxc"]
 [ext_resource type="Texture2D" uid="uid://4s2vyf6sgghh" path="res://assets/sprites/player/exiled_knight/Walk.png" id="12_akkhf"]
+[ext_resource type="Script" uid="uid://hn32sr8q5ci6" path="res://scripts/world/LocationInteractable.gd" id="13_pndl3"]
+[ext_resource type="Resource" uid="uid://def67ifrmly4p" path="res://resources/run_choice/corpse road/01_search.tres" id="14_3aacm"]
+[ext_resource type="Resource" uid="uid://8pgwux1n0jqx" path="res://resources/run_choice/corpse road/02_follow_trail.tres" id="15_230bx"]
+[ext_resource type="Resource" uid="uid://b7tppt135wb22" path="res://resources/run_choice/corpse road/03_press_on.tres" id="16_nryiw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3u1yb"]
 size = Vector2(1161, 20)
@@ -423,6 +427,13 @@ animations = [{
 "speed": 8.0
 }]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_3aacm"]
+radius = 39.012817
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pu0r7"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pndl3"]
+
 [node name="SideViewLocation" type="Node2D" unique_id=1589068925]
 script = ExtResource("1_viajb")
 
@@ -458,6 +469,47 @@ animation = &"attack_1"
 autoplay = "idle"
 
 [node name="Interactables" type="Node2D" parent="." unique_id=1326279756]
+
+[node name="CorpseCart" type="Area2D" parent="Interactables" unique_id=1231703639]
+position = Vector2(551, 542)
+script = ExtResource("13_pndl3")
+linked_choice = ExtResource("14_3aacm")
+metadata/_custom_type_script = "uid://hn32sr8q5ci6"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/CorpseCart" unique_id=704550195]
+shape = SubResource("CircleShape2D_3aacm")
+
+[node name="PlaceholderVisual" type="ColorRect" parent="Interactables/CorpseCart" unique_id=1091603977]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ScrapingSoundExit" type="Area2D" parent="Interactables" unique_id=1502306241]
+position = Vector2(1093, 543)
+script = ExtResource("13_pndl3")
+linked_choice = ExtResource("15_230bx")
+metadata/_custom_type_script = "uid://hn32sr8q5ci6"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/ScrapingSoundExit" unique_id=1049604701]
+scale = Vector2(4.04, 4.04)
+shape = SubResource("CircleShape2D_pu0r7")
+
+[node name="PlaceholderVisual" type="ColorRect" parent="Interactables/ScrapingSoundExit" unique_id=1275314642]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DitchPath" type="Area2D" parent="Interactables" unique_id=1579402946]
+position = Vector2(781, 543)
+script = ExtResource("13_pndl3")
+linked_choice = ExtResource("16_nryiw")
+metadata/_custom_type_script = "uid://hn32sr8q5ci6"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/DitchPath" unique_id=1978223266]
+scale = Vector2(3.959995, 3.959995)
+shape = SubResource("CircleShape2D_pndl3")
+
+[node name="PlaceholderVisual" type="ColorRect" parent="Interactables/DitchPath" unique_id=1220747546]
+offset_right = 40.0
+offset_bottom = 40.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=511070798]
 
