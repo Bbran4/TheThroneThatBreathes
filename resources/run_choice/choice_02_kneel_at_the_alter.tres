@@ -6,6 +6,8 @@
 [resource]
 script = ExtResource("1_61s2n")
 choice_text = "Kneel at the Altar"
-result_text = "You kneel before the dead stone. Your blade opens your palm. Blood coils into the basin, and something beneath the altar remembers your name."
+result_text = "You kneel before the dead stone. Your blade opens your palm.
+Blood coils into the basin, and something beneath the altar
+remembers your name."
 next_node = ExtResource("1_p85sq")
 metadata/_custom_type_script = "uid://bgjkr3elvy71k"
