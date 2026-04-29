@@ -2,10 +2,12 @@
 
 [ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="1_nyo6s"]
 [ext_resource type="Resource" uid="uid://cwn7cq3yq8p7q" path="res://resources/run_nodes/corpse_road/node_01a_corpse_road_intro.tres" id="2_cco3t"]
+[ext_resource type="PackedScene" uid="uid://dlofsiel3rtrm" path="res://scenes/world/CorpseRoadLocation.tscn" id="3_f82gb"]
 
 [resource]
 script = ExtResource("1_nyo6s")
 location_name = "Corpse Road"
 description = "The carts have been here for weeks. Their horses are long dead, stripped to bone by birds that still circle overhead, patient and unhurried. The road runs straight between leaning pines, and somewhere ahead something is dragging metal across stone. It hasn't stopped."
 entry_node = ExtResource("2_cco3t")
+side_view_scene = ExtResource("3_f82gb")
 metadata/_custom_type_script = "uid://byl0426pkhvcv"

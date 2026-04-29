@@ -5,7 +5,7 @@ class_name RunTest
 @export var run_nodes: Array[RunNodeData] = []
 
 @export var combat_test_scene: PackedScene
-
+@export var card_view_scene: PackedScene
 @export var starting_location: LocationData
 @export var route_locations: Array[LocationData] = []
 @export var location_view_scene: PackedScene
@@ -23,9 +23,17 @@ var route_ui: Control
 var route_title: Label
 var route_status: Label
 var node_button_container: VBoxContainer
-
+var reward_card_container: HBoxContainer
+var reward_card_tweens: Dictionary = {}
 var active_combat_root: Node
 var current_combat_node: RunNodeData = null
+
+const REWARD_CARD_WIDTH := 180.0
+const REWARD_CARD_HEIGHT := 270.0
+const REWARD_CARD_HOVER_LIFT := 34.0
+const REWARD_CARD_HOVER_SCALE := Vector2(1.10, 1.10)
+const REWARD_CARD_SPACING := 28
+const REWARD_SELECT_BUTTON_HEIGHT := 38.0
 
 func _ready() -> void:
 	_build_route_ui()
@@ -46,7 +54,10 @@ func _show_location_route_screen() -> void:
 	route_title.text = "The Road Ahead"
 
 	_clear_children(node_button_container)
-
+	_clear_children(reward_card_container)
+	reward_card_container.visible = false
+	node_button_container.visible = true
+	
 	route_status.text = "HP: %s / %s\nChoose your path." % [
 		run_state.current_hp,
 		run_state.max_hp
@@ -291,6 +302,13 @@ func _build_route_ui() -> void:
 	route_status.text = ""
 	vbox.add_child(route_status)
 
+	reward_card_container = HBoxContainer.new()
+	reward_card_container.name = "RewardCardContainer"
+	reward_card_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	reward_card_container.add_theme_constant_override("separation", REWARD_CARD_SPACING)
+	reward_card_container.visible = false
+	vbox.add_child(reward_card_container)
+
 	node_button_container = VBoxContainer.new()
 	vbox.add_child(node_button_container)
 
@@ -311,7 +329,10 @@ func _show_route_screen() -> void:
 	]
 
 	_clear_children(node_button_container)
-
+	_clear_children(reward_card_container)
+	reward_card_container.visible = false
+	node_button_container.visible = true
+	
 	if run_state.is_dead():
 		var dead_label := Label.new()
 		dead_label.text = "You died on the road."
@@ -379,7 +400,10 @@ func _start_event_node(node_data: RunNodeData) -> void:
 	print("Choices count: ", node_data.choices.size())
 
 	_clear_children(node_button_container)
-
+	_clear_children(reward_card_container)
+	reward_card_container.visible = false
+	node_button_container.visible = true
+	
 	route_ui.visible = true
 	route_title.text = node_data.node_name
 	route_status.text = node_data.scene_text
@@ -503,6 +527,97 @@ func _on_run_combat_finished(player_won: bool, surviving_player: PlayerCombatant
 		await get_tree().create_timer(0.8).timeout
 		_show_route_screen()
 
+func _create_reward_card_option(card: CardData, index: int) -> VBoxContainer:
+	var option := VBoxContainer.new()
+	option.name = "RewardOption_%s" % index
+	option.custom_minimum_size = Vector2(REWARD_CARD_WIDTH, REWARD_CARD_HEIGHT + REWARD_SELECT_BUTTON_HEIGHT + 12.0)
+	option.alignment = BoxContainer.ALIGNMENT_CENTER
+
+	var card_view: CardView = card_view_scene.instantiate()
+	option.add_child(card_view)
+
+	card_view.custom_minimum_size = Vector2(REWARD_CARD_WIDTH, REWARD_CARD_HEIGHT)
+	card_view.size = Vector2(REWARD_CARD_WIDTH, REWARD_CARD_HEIGHT)
+	card_view.pivot_offset = Vector2(REWARD_CARD_WIDTH * 0.5, REWARD_CARD_HEIGHT * 0.5)
+	card_view.focus_mode = Control.FOCUS_NONE
+	card_view.mouse_filter = Control.MOUSE_FILTER_STOP
+	card_view.set_meta("reward_rest_position", Vector2.ZERO)
+	card_view.set_meta("reward_rest_z", index)
+
+	card_view.modulate.a = 0.0
+	card_view.scale = Vector2(0.72, 0.72)
+	card_view.rotation_degrees = -5.0 + index * 5.0
+	card_view.z_index = index
+
+	card_view.mouse_entered.connect(func():
+		_on_run_reward_card_mouse_entered(card_view)
+	)
+
+	card_view.mouse_exited.connect(func():
+		_on_run_reward_card_mouse_exited(card_view)
+	)
+
+	# Important:
+	# CardView.setup() depends on @onready label references.
+	# Defer it until CardView has entered the scene tree.
+	card_view.call_deferred("setup", card, true)
+
+	var select_button := Button.new()
+	select_button.text = "Select"
+	select_button.custom_minimum_size = Vector2(REWARD_CARD_WIDTH, REWARD_SELECT_BUTTON_HEIGHT)
+	select_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	select_button.pressed.connect(func():
+		run_state.add_card(card)
+		_complete_current_node()
+	)
+	option.add_child(select_button)
+
+	var reveal_tween := card_view.create_tween()
+	reveal_tween.set_parallel(true)
+	reveal_tween.tween_property(card_view, "modulate:a", 1.0, 0.14).set_delay(index * 0.08)
+	reveal_tween.tween_property(card_view, "scale", Vector2.ONE, 0.32).set_delay(index * 0.08).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	reveal_tween.tween_property(card_view, "rotation_degrees", 0.0, 0.32).set_delay(index * 0.08).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+	return option
+
+func _on_run_reward_card_mouse_entered(card_view: CardView) -> void:
+	if card_view == null or not is_instance_valid(card_view):
+		return
+
+	if reward_card_tweens.has(card_view):
+		var old_tween: Tween = reward_card_tweens[card_view]
+		if old_tween != null:
+			old_tween.kill()
+
+	card_view.z_index = 100
+
+	var tween := card_view.create_tween()
+	reward_card_tweens[card_view] = tween
+	tween.set_parallel(true)
+	tween.tween_property(card_view, "position:y", -REWARD_CARD_HOVER_LIFT, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(card_view, "scale", REWARD_CARD_HOVER_SCALE, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(card_view, "rotation_degrees", 0.0, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+
+
+func _on_run_reward_card_mouse_exited(card_view: CardView) -> void:
+	if card_view == null or not is_instance_valid(card_view):
+		return
+
+	if reward_card_tweens.has(card_view):
+		var old_tween: Tween = reward_card_tweens[card_view]
+		if old_tween != null:
+			old_tween.kill()
+
+	var rest_z: int = card_view.get_meta("reward_rest_z", 0)
+	card_view.z_index = rest_z
+
+	var tween := card_view.create_tween()
+	reward_card_tweens[card_view] = tween
+	tween.set_parallel(true)
+	tween.tween_property(card_view, "position:y", 0.0, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(card_view, "scale", Vector2.ONE, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(card_view, "rotation_degrees", 0.0, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+
 func _show_reward_after_combat() -> void:
 	_cleanup_active_combat()
 	_cleanup_location_view()
@@ -513,6 +628,9 @@ func _show_reward_after_combat() -> void:
 	route_title.text = "Spoils of the Road"
 
 	_clear_children(node_button_container)
+	_clear_children(reward_card_container)
+	reward_card_container.visible = false
+	node_button_container.visible = true
 
 	var node_data: RunNodeData = _get_current_reward_node()
 
@@ -544,23 +662,31 @@ func _show_reward_after_combat() -> void:
 		node_button_container.add_child(continue_button)
 		return
 
-	for card in node_data.reward_cards:
-		var button := Button.new()
-		button.text = "+ " + card.card_name
-		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.pressed.connect(func():
-			run_state.add_card(card)
-			_complete_current_node()
-		)
-		node_button_container.add_child(button)
+	if card_view_scene == null:
+		push_error("RunTest missing card_view_scene. Assign res://scenes/ui/CardView.tscn.")
+		return
+
+	node_button_container.visible = false
+	reward_card_container.visible = true
+
+	for i in node_data.reward_cards.size():
+		var card: CardData = node_data.reward_cards[i]
+		var option := _create_reward_card_option(card, i)
+		reward_card_container.add_child(option)
 
 	var skip_button := Button.new()
 	skip_button.text = "Skip"
+	skip_button.custom_minimum_size = Vector2(180, REWARD_SELECT_BUTTON_HEIGHT)
 	skip_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	skip_button.pressed.connect(func():
 		_complete_current_node()
 	)
-	node_button_container.add_child(skip_button)
+
+	var skip_wrapper := VBoxContainer.new()
+	skip_wrapper.custom_minimum_size = Vector2(180, REWARD_CARD_HEIGHT + REWARD_SELECT_BUTTON_HEIGHT + 12.0)
+	skip_wrapper.alignment = BoxContainer.ALIGNMENT_END
+	skip_wrapper.add_child(skip_button)
+	reward_card_container.add_child(skip_wrapper)
 
 func _complete_current_node() -> void:
 	current_combat_node = null

@@ -25,10 +25,9 @@ var hovered_card: CardData = null
 
 var result_panel: PanelContainer
 var reward_buttons_container: VBoxContainer
-var hand_refresh_version: int = 0
-
-var reward_cards_container: HBoxContainer = null
+var reward_cards_layer: Control
 var reward_card_tweens: Dictionary = {}
+var hand_refresh_version: int = 0
 
 var pending_card: CardData = null
 var pending_dice: Array[DiceData] = []
@@ -46,10 +45,19 @@ const CARD_WIDTH := 180.0
 const CARD_HEIGHT := 270.0
 
 const REWARD_CARD_SPACING := 28
-const REWARD_CARD_REVEAL_DELAY := 0.10
-const REWARD_CARD_HOVER_LIFT := 28.0
+const REWARD_CARD_SPREAD := 230.0
+const REWARD_CARD_HOVER_LIFT := 34.0
 const REWARD_CARD_HOVER_SCALE := Vector2(1.10, 1.10)
+const REWARD_CARD_REVEAL_DELAY := 0.09
+const RESULT_PANEL_WIDTH := 760.0
+const RESULT_PANEL_HEIGHT := 430.0
 const REWARD_CARD_MOUSE_TILT := 7.0
+
+const REWARD_OPTION_WIDTH := 190.0
+const REWARD_OPTION_HEIGHT := 320.0
+const REWARD_SELECT_BUTTON_HEIGHT := 38.0
+const REWARD_CARD_TOP_PADDING := 0.0
+const REWARD_BUTTON_GAP := 10.0
 
 signal target_selected(target: Combatant)
 signal pending_card_changed(card: CardData)
@@ -96,19 +104,22 @@ func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombat
 
 func _ensure_polish_ui_nodes() -> void:
 	result_panel = get_node_or_null("ResultPanel") as PanelContainer
+
 	if result_panel == null:
 		result_panel = PanelContainer.new()
 		result_panel.name = "ResultPanel"
 		result_panel.visible = false
-		result_panel.custom_minimum_size = Vector2(760, 430)
-		result_panel.position = Vector2(260, 110)
+		result_panel.custom_minimum_size = Vector2(RESULT_PANEL_WIDTH, RESULT_PANEL_HEIGHT)
+		result_panel.size = Vector2(RESULT_PANEL_WIDTH, RESULT_PANEL_HEIGHT)
+		result_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		add_child(result_panel)
 
 		var margin := MarginContainer.new()
-		margin.add_theme_constant_override("margin_left", 22)
-		margin.add_theme_constant_override("margin_right", 22)
-		margin.add_theme_constant_override("margin_top", 22)
-		margin.add_theme_constant_override("margin_bottom", 22)
+		margin.name = "MarginContainer"
+		margin.add_theme_constant_override("margin_left", 18)
+		margin.add_theme_constant_override("margin_right", 18)
+		margin.add_theme_constant_override("margin_top", 18)
+		margin.add_theme_constant_override("margin_bottom", 18)
 		result_panel.add_child(margin)
 
 		var vbox := VBoxContainer.new()
@@ -124,31 +135,42 @@ func _ensure_polish_ui_nodes() -> void:
 		var subtitle := Label.new()
 		subtitle.name = "SubtitleLabel"
 		subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		subtitle.text = "Choose a reward"
+		subtitle.text = "Choose a reward card"
 		vbox.add_child(subtitle)
 
-		reward_cards_container = HBoxContainer.new()
-		reward_cards_container.name = "RewardCards"
-		reward_cards_container.alignment = BoxContainer.ALIGNMENT_CENTER
-		reward_cards_container.add_theme_constant_override("separation", REWARD_CARD_SPACING)
-		vbox.add_child(reward_cards_container)
+		reward_cards_layer = Control.new()
+		reward_cards_layer.name = "RewardCardsLayer"
+		reward_cards_layer.custom_minimum_size = Vector2(RESULT_PANEL_WIDTH - 36.0, 320.0)
+		reward_cards_layer.size = Vector2(RESULT_PANEL_WIDTH - 36.0, 320.0)
+		reward_cards_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		vbox.add_child(reward_cards_layer)
 
 		reward_buttons_container = VBoxContainer.new()
 		reward_buttons_container.name = "RewardButtons"
 		reward_buttons_container.visible = false
 		vbox.add_child(reward_buttons_container)
 	else:
-		reward_buttons_container = result_panel.get_node_or_null("MarginContainer/ResultVBox/RewardButtons") as VBoxContainer
-		reward_cards_container = result_panel.get_node_or_null("MarginContainer/ResultVBox/RewardCards") as HBoxContainer
+		result_panel.custom_minimum_size = Vector2(RESULT_PANEL_WIDTH, RESULT_PANEL_HEIGHT)
+		result_panel.size = Vector2(RESULT_PANEL_WIDTH, RESULT_PANEL_HEIGHT)
+		result_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
-		if reward_cards_container == null:
-			var vbox := result_panel.get_node_or_null("MarginContainer/ResultVBox") as VBoxContainer
-			if vbox != null:
-				reward_cards_container = HBoxContainer.new()
-				reward_cards_container.name = "RewardCards"
-				reward_cards_container.alignment = BoxContainer.ALIGNMENT_CENTER
-				reward_cards_container.add_theme_constant_override("separation", REWARD_CARD_SPACING)
-				vbox.add_child(reward_cards_container)
+		reward_buttons_container = result_panel.get_node_or_null("MarginContainer/ResultVBox/RewardButtons") as VBoxContainer
+		reward_cards_layer = result_panel.get_node_or_null("MarginContainer/ResultVBox/RewardCardsLayer") as Control
+
+		var vbox := result_panel.get_node_or_null("MarginContainer/ResultVBox") as VBoxContainer
+
+		if reward_cards_layer == null and vbox != null:
+			reward_cards_layer = Control.new()
+			reward_cards_layer.name = "RewardCardsLayer"
+			reward_cards_layer.custom_minimum_size = Vector2(RESULT_PANEL_WIDTH - 36.0, 320.0)
+			reward_cards_layer.size = Vector2(RESULT_PANEL_WIDTH - 36.0, 320.0)
+			reward_cards_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			vbox.add_child(reward_cards_layer)
+
+		if reward_buttons_container == null and vbox != null:
+			reward_buttons_container = VBoxContainer.new()
+			reward_buttons_container.name = "RewardButtons"
+			vbox.add_child(reward_buttons_container)
 
 		if reward_buttons_container != null:
 			reward_buttons_container.visible = false
@@ -615,6 +637,44 @@ func cancel_pending_card() -> void:
 	pending_card = null
 	pending_dice.clear()
 
+func _create_reward_option(card: CardData, index: int) -> Control:
+	var option := Control.new()
+	option.name = "RewardOption_%s" % index
+	option.custom_minimum_size = Vector2(REWARD_OPTION_WIDTH, REWARD_OPTION_HEIGHT)
+	option.size = Vector2(REWARD_OPTION_WIDTH, REWARD_OPTION_HEIGHT)
+	option.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var card_view := _create_reward_choice_card(card, index)
+	option.add_child(card_view)
+
+	var card_rest_position := Vector2(
+		(REWARD_OPTION_WIDTH - CARD_WIDTH) * 0.5,
+		REWARD_CARD_TOP_PADDING
+	)
+
+	card_view.position = card_rest_position
+	card_view.set_meta("reward_rest_position", card_rest_position)
+	card_view.set_meta("reward_rest_rotation", 0.0)
+	card_view.set_meta("reward_rest_z", index)
+
+	var select_button := Button.new()
+	select_button.name = "SelectButton"
+	select_button.text = "Select"
+	select_button.custom_minimum_size = Vector2(REWARD_OPTION_WIDTH, REWARD_SELECT_BUTTON_HEIGHT)
+	select_button.size = Vector2(REWARD_OPTION_WIDTH, REWARD_SELECT_BUTTON_HEIGHT)
+	select_button.position = Vector2(
+		0.0,
+		REWARD_CARD_TOP_PADDING + CARD_HEIGHT + REWARD_BUTTON_GAP
+	)
+	select_button.focus_mode = Control.FOCUS_NONE
+	select_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	select_button.pressed.connect(func():
+		_on_reward_card_chosen(card)
+	)
+	option.add_child(select_button)
+
+	return option
+
 func _create_reward_choice_card(card: CardData, index: int) -> CardView:
 	var card_view: CardView = card_view_scene.instantiate()
 	card_view.setup(card, true)
@@ -624,32 +684,16 @@ func _create_reward_choice_card(card: CardData, index: int) -> CardView:
 	card_view.pivot_offset = Vector2(CARD_WIDTH * 0.5, CARD_HEIGHT * 0.5)
 	card_view.focus_mode = Control.FOCUS_NONE
 	card_view.mouse_filter = Control.MOUSE_FILTER_STOP
-	card_view.z_index = index
-
-	card_view.modulate.a = 0.0
-	card_view.scale = Vector2(0.55, 0.55)
-	card_view.rotation_degrees = -8.0 + index * 8.0
-
-	var reveal_tween := card_view.create_tween()
-	reveal_tween.set_parallel(true)
-	reveal_tween.tween_property(card_view, "modulate:a", 1.0, 0.14).set_delay(index * REWARD_CARD_REVEAL_DELAY)
-	reveal_tween.tween_property(card_view, "scale", Vector2.ONE, 0.36).set_delay(index * REWARD_CARD_REVEAL_DELAY).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	reveal_tween.tween_property(card_view, "rotation_degrees", 0.0, 0.36).set_delay(index * REWARD_CARD_REVEAL_DELAY).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 	card_view.mouse_entered.connect(func():
 		_on_reward_choice_card_mouse_entered(card_view)
 	)
 
 	card_view.mouse_exited.connect(func():
-		_on_reward_choice_card_mouse_exited(card_view, index)
-	)
-
-	card_view.pressed.connect(func():
-		_on_reward_card_chosen(card)
+		_on_reward_choice_card_mouse_exited(card_view)
 	)
 
 	return card_view
-
 
 func _on_reward_choice_card_mouse_entered(card_view: CardView) -> void:
 	if card_view == null or not is_instance_valid(card_view):
@@ -660,17 +704,19 @@ func _on_reward_choice_card_mouse_entered(card_view: CardView) -> void:
 		if old_tween != null:
 			old_tween.kill()
 
+	var rest_position: Vector2 = card_view.get_meta("reward_rest_position", card_view.position)
+
 	card_view.z_index = 100
 
 	var tween := card_view.create_tween()
 	reward_card_tweens[card_view] = tween
 	tween.set_parallel(true)
-	tween.tween_property(card_view, "position:y", card_view.position.y - REWARD_CARD_HOVER_LIFT, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(card_view, "position", rest_position + Vector2(0, -REWARD_CARD_HOVER_LIFT), 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tween.tween_property(card_view, "scale", REWARD_CARD_HOVER_SCALE, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tween.tween_property(card_view, "rotation_degrees", 0.0, 0.14).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 
 
-func _on_reward_choice_card_mouse_exited(card_view: CardView, index: int) -> void:
+func _on_reward_choice_card_mouse_exited(card_view: CardView) -> void:
 	if card_view == null or not is_instance_valid(card_view):
 		return
 
@@ -679,24 +725,31 @@ func _on_reward_choice_card_mouse_exited(card_view: CardView, index: int) -> voi
 		if old_tween != null:
 			old_tween.kill()
 
-	card_view.z_index = index
+	var rest_position: Vector2 = card_view.get_meta("reward_rest_position", card_view.position)
+	var rest_rotation: float = card_view.get_meta("reward_rest_rotation", 0.0)
+	var rest_z: int = card_view.get_meta("reward_rest_z", 0)
+
+	card_view.z_index = rest_z
 
 	var tween := card_view.create_tween()
 	reward_card_tweens[card_view] = tween
 	tween.set_parallel(true)
-	tween.tween_property(card_view, "position:y", 0.0, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(card_view, "position", rest_position, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 	tween.tween_property(card_view, "scale", Vector2.ONE, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
-	tween.tween_property(card_view, "rotation_degrees", 0.0, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(card_view, "rotation_degrees", rest_rotation, 0.12).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
 
 func _show_result_panel(player_won: bool) -> void:
 	if result_panel == null:
 		return
 
+	var viewport_size := get_viewport_rect().size
+
 	result_panel.visible = true
-	result_panel.custom_minimum_size = Vector2(760, 430)
+	result_panel.custom_minimum_size = Vector2(RESULT_PANEL_WIDTH, RESULT_PANEL_HEIGHT)
+	result_panel.size = Vector2(RESULT_PANEL_WIDTH, RESULT_PANEL_HEIGHT)
 	result_panel.position = Vector2(
-		(get_viewport_rect().size.x - result_panel.custom_minimum_size.x) * 0.5,
-		90.0
+		(viewport_size.x - RESULT_PANEL_WIDTH) * 0.5,
+		(viewport_size.y - RESULT_PANEL_HEIGHT) * 0.5
 	)
 
 	var title := result_panel.get_node_or_null("MarginContainer/ResultVBox/TitleLabel") as Label
@@ -712,32 +765,56 @@ func _show_result_panel(player_won: bool) -> void:
 		reward_buttons_container.visible = false
 		_clear_children(reward_buttons_container)
 
-	if reward_cards_container != null:
-		reward_cards_container.visible = true
-		_clear_children(reward_cards_container)
+	if reward_cards_layer != null:
+		reward_cards_layer.visible = true
+		_clear_children(reward_cards_layer)
 
 	if not player_won:
-		if reward_cards_container != null:
-			reward_cards_container.visible = false
+		if reward_cards_layer != null:
+			reward_cards_layer.visible = false
 
 		if reward_buttons_container != null:
 			reward_buttons_container.visible = true
 
 			var close_button := Button.new()
 			close_button.text = "Return"
+			close_button.custom_minimum_size = Vector2(280, 44)
 			reward_buttons_container.add_child(close_button)
 
 		return
 
-	if reward_cards_container == null:
+	if reward_cards_layer == null:
+		return
+
+	if card_view_scene == null:
+		push_error("CombatUI is missing card_view_scene.")
 		return
 
 	var reward_cards := _get_reward_card_options(3)
+	var total_width := (reward_cards.size() - 1) * REWARD_CARD_SPREAD
+	var center_x := reward_cards_layer.custom_minimum_size.x * 0.5
+	var center_y := 165.0
 
 	for i in reward_cards.size():
 		var card := reward_cards[i]
-		var card_view := _create_reward_choice_card(card, i)
-		reward_cards_container.add_child(card_view)
+		var option := _create_reward_option(card, i)
+		reward_cards_layer.add_child(option)
+
+		var rest_position := Vector2(
+			center_x - total_width * 0.5 + i * REWARD_CARD_SPREAD - REWARD_OPTION_WIDTH * 0.5,
+			center_y - REWARD_OPTION_HEIGHT * 0.5
+		)
+
+		option.position = rest_position + Vector2(0, 36)
+		option.scale = Vector2(0.55, 0.55)
+		option.modulate.a = 0.0
+		option.z_index = i
+
+		var reveal_tween := option.create_tween()
+		reveal_tween.set_parallel(true)
+		reveal_tween.tween_property(option, "modulate:a", 1.0, 0.14).set_delay(i * REWARD_CARD_REVEAL_DELAY)
+		reveal_tween.tween_property(option, "position", rest_position, 0.34).set_delay(i * REWARD_CARD_REVEAL_DELAY).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		reveal_tween.tween_property(option, "scale", Vector2.ONE, 0.34).set_delay(i * REWARD_CARD_REVEAL_DELAY).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 func _get_reward_card_options(amount: int) -> Array[CardData]:
 	var options: Array[CardData] = []
@@ -774,29 +851,14 @@ func _on_reward_card_chosen(card: CardData) -> void:
 		active_player.discard_pile.append(card)
 		active_player.deck_changed.emit(active_player.deck.size(), active_player.discard_pile.size())
 
-	if reward_cards_container != null:
-		_clear_children(reward_cards_container)
+	if reward_cards_layer != null:
+		_clear_children(reward_cards_layer)
 
 	if reward_buttons_container != null:
-		reward_buttons_container.visible = false
 		_clear_children(reward_buttons_container)
 
-	var title := result_panel.get_node_or_null("MarginContainer/ResultVBox/TitleLabel") as Label
-	var subtitle := result_panel.get_node_or_null("MarginContainer/ResultVBox/SubtitleLabel") as Label
-
-	if title != null:
-		title.text = "CARD TAKEN"
-
-	if subtitle != null:
-		subtitle.text = card.card_name + " was added to your deck."
-
-	if reward_cards_container != null:
-		reward_cards_container.visible = true
-
-		var chosen_card := _create_reward_choice_card(card, 0)
-		chosen_card.disabled = true
-		chosen_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		reward_cards_container.add_child(chosen_card)
+	if result_panel != null:
+		result_panel.visible = false
 
 func _on_combatant_damage_taken(
 	combatant: Combatant,
