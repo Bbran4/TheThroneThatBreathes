@@ -58,6 +58,18 @@ func _on_guard_changed(current_guard: int) -> void:
 func _on_intent_changed(intent_text: String) -> void:
 	intent_label.text = intent_text
 
+func get_health_floating_text_position() -> Vector2:
+	if health_bar != null:
+		return health_bar.global_position + health_bar.size * 0.5
+
+	return global_position
+
+
+func get_guard_floating_text_position() -> Vector2:
+	if guard_label != null:
+		return guard_label.global_position + guard_label.size * 0.5
+
+	return global_position
 
 func _on_died(_dead_combatant: Combatant) -> void:
 	visible = false

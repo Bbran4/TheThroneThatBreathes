@@ -6,6 +6,8 @@ signal end_turn_pressed
 @onready var status_label: Label = $HBoxContainer/StatusLabel
 @onready var end_turn_button: Button = $HBoxContainer/EndTurnButton
 
+
+
 var player: PlayerCombatant
 
 
@@ -50,7 +52,6 @@ func set_end_turn_enabled(is_enabled: bool) -> void:
 
 func set_status_text(text_value: String) -> void:
 	status_label.text = text_value
-
 
 func _refresh_all() -> void:
 	if player == null:

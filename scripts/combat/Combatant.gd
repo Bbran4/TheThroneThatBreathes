@@ -48,7 +48,7 @@ func setup(new_stats: CharacterStats, starting_deck: Array) -> void:
 	stats = new_stats.duplicate_stats()
 
 	current_hp = stats.max_hp
-	current_guard = 0
+	current_guard = get_base_guard()
 	has_emitted_death = false
 
 	deck = starting_deck.duplicate()
@@ -70,7 +70,8 @@ func take_damage(amount: int) -> void:
 	var guard_before := current_guard
 	var hp_before := current_hp
 
-	var blocked_damage: int = min(current_guard, incoming_damage)
+	var effective_guard : Variant = max(current_guard, 0)
+	var blocked_damage: int = min(effective_guard, incoming_damage)
 
 	current_guard -= blocked_damage
 	var remaining_damage: int = incoming_damage - blocked_damage
@@ -140,7 +141,7 @@ func heal(amount: int) -> void:
 func reset_guard() -> void:
 	var guard_before := current_guard
 
-	current_guard = 0
+	current_guard = get_base_guard()
 
 	if guard_before != current_guard:
 		print("%s guard reset: %s -> %s" % [get_display_name(), guard_before, current_guard])
@@ -205,6 +206,12 @@ func get_display_name() -> String:
 
 func get_power() -> int:
 	return stats.power
+
+func get_base_guard() -> int:
+	if stats == null:
+		return 0
+
+	return stats.guard
 
 func get_guard_bonus() -> int:
 	return stats.guard

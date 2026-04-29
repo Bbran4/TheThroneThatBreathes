@@ -9,6 +9,9 @@ class_name CombatUI
 @onready var player_top_hud: PlayerTopHUD = $PlayerTopHUD
 @onready var player_label_fallback_position: Control = $PlayerTopHUD
 @export var show_builtin_result_panel: bool = true
+
+
+
 var combat_manager: CombatManager
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
@@ -40,6 +43,7 @@ const CARD_HEIGHT := 270.0
 
 signal target_selected(target: Combatant)
 signal pending_card_changed(card: CardData)
+signal floating_text_requested(combatant: Combatant, text_value: String, text_kind: String)
 
 func setup_ui(new_combat_manager: CombatManager, new_players: Array[PlayerCombatant], new_enemies: Array[EnemyCombatant]) -> void:
 	combat_manager = new_combat_manager
@@ -672,16 +676,13 @@ func _on_combatant_damage_taken(
 	_hp_before: int,
 	_hp_after: int
 ) -> void:
-	var position := _get_floating_text_position_for_combatant(combatant)
-
 	if blocked_damage > 0:
-		_spawn_floating_text("Blocked " + str(blocked_damage), position + Vector2(0, 18))
+		floating_text_requested.emit(combatant, "Blocked " + str(blocked_damage), "guard")
 
 	if hp_damage > 0:
-		_spawn_floating_text("-" + str(hp_damage), position)
+		floating_text_requested.emit(combatant, "-" + str(hp_damage), "health")
 	elif incoming_damage > 0:
-		_spawn_floating_text("Blocked", position)
-
+		floating_text_requested.emit(combatant, "Blocked", "guard")
 
 func _on_combatant_guard_gained(
 	combatant: Combatant,
@@ -689,8 +690,7 @@ func _on_combatant_guard_gained(
 	_guard_before: int,
 	_guard_after: int
 ) -> void:
-	var position := _get_floating_text_position_for_combatant(combatant)
-	_spawn_floating_text("🛡 +" + str(amount), position + Vector2(0, 20))
+	floating_text_requested.emit(combatant, "🛡 +" + str(amount), "guard")
 
 
 func _on_combatant_guard_reset(
@@ -701,27 +701,14 @@ func _on_combatant_guard_reset(
 	if guard_before <= 0:
 		return
 
-	var position := _get_floating_text_position_for_combatant(combatant)
-	_spawn_floating_text("Guard reset", position + Vector2(0, 36))
-
-
-func _get_floating_text_position_for_combatant(combatant: Combatant) -> Vector2:
-	for p in players:
-		if p == combatant:
-			return player_top_hud.global_position + Vector2(120, 36)
-
-	if target_buttons_by_combatant.has(combatant):
-		var button: Button = target_buttons_by_combatant[combatant]
-		return button.global_position + button.size * 0.5 + Vector2(0, -40)
-
-	return global_position + Vector2(300, 300)
+	floating_text_requested.emit(combatant, "Guard reset", "guard")
 
 func _on_combatant_died(combatant: Combatant) -> void:
 	if selected_target == combatant:
 		selected_target = null
 
-	_spawn_floating_text("DEFEATED", _get_floating_text_position_for_combatant(combatant))
-
+	floating_text_requested.emit(combatant, "DEFEATED", "health")
+	
 	_update_all()
 
 

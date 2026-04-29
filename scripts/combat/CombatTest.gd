@@ -396,7 +396,10 @@ func _start_combat_test() -> void:
 	if launched_from_run:
 		combat_ui.show_builtin_result_panel = false
 	combat_ui.setup_target_buttons(combatant_visuals)
-
+	
+	if not combat_ui.floating_text_requested.is_connected(_on_floating_text_requested):
+		combat_ui.floating_text_requested.connect(_on_floating_text_requested)
+	
 	combat_ui.target_selected.connect(func(_target: Combatant):
 		_update_target_visuals()
 	)
@@ -441,3 +444,33 @@ func _start_combat_test() -> void:
 
 func apply_run_state(new_run_state: RunState) -> void:
 	run_state = new_run_state
+
+func _on_floating_text_requested(combatant: Combatant, text_value: String, text_kind: String) -> void:
+	if combat_ui == null:
+		return
+
+	var spawn_position := Vector2.ZERO
+	var found_position := false
+
+	if combatant_status_uis.has(combatant):
+		var entry: Dictionary = combatant_status_uis[combatant]
+		var status_ui: CombatantStatusUI = entry["ui"]
+
+		if is_instance_valid(status_ui):
+			match text_kind:
+				"health":
+					spawn_position = status_ui.get_health_floating_text_position()
+					found_position = true
+
+				"guard":
+					spawn_position = status_ui.get_guard_floating_text_position()
+					found_position = true
+
+				_:
+					spawn_position = status_ui.global_position
+					found_position = true
+
+	if not found_position:
+		spawn_position = combat_ui.global_position + Vector2(300, 300)
+
+	combat_ui._spawn_floating_text(text_value, spawn_position)
