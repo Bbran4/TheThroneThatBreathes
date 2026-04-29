@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://cxbh4qpukv1o5"]
+
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="1_0s7gt"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="2_2qhvv"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="3_7w0y0"]
+
+[resource]
+script = ExtResource("3_7w0y0")
+node_name = "Ruined Shrine"
+node_type = 1
+description = "A dead saint watches from beneath a cracked helm."
+heal_amount = 15
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

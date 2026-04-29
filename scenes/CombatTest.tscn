@@ -7,9 +7,7 @@
 [ext_resource type="Resource" uid="uid://bpnfmkbsa56jq" path="res://resources/enemies/RotWolf.tres" id="4_enemy"]
 [ext_resource type="Resource" uid="uid://cihmxdwhbg2la" path="res://resources/enemies/HollowAcolyte.tres" id="5_ycf86"]
 [ext_resource type="PackedScene" uid="uid://dh7rjavsrrbyi" path="res://scenes/ui/CombatantStatusUI.tscn" id="6_mvvgd"]
-[ext_resource type="PackedScene" uid="uid://curcwunumwlcv" path="res://scenes/ui/FloatingText.tscn" id="7_float"]
 [ext_resource type="PackedScene" uid="uid://dhvfey22vpu1o" path="res://scenes/ui/CombatUI.tscn" id="8_ui"]
-[ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="9_card"]
 
 [node name="CombatTest" type="Node" unique_id=204473287]
 script = ExtResource("1_aa5v2")
@@ -50,5 +48,3 @@ position = Vector2(790, 340)
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1819585525]
 
 [node name="CombatUI" parent="CanvasLayer" unique_id=1585304774 instance=ExtResource("8_ui")]
-card_view_scene = ExtResource("9_card")
-floating_text_scene = ExtResource("7_float")

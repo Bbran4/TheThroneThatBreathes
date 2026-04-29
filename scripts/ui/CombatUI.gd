@@ -8,7 +8,7 @@ class_name CombatUI
 @export var floating_text_scene: PackedScene
 @onready var player_top_hud: PlayerTopHUD = $PlayerTopHUD
 @onready var player_label_fallback_position: Control = $PlayerTopHUD
-
+@export var show_builtin_result_panel: bool = true
 var combat_manager: CombatManager
 var players: Array[PlayerCombatant] = []
 var enemies: Array[EnemyCombatant] = []
@@ -534,10 +534,14 @@ func _on_combat_ended(winner: Combatant) -> void:
 
 	if _is_player_combatant(winner):
 		player_top_hud.set_status_text("Victory")
-		_show_result_panel(true)
+
+		if show_builtin_result_panel:
+			_show_result_panel(true)
 	else:
 		player_top_hud.set_status_text("Defeat")
-		_show_result_panel(false)
+
+		if show_builtin_result_panel:
+			_show_result_panel(false)
 
 func select_target(target: Combatant) -> void:
 	if target == null:

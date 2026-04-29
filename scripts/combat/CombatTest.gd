@@ -1,5 +1,7 @@
 extends Node
 
+signal combat_finished(player_won: bool, surviving_player: PlayerCombatant)
+
 @export var player_team_data: Array[CombatantData] = []
 @export var enemy_team_data: Array[CombatantData] = []
 
@@ -22,59 +24,14 @@ var enemies: Array[EnemyCombatant] = []
 var combatant_visuals: Dictionary = {}
 var combatant_status_uis: Dictionary = {}
 
+var has_external_setup: bool = false
+var combat_has_started: bool = false
+
+var override_player_hp: int = -1
+var override_player_deck: Array[CardData] = []
+
 func _ready() -> void:
-	if not _validate_team_data(player_team_data, "Player team"):
-		return
-
-	if not _validate_team_data(enemy_team_data, "Enemy team"):
-		return
-
-	_spawn_player_team()
-	_spawn_enemy_team()
-
-	combat_manager.setup_combat(players, enemies)
-	combat_ui.setup_ui(combat_manager, players, enemies)
-	combat_ui.setup_target_buttons(combatant_visuals)
-
-	combat_ui.target_selected.connect(func(_target: Combatant):
-		_update_target_visuals()
-	)
-	combat_ui.pending_card_changed.connect(func(_card: CardData):
-		_update_target_visuals()
-	)
-	combat_manager.combat_started.connect(_on_combat_started)
-	combat_manager.player_turn_started.connect(_on_player_turn_started)
-	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
-	combat_manager.combat_ended.connect(_on_combat_ended)
-	combat_manager.combat_log.connect(_on_combat_log)
-
-	for combatant in players + enemies:
-		combatant.died.connect(_on_combatant_died)
-
-		combatant.damage_taken.connect(func(
-			_changed_combatant: Combatant,
-			_incoming_damage: int,
-			_blocked_damage: int,
-			hp_damage: int,
-			_guard_before: int,
-			_guard_after: int,
-			_hp_before: int,
-			_hp_after: int
-		):
-			if hp_damage > 0:
-				_on_combatant_visual_hp_changed(combatant)
-		)
-
-		combatant.guard_gained.connect(func(
-			_changed_combatant: Combatant,
-			_amount: int,
-			_guard_before: int,
-			_guard_after: int
-		):
-			_on_combatant_visual_guard_changed(combatant)
-		)
-
-	combat_manager.start_combat()
+	_start_combat_test()	
 
 func _process(_delta: float) -> void:
 	if combat_ui != null:
@@ -166,7 +123,19 @@ func _spawn_player_team() -> void:
 		add_child(combatant)
 		combatant.name = "PlayerCombatant_%s" % i
 		combatant.setup(data.stats, data.starting_deck)
+		
+		if not override_player_deck.is_empty():
+			combatant.deck = override_player_deck.duplicate()
+			combatant.deck.shuffle()
+			combatant.hand.clear()
+			combatant.discard_pile.clear()
+			combatant.hand_changed.emit(combatant.hand)
+			combatant.deck_changed.emit(combatant.deck.size(), combatant.discard_pile.size())
 
+		if override_player_hp >= 0:
+			combatant.current_hp = clamp(override_player_hp, 0, combatant.stats.max_hp)
+			combatant.hp_changed.emit(combatant.current_hp, combatant.stats.max_hp)
+		
 		players.append(combatant)
 		_spawn_visual_for_combatant(combatant, data, player_slots, i)
 
@@ -299,12 +268,20 @@ func _on_enemy_turn_started() -> void:
 
 
 func _on_combat_ended(winner: Combatant) -> void:
-	if _is_player_combatant(winner):
+	var player_won := _is_player_combatant(winner)
+
+	if player_won:
 		print("Combat ended. Player team wins.")
-	elif _is_enemy_combatant(winner):
-		print("Combat ended. Enemy team wins.")
 	else:
-		print("Combat ended.")
+		print("Combat ended. Enemy team wins.")
+
+	var surviving_player: PlayerCombatant = null
+	for p in players:
+		if p != null and not p.is_dead():
+			surviving_player = p
+			break
+
+	combat_finished.emit(player_won, surviving_player)
 
 func _is_player_combatant(combatant: Combatant) -> bool:
 	for p in players:
@@ -387,3 +364,73 @@ func _try_play_first_card() -> void:
 		print("Target HP now: ", target.current_hp)
 	else:
 		print("Could not play card: ", card.card_name)
+
+func setup_from_run(new_player_team_data: Array[CombatantData], new_enemy_team_data: Array[CombatantData]) -> void:
+	has_external_setup = true
+	player_team_data = new_player_team_data
+	enemy_team_data = new_enemy_team_data
+
+func _start_combat_test() -> void:
+	if combat_has_started:
+		return
+
+	combat_has_started = true
+
+	if not _validate_team_data(player_team_data, "Player team"):
+		return
+
+	if not _validate_team_data(enemy_team_data, "Enemy team"):
+		return
+
+	_spawn_player_team()
+	_spawn_enemy_team()
+
+	combat_manager.setup_combat(players, enemies)
+	combat_ui.setup_ui(combat_manager, players, enemies)
+	combat_ui.setup_target_buttons(combatant_visuals)
+
+	combat_ui.target_selected.connect(func(_target: Combatant):
+		_update_target_visuals()
+	)
+
+	combat_ui.pending_card_changed.connect(func(_card: CardData):
+		_update_target_visuals()
+	)
+
+	combat_manager.combat_started.connect(_on_combat_started)
+	combat_manager.player_turn_started.connect(_on_player_turn_started)
+	combat_manager.enemy_turn_started.connect(_on_enemy_turn_started)
+	combat_manager.combat_ended.connect(_on_combat_ended)
+	combat_manager.combat_log.connect(_on_combat_log)
+
+	for combatant in players + enemies:
+		combatant.died.connect(_on_combatant_died)
+
+		combatant.damage_taken.connect(func(
+			_changed_combatant: Combatant,
+			_incoming_damage: int,
+			_blocked_damage: int,
+			hp_damage: int,
+			_guard_before: int,
+			_guard_after: int,
+			_hp_before: int,
+			_hp_after: int
+		):
+			if hp_damage > 0:
+				_on_combatant_visual_hp_changed(combatant)
+		)
+
+		combatant.guard_gained.connect(func(
+			_changed_combatant: Combatant,
+			_amount: int,
+			_guard_before: int,
+			_guard_after: int
+		):
+			_on_combatant_visual_guard_changed(combatant)
+		)
+
+	combat_manager.start_combat()
+
+func apply_run_player_state(current_hp: int, run_deck: Array[CardData]) -> void:
+	override_player_hp = current_hp
+	override_player_deck = run_deck.duplicate()

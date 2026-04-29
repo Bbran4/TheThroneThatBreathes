@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cc67nka1h7bq5" path="res://scripts/ui/CombatUI.gd" id="1_k0kdm"]
 [ext_resource type="PackedScene" uid="uid://brw3wrwd3psdl" path="res://scenes/ui/PlayerTopHUD.tscn" id="2_2xdv1"]
+[ext_resource type="PackedScene" uid="uid://ciar7k28ykcld" path="res://scenes/ui/CardView.tscn" id="2_5cuiw"]
+[ext_resource type="PackedScene" uid="uid://curcwunumwlcv" path="res://scenes/ui/FloatingText.tscn" id="3_xnk1x"]
 
 [node name="CombatUI" type="Control" unique_id=1242325184]
 layout_mode = 3
@@ -12,6 +14,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_k0kdm")
+card_view_scene = ExtResource("2_5cuiw")
+floating_text_scene = ExtResource("3_xnk1x")
 
 [node name="PlayerTopHUD" parent="." unique_id=288534297 instance=ExtResource("2_2xdv1")]
 layout_mode = 1

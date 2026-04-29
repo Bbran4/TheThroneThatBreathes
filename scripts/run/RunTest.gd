@@ -1,0 +1,264 @@
+extends Node
+class_name RunTest
+
+@export var player_data: CombatantData
+@export var run_nodes: Array[RunNodeData] = []
+
+@export var combat_test_scene: PackedScene
+
+var run_state: RunState
+
+var current_node_index: int = -1
+
+var route_ui: Control
+var route_title: Label
+var route_status: Label
+var node_button_container: VBoxContainer
+
+var active_combat_root: Node
+
+
+func _ready() -> void:
+	_build_route_ui()
+
+	run_state = RunState.new()
+	add_child(run_state)
+	run_state.setup_from_player_data(player_data)
+
+	_show_route_screen()
+
+
+func _build_route_ui() -> void:
+	route_ui = Control.new()
+	route_ui.name = "RouteUI"
+	route_ui.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(route_ui)
+
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(460, 360)
+	panel.position = Vector2(60, 80)
+	route_ui.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 18)
+	margin.add_theme_constant_override("margin_right", 18)
+	margin.add_theme_constant_override("margin_top", 18)
+	margin.add_theme_constant_override("margin_bottom", 18)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	margin.add_child(vbox)
+
+	route_title = Label.new()
+	route_title.text = "The Road Ahead"
+	route_title.add_theme_font_size_override("font_size", 28)
+	vbox.add_child(route_title)
+
+	route_status = Label.new()
+	route_status.text = ""
+	vbox.add_child(route_status)
+
+	node_button_container = VBoxContainer.new()
+	vbox.add_child(node_button_container)
+
+
+func _show_route_screen() -> void:
+	_cleanup_active_combat()
+
+	route_ui.visible = true
+
+	route_status.text = "HP: %s / %s\nCompleted: %s / %s" % [
+		run_state.current_hp,
+		run_state.max_hp,
+		run_state.completed_nodes,
+		run_nodes.size()
+	]
+
+	_clear_children(node_button_container)
+
+	if run_state.is_dead():
+		var dead_label := Label.new()
+		dead_label.text = "You died on the road."
+		node_button_container.add_child(dead_label)
+		return
+
+	if run_state.completed_nodes >= run_nodes.size():
+		var complete_label := Label.new()
+		complete_label.text = "Run complete. The road continues..."
+		node_button_container.add_child(complete_label)
+		return
+
+	for i in run_nodes.size():
+		var node_data := run_nodes[i]
+		var button := Button.new()
+
+		var prefix := "✓ " if i < run_state.completed_nodes else ""
+		button.text = "%s%s — %s" % [
+			prefix,
+			node_data.node_name,
+			_get_node_type_text(node_data.node_type)
+		]
+
+		button.disabled = i != run_state.completed_nodes
+
+		button.pressed.connect(func():
+			_start_node(i)
+		)
+
+		node_button_container.add_child(button)
+
+
+func _start_node(index: int) -> void:
+	if index < 0 or index >= run_nodes.size():
+		return
+
+	current_node_index = index
+	var node_data := run_nodes[index]
+
+	match node_data.node_type:
+		RunNodeData.RunNodeType.COMBAT:
+			_start_combat_node(node_data)
+
+		RunNodeData.RunNodeType.ELITE:
+			_start_combat_node(node_data)
+
+		RunNodeData.RunNodeType.BOSS:
+			_start_combat_node(node_data)
+
+		RunNodeData.RunNodeType.EVENT:
+			_start_event_node(node_data)
+
+
+func _start_event_node(node_data: RunNodeData) -> void:
+	_clear_children(node_button_container)
+
+	route_title.text = node_data.node_name
+	route_status.text = node_data.description
+
+	var heal_button := Button.new()
+	heal_button.text = "Rest: Heal %s HP" % max(node_data.heal_amount, 3)
+	heal_button.pressed.connect(func():
+		run_state.heal(max(node_data.heal_amount, 3))
+		_complete_current_node()
+	)
+	node_button_container.add_child(heal_button)
+
+	var power_button := Button.new()
+	power_button.text = "Press onward: Gain no reward"
+	power_button.pressed.connect(func():
+		_complete_current_node()
+	)
+	node_button_container.add_child(power_button)
+
+
+func _start_combat_node(node_data: RunNodeData) -> void:
+	if combat_test_scene == null:
+		push_error("RunTest missing combat_test_scene.")
+		return
+
+	if node_data.enemy_team_data.is_empty():
+		push_error("Combat node has no enemy team: " + node_data.node_name)
+		return
+
+	route_ui.visible = false
+	_cleanup_active_combat()
+
+	active_combat_root = combat_test_scene.instantiate()
+
+	if not active_combat_root.has_method("setup_from_run"):
+		push_error("CombatTest scene is missing setup_from_run().")
+		return
+
+	var player_team_for_combat: Array[CombatantData] = []
+	player_team_for_combat.append(player_data)
+
+	active_combat_root.setup_from_run(player_team_for_combat, node_data.enemy_team_data)
+	active_combat_root.apply_run_player_state(run_state.current_hp, run_state.deck)
+
+	if active_combat_root.has_signal("combat_finished"):
+		active_combat_root.combat_finished.connect(_on_run_combat_finished)
+	else:
+		push_error("CombatTest scene is missing combat_finished signal.")
+
+	add_child(active_combat_root)
+
+func _on_run_combat_finished(player_won: bool, surviving_player: PlayerCombatant) -> void:
+	if player_won and surviving_player != null:
+		run_state.save_from_player_combatant(surviving_player)
+
+		await get_tree().create_timer(0.8).timeout
+		_show_reward_after_combat()
+	else:
+		run_state.current_hp = 0
+
+		await get_tree().create_timer(0.8).timeout
+		_show_route_screen()
+
+func _show_reward_after_combat() -> void:
+	_cleanup_active_combat()
+
+	route_ui.visible = true
+	route_title.text = "Spoils of the Road"
+
+	_clear_children(node_button_container)
+
+	var node_data := run_nodes[current_node_index]
+
+	route_status.text = "HP: %s / %s\nChoose a reward." % [
+		run_state.current_hp,
+		run_state.max_hp
+	]
+
+	if node_data.reward_cards.is_empty():
+		var continue_button := Button.new()
+		continue_button.text = "Continue"
+		continue_button.pressed.connect(func():
+			_complete_current_node()
+		)
+		node_button_container.add_child(continue_button)
+		return
+
+	for card in node_data.reward_cards:
+		var button := Button.new()
+		button.text = "+ " + card.card_name
+		button.pressed.connect(func():
+			run_state.add_card(card)
+			_complete_current_node()
+		)
+		node_button_container.add_child(button)
+
+	var skip_button := Button.new()
+	skip_button.text = "Skip"
+	skip_button.pressed.connect(func():
+		_complete_current_node()
+	)
+	node_button_container.add_child(skip_button)
+
+func _complete_current_node() -> void:
+	run_state.completed_nodes += 1
+	_show_route_screen()
+
+func _cleanup_active_combat() -> void:
+	if active_combat_root != null and is_instance_valid(active_combat_root):
+		active_combat_root.queue_free()
+
+	active_combat_root = null
+
+
+func _clear_children(container: Node) -> void:
+	for child in container.get_children():
+		child.queue_free()
+
+
+func _get_node_type_text(node_type: RunNodeData.RunNodeType) -> String:
+	match node_type:
+		RunNodeData.RunNodeType.COMBAT:
+			return "Combat"
+		RunNodeData.RunNodeType.EVENT:
+			return "Event"
+		RunNodeData.RunNodeType.ELITE:
+			return "Elite"
+		RunNodeData.RunNodeType.BOSS:
+			return "Boss"
+
+	return "Unknown"
