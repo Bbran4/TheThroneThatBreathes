@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://8ab5k7ddcvn0" path="res://scripts/world/SideViewLocation.gd" id="1_turap"]
 [ext_resource type="PackedScene" uid="uid://c354sbdwds3m7" path="res://scenes/world/InteractionResultView.tscn" id="2_0m50j"]
+[ext_resource type="Texture2D" uid="uid://bm4v6185t3n2f" path="res://assets/ChatGPT Image Apr 29, 2026, 03_17_45 PM.png" id="3_0m50j"]
 [ext_resource type="Script" uid="uid://cnjuslky0wu3a" path="res://scripts/world/LocationPlayer.gd" id="3_ip1qj"]
 [ext_resource type="Texture2D" uid="uid://chby2hohg0khx" path="res://assets/sprites/player/exiled_knight/Attack 1.png" id="4_kdjpv"]
 [ext_resource type="Texture2D" uid="uid://jm3pkbexd4jy" path="res://assets/sprites/player/exiled_knight/Attack 2.png" id="5_20n35"]
@@ -439,27 +440,32 @@ radius = 39.012817
 script = ExtResource("1_turap")
 interaction_result_view_scene = ExtResource("2_0m50j")
 
-[node name="Background" type="ColorRect" parent="." unique_id=972835728]
+[node name="Background" type="TextureRect" parent="." unique_id=477310011]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 1155.0
-offset_bottom = 657.0
+offset_left = -15.0
+offset_top = -69.000015
+offset_right = 1521.0
+offset_bottom = 955.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.012510314, 0, 0.37896553, 1)
+scale = Vector2(0.7599997, 0.7599997)
+texture = ExtResource("3_0m50j")
 
 [node name="Ground" type="StaticBody2D" parent="." unique_id=1289174704]
-position = Vector2(585, 595)
+position = Vector2(577, 393)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=414187247]
+scale = Vector2(1.88, 1)
 shape = SubResource("RectangleShape2D_3u1yb")
 
 [node name="PlayerSpawn" type="Marker2D" parent="." unique_id=927118479]
-position = Vector2(148, 544)
+position = Vector2(132, 340)
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=938940466]
-position = Vector2(86, 516)
+position = Vector2(132, 320)
+scale = Vector2(2, 2)
 script = ExtResource("3_ip1qj")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=291696413]
@@ -473,7 +479,7 @@ autoplay = "idle"
 [node name="Interactables" type="Node2D" parent="." unique_id=1326279756]
 
 [node name="CorpseCart" type="Area2D" parent="Interactables" unique_id=1231703639]
-position = Vector2(551, 542)
+position = Vector2(672, 348)
 script = ExtResource("14_cdq33")
 interactable_id = "CorpseCart"
 interaction_name = "Search the corpse-cart"
@@ -482,14 +488,16 @@ metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/CorpseCart" unique_id=704550195]
 position = Vector2(20, 18)
+scale = Vector2(2.6800013, 2.6800013)
 shape = SubResource("CircleShape2D_3aacm")
 
 [node name="PlaceholderVisual" type="ColorRect" parent="Interactables/CorpseCart" unique_id=1091603977]
+visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="ScrapingSoundExit" type="Area2D" parent="Interactables" unique_id=1502306241]
-position = Vector2(1093, 543)
+position = Vector2(1084, 371)
 script = ExtResource("14_cdq33")
 interactable_id = "FollowSound"
 interaction_name = "Follow the scraping sound"
@@ -502,11 +510,12 @@ scale = Vector2(4.04, 4.04)
 shape = SubResource("CircleShape2D_pu0r7")
 
 [node name="PlaceholderVisual" type="ColorRect" parent="Interactables/ScrapingSoundExit" unique_id=1275314642]
+visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="DitchPath" type="Area2D" parent="Interactables" unique_id=1579402946]
-position = Vector2(781, 543)
+position = Vector2(899, 377)
 script = ExtResource("14_cdq33")
 interactable_id = "Continue"
 interaction_name = "Press On"
@@ -519,6 +528,7 @@ scale = Vector2(3.959995, 3.959995)
 shape = SubResource("CircleShape2D_pndl3")
 
 [node name="PlaceholderVisual" type="ColorRect" parent="Interactables/DitchPath" unique_id=1220747546]
+visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 
