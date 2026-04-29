@@ -25,7 +25,7 @@ var route_status: Label
 var node_button_container: VBoxContainer
 
 var active_combat_root: Node
-
+var current_combat_node: RunNodeData = null
 
 func _ready() -> void:
 	_build_route_ui()
@@ -168,9 +168,7 @@ func _start_side_view_node(node_data: RunNodeData) -> void:
 			_start_combat_from_side_view(node_data)
 
 func _start_combat_from_side_view(node_data: RunNodeData) -> void:
-	if active_side_view_location != null:
-		active_side_view_location.visible = false
-
+	_cleanup_side_view_location()
 	_start_combat_node(node_data)
 
 func _open_location_view(location: LocationData, node_data: RunNodeData) -> void:
@@ -260,9 +258,7 @@ func _on_location_leave_requested() -> void:
 	_complete_current_node()
 
 func _start_combat_from_location(node_data: RunNodeData) -> void:
-	if active_location_view != null:
-		active_location_view.visible = false
-
+	_cleanup_location_view()
 	_start_combat_node(node_data)
 
 func _build_route_ui() -> void:
@@ -462,6 +458,8 @@ func _start_combat_node(node_data: RunNodeData) -> void:
 		push_error("Combat node has no enemy team: " + node_data.node_name)
 		return
 
+	current_combat_node = node_data
+
 	route_ui.visible = false
 	_cleanup_active_combat()
 
@@ -484,6 +482,15 @@ func _start_combat_node(node_data: RunNodeData) -> void:
 
 	add_child(active_combat_root)
 
+func _get_current_reward_node() -> RunNodeData:
+	if current_combat_node != null:
+		return current_combat_node
+
+	if current_node_index >= 0 and current_node_index < run_nodes.size():
+		return run_nodes[current_node_index]
+
+	return null
+
 func _on_run_combat_finished(player_won: bool, surviving_player: PlayerCombatant) -> void:
 	if player_won and surviving_player != null:
 		run_state.save_from_player_combatant(surviving_player)
@@ -498,13 +505,30 @@ func _on_run_combat_finished(player_won: bool, surviving_player: PlayerCombatant
 
 func _show_reward_after_combat() -> void:
 	_cleanup_active_combat()
+	_cleanup_location_view()
+	_cleanup_side_view_location()
 
 	route_ui.visible = true
+	route_ui.move_to_front()
 	route_title.text = "Spoils of the Road"
 
 	_clear_children(node_button_container)
 
-	var node_data := run_nodes[current_node_index]
+	var node_data: RunNodeData = _get_current_reward_node()
+
+	if node_data == null:
+		route_status.text = "HP: %s / %s\nNo reward data found." % [
+			run_state.current_hp,
+			run_state.max_hp
+		]
+
+		var continue_button := Button.new()
+		continue_button.text = "Continue"
+		continue_button.pressed.connect(func():
+			_complete_current_node()
+		)
+		node_button_container.add_child(continue_button)
+		return
 
 	route_status.text = "HP: %s / %s\nChoose a reward." % [
 		run_state.current_hp,
@@ -523,6 +547,7 @@ func _show_reward_after_combat() -> void:
 	for card in node_data.reward_cards:
 		var button := Button.new()
 		button.text = "+ " + card.card_name
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
 		button.pressed.connect(func():
 			run_state.add_card(card)
 			_complete_current_node()
@@ -531,12 +556,14 @@ func _show_reward_after_combat() -> void:
 
 	var skip_button := Button.new()
 	skip_button.text = "Skip"
+	skip_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	skip_button.pressed.connect(func():
 		_complete_current_node()
 	)
 	node_button_container.add_child(skip_button)
 
 func _complete_current_node() -> void:
+	current_combat_node = null
 	run_state.completed_nodes += 1
 	_show_route_screen()
 

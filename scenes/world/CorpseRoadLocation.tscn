@@ -476,6 +476,7 @@ autoplay = "idle"
 position = Vector2(551, 542)
 script = ExtResource("13_pndl3")
 interactable_id = "CorpseCart"
+interaction_name = "Search the corpse-cart"
 linked_choice = ExtResource("14_3aacm")
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 
@@ -490,6 +491,8 @@ offset_bottom = 40.0
 [node name="ScrapingSoundExit" type="Area2D" parent="Interactables" unique_id=1502306241]
 position = Vector2(1093, 543)
 script = ExtResource("13_pndl3")
+interactable_id = "FollowSound"
+interaction_name = "Follow the scraping sound"
 linked_choice = ExtResource("15_230bx")
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 
@@ -505,6 +508,8 @@ offset_bottom = 40.0
 [node name="DitchPath" type="Area2D" parent="Interactables" unique_id=1579402946]
 position = Vector2(781, 543)
 script = ExtResource("13_pndl3")
+interactable_id = "Continue"
+interaction_name = "Press On"
 linked_choice = ExtResource("16_nryiw")
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 

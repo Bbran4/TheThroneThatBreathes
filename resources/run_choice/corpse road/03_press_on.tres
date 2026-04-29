@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_d814j")
+result_text = "Press On"
 metadata/_custom_type_script = "uid://bgjkr3elvy71k"

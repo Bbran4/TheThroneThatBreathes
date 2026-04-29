@@ -30,6 +30,18 @@ var current_result_interactable: LocationInteractable
 func _ready() -> void:
 	prompt_label.visible = false
 
+	if location_title_label != null:
+		location_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if subtitle_label != null:
+		subtitle_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if prompt_label != null:
+		prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if has_node("CanvasLayer/UI"):
+		$CanvasLayer/UI.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	if player_spawn != null and player != null:
 		player.global_position = player_spawn.global_position
 
