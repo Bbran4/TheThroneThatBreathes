@@ -24,7 +24,13 @@ func show_result(title_text: String, result_text: String, reward_card: CardData 
 
 	if reward_card != null:
 		reward_card_panel.visible = true
-		reward_card_label.text = reward_card.card_name + "\n\n" + reward_card.description
+
+		var card_text := reward_card.card_name + "\n\n" + reward_card.description
+
+		if reward_card.flavor_text != "":
+			card_text += "\n\n\"" + reward_card.flavor_text + "\""
+
+		reward_card_label.text = card_text
 	else:
 		reward_card_panel.visible = false
 		reward_card_label.text = ""
