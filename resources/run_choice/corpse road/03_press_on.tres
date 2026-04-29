@@ -1,8 +1,11 @@
 [gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://b7tppt135wb22"]
 
 [ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_d814j"]
+[ext_resource type="Resource" uid="uid://cxbh4qpukv1o5" path="res://resources/run_nodes/ruined_shrine/node_02a_ruined_shrine.tres" id="1_j3ree"]
 
 [resource]
 script = ExtResource("1_d814j")
 result_text = "Press On"
+effect_type = 5
+next_node = ExtResource("1_j3ree")
 metadata/_custom_type_script = "uid://bgjkr3elvy71k"

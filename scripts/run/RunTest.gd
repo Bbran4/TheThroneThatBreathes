@@ -135,6 +135,12 @@ func _on_side_view_choice_selected(choice: RunChoiceData) -> void:
 	active_side_view_location.show_choice_result(interactable, choice)
 
 func _on_side_view_choice_result_next_node(node_data: RunNodeData) -> void:
+	var destination_location := _find_location_for_entry_node(node_data)
+
+	if destination_location != null and destination_location != current_location:
+		_enter_location(destination_location)
+		return
+
 	_start_side_view_node(node_data)
 
 func _on_side_view_choice_result_no_next_node() -> void:
@@ -156,9 +162,28 @@ func _resolve_side_view_choice_continuation(choice: RunChoiceData) -> void:
 	pending_location_choice = null
 
 	if choice.next_node != null:
+		var destination_location := _find_location_for_entry_node(choice.next_node)
+
+		if destination_location != null and destination_location != current_location:
+			_enter_location(destination_location)
+			return
+
 		_start_side_view_node(choice.next_node)
 	else:
 		_complete_current_node()
+
+func _find_location_for_entry_node(node_data: RunNodeData) -> LocationData:
+	if node_data == null:
+		return null
+
+	if starting_location != null and starting_location.entry_node == node_data:
+		return starting_location
+
+	for location in route_locations:
+		if location != null and location.entry_node == node_data:
+			return location
+
+	return null
 
 func _start_side_view_node(node_data: RunNodeData) -> void:
 	if node_data == null:
@@ -695,8 +720,35 @@ func _show_reward_after_combat() -> void:
 
 func _complete_current_node() -> void:
 	current_combat_node = null
+
+	var completed_location := current_location
 	run_state.completed_nodes += 1
-	_show_route_screen()
+
+	if run_state.is_dead():
+		_show_route_screen()
+		return
+
+	if route_locations.is_empty():
+		_show_route_screen()
+		return
+
+	var completed_index := route_locations.find(completed_location)
+
+	if completed_index == -1:
+		if run_state.completed_nodes >= route_locations.size():
+			_show_route_screen()
+			return
+
+		_enter_location(route_locations[run_state.completed_nodes])
+		return
+
+	var next_index := completed_index + 1
+
+	if next_index >= route_locations.size():
+		_show_route_screen()
+		return
+
+	_enter_location(route_locations[next_index])
 
 func _cleanup_active_combat() -> void:
 	if active_combat_root != null and is_instance_valid(active_combat_root):
