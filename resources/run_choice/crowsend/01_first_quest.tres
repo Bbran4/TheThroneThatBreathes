@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://c5enyy2niiqab"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_vwy5b"]
+
+[resource]
+script = ExtResource("1_vwy5b")
+choice_text = "Speak to Mara"
+result_text = "The woman points toward the castle road. 'The King still breathes. That is why the dead do not sleep.'"
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

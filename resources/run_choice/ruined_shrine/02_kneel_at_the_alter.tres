@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://cxu1a2q1xkxur"]
 
 [ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_61s2n"]
-[ext_resource type="Resource" uid="uid://ck58y2peksvkd" path="res://resources/run_nodes/ruined_shrine/node_02b_altar_blood_cutscene.tres" id="1_p85sq"]
+[ext_resource type="Resource" uid="uid://ck58y2peksvkd" path="res://resources/run_nodes/ruined_shrine/node_03b_altar_blood_cutscene.tres" id="1_p85sq"]
 
 [resource]
 script = ExtResource("1_61s2n")

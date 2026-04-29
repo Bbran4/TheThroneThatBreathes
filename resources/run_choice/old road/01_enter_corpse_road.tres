@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://dy130hnp0ui7g"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_cg5k0"]
+[ext_resource type="Resource" uid="uid://cwn7cq3yq8p7q" path="res://resources/run_nodes/corpse_road/node_02a_corpse_road_intro.tres" id="1_fdnnd"]
+
+[resource]
+script = ExtResource("1_cg5k0")
+choice_text = "Press On"
+effect_type = 5
+next_node = ExtResource("1_fdnnd")
+metadata/_custom_type_script = "uid://bgjkr3elvy71k"

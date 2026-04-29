@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LocationData" format=3 uid="uid://cc7jt14l7aulk"]
+
+[ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="1_lamkl"]
+[ext_resource type="Resource" uid="uid://d2yt07j8g2ia" path="res://resources/run_nodes/old_road/node_01_old_road_entry.tres" id="2_lamkl"]
+[ext_resource type="PackedScene" uid="uid://c20pm344iconu" path="res://scenes/world/SideViewLocations/OldRoadSideViewLocation.tscn" id="3_hdnb6"]
+
+[resource]
+script = ExtResource("1_lamkl")
+location_name = "Old Road"
+description = "A broken path leading toward the castle."
+entry_node = ExtResource("2_lamkl")
+side_view_scene = ExtResource("3_hdnb6")
+metadata/_custom_type_script = "uid://byl0426pkhvcv"

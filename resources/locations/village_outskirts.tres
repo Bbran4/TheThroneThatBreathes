@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="LocationData" format=3 uid="uid://pr388ohs0uh7"]
 
 [ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="1_tig0l"]
-[ext_resource type="Resource" uid="uid://dm3xyq7kippee" path="res://resources/run_nodes/village_outskirts/node_03a_village_outskirts_intro.tres" id="2_blipx"]
+[ext_resource type="Resource" uid="uid://dm3xyq7kippee" path="res://resources/run_nodes/village_outskirts/node_04a_village_outskirts_intro.tres" id="2_blipx"]
 
 [resource]
 script = ExtResource("1_tig0l")

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://d2yt07j8g2ia"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_udi6x"]
+[ext_resource type="Resource" uid="uid://dy130hnp0ui7g" path="res://resources/run_choice/old road/01_enter_corpse_road.tres" id="2_2p4wo"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="3_p6v2l"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="4_cpd3h"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="5_7g3ns"]
+
+[resource]
+script = ExtResource("5_7g3ns")
+node_name = "Old Road Entry"
+choices = Array[ExtResource("1_udi6x")]([ExtResource("2_2p4wo")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="RunNodeData" format=3 uid="uid://c3dkotukxnd5m"]
+
+[ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_tor5a"]
+[ext_resource type="Resource" uid="uid://c5enyy2niiqab" path="res://resources/run_choice/crowsend/01_first_quest.tres" id="2_3ksum"]
+[ext_resource type="Resource" uid="uid://b2sxglo70e8xf" path="res://resources/run_choice/crowsend/02_leave_town.tres" id="2_4ad73"]
+[ext_resource type="Script" uid="uid://0vgymfy4egw4" path="res://scripts/combat/CombatantData.gd" id="3_3ksum"]
+[ext_resource type="Script" uid="uid://c6v6cyclnv500" path="res://scripts/combat/CardData.gd" id="4_qmtar"]
+[ext_resource type="Script" uid="uid://vkhv86qo74ca" path="res://scripts/run/RunNodeData.gd" id="5_g3w8r"]
+
+[resource]
+script = ExtResource("5_g3w8r")
+node_name = "Town Entry Node"
+choices = Array[ExtResource("1_tor5a")]([ExtResource("2_3ksum"), ExtResource("2_4ad73")])
+metadata/_custom_type_script = "uid://vkhv86qo74ca"

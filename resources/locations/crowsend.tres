@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="LocationData" format=3 uid="uid://c8jiixmmry6ek"]
+
+[ext_resource type="Script" uid="uid://byl0426pkhvcv" path="res://scripts/world/LocationData.gd" id="1_02ura"]
+[ext_resource type="Resource" uid="uid://cc7jt14l7aulk" path="res://resources/locations/old_road.tres" id="2_02ura"]
+[ext_resource type="Resource" uid="uid://c3dkotukxnd5m" path="res://resources/run_nodes/crowsend/node_00_crowsend_entry.tres" id="3_dg0ff"]
+[ext_resource type="PackedScene" uid="uid://crbkm405myocr" path="res://scenes/world/SideViewLocations/CrowsendLocation.tscn" id="4_23ncq"]
+
+[resource]
+script = ExtResource("1_02ura")
+location_name = "Crowsend"
+location_type = 3
+description = "A town crouched beneath the shadow of the castle."
+entry_node = ExtResource("3_dg0ff")
+side_view_scene = ExtResource("4_23ncq")
+connected_locations = Array[ExtResource("1_02ura")]([ExtResource("2_02ura")])
+metadata/_custom_type_script = "uid://byl0426pkhvcv"

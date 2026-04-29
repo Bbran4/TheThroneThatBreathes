@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="RunChoiceData" format=3 uid="uid://8pgwux1n0jqx"]
 
 [ext_resource type="Script" uid="uid://bgjkr3elvy71k" path="res://scripts/run/RunChoiceData.gd" id="1_5qbnn"]
-[ext_resource type="Resource" uid="uid://dxhlhc0ptgonh" path="res://resources/run_nodes/corpse_road/node_01b_road_ambush.tres" id="1_b4hra"]
+[ext_resource type="Resource" uid="uid://dxhlhc0ptgonh" path="res://resources/run_nodes/corpse_road/node_02b_road_ambush.tres" id="1_b4hra"]
 
 [resource]
 script = ExtResource("1_5qbnn")
