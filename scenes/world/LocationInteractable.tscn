@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://dij0itjgx01jk"]
+
+[ext_resource type="Script" uid="uid://hn32sr8q5ci6" path="res://scripts/world/LocationInteractable.gd" id="1_wj7fo"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wj7fo"]
+
+[node name="LocationInteractable" type="Area2D" unique_id=784627550]
+script = ExtResource("1_wj7fo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1352170879]
+shape = SubResource("CapsuleShape2D_wj7fo")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1099988097]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="." unique_id=1191548811]
+offset_right = 40.0
+offset_bottom = 23.0

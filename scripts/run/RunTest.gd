@@ -9,11 +9,13 @@ class_name RunTest
 @export var starting_location: LocationData
 @export var route_locations: Array[LocationData] = []
 @export var location_view_scene: PackedScene
+@export var side_view_location_scene: PackedScene
 
 var current_location: LocationData
 var active_location_view: LocationView
 var pending_choice: RunChoiceData
-
+var active_side_view_location: SideViewLocation
+var pending_location_choice: RunChoiceData
 var run_state: RunState
 
 var current_node_index: int = -1
@@ -82,7 +84,81 @@ func _enter_location(location: LocationData) -> void:
 	current_location = location
 	route_ui.visible = false
 
-	_open_location_view(location, location.entry_node)
+	_open_side_view_location(location, location.entry_node)
+
+func _open_side_view_location(location: LocationData, node_data: RunNodeData) -> void:
+	_cleanup_side_view_location()
+
+	if side_view_location_scene == null:
+		push_error("RunTest missing side_view_location_scene.")
+		return
+
+	active_side_view_location = side_view_location_scene.instantiate() as SideViewLocation
+	add_child(active_side_view_location)
+
+	active_side_view_location.choice_selected.connect(_on_side_view_choice_selected)
+	active_side_view_location.location_exit_requested.connect(_on_side_view_location_exit_requested)
+
+	active_side_view_location.setup(location, node_data)
+
+func _on_side_view_choice_selected(choice: RunChoiceData) -> void:
+	if choice == null:
+		return
+
+	pending_location_choice = choice
+	run_state.apply_choice(choice)
+
+	if choice.result_text != "":
+		active_side_view_location.show_result_text(choice.choice_text, choice.result_text)
+	else:
+		_resolve_side_view_choice_continuation(choice)
+
+func _on_side_view_location_exit_requested() -> void:
+	if pending_location_choice != null:
+		_resolve_side_view_choice_continuation(pending_location_choice)
+	else:
+		_complete_current_node()
+
+func _resolve_side_view_choice_continuation(choice: RunChoiceData) -> void:
+	if choice == null:
+		_complete_current_node()
+		return
+
+	pending_location_choice = null
+
+	if choice.next_node != null:
+		_start_side_view_node(choice.next_node)
+	else:
+		_complete_current_node()
+
+func _start_side_view_node(node_data: RunNodeData) -> void:
+	if node_data == null:
+		_complete_current_node()
+		return
+
+	match node_data.node_type:
+		RunNodeData.RunNodeType.STORY:
+			if active_side_view_location != null:
+				active_side_view_location.setup(current_location, node_data)
+
+		RunNodeData.RunNodeType.CHOICE:
+			if active_side_view_location != null:
+				active_side_view_location.setup(current_location, node_data)
+
+		RunNodeData.RunNodeType.COMBAT:
+			_start_combat_from_side_view(node_data)
+
+		RunNodeData.RunNodeType.ELITE:
+			_start_combat_from_side_view(node_data)
+
+		RunNodeData.RunNodeType.BOSS:
+			_start_combat_from_side_view(node_data)
+
+func _start_combat_from_side_view(node_data: RunNodeData) -> void:
+	if active_side_view_location != null:
+		active_side_view_location.visible = false
+
+	_start_combat_node(node_data)
 
 func _open_location_view(location: LocationData, node_data: RunNodeData) -> void:
 	_cleanup_location_view()
@@ -106,6 +182,13 @@ func _cleanup_location_view() -> void:
 
 	active_location_view = null
 	pending_choice = null
+
+func _cleanup_side_view_location() -> void:
+	if active_side_view_location != null and is_instance_valid(active_side_view_location):
+		active_side_view_location.queue_free()
+
+	active_side_view_location = null
+	pending_location_choice = null
 
 func _on_location_choice_selected(choice: RunChoiceData) -> void:
 	if choice == null:
@@ -206,6 +289,7 @@ func _build_route_ui() -> void:
 func _show_route_screen() -> void:
 	_cleanup_active_combat()
 	_cleanup_location_view()
+	_cleanup_side_view_location()
 
 	route_ui.visible = true
 	route_title.text = "The Road Ahead"

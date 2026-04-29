@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://4pvaf3bum0vw" path="res://resources/locations/ruined_shrine.tres" id="10_qh46i"]
 [ext_resource type="Resource" uid="uid://pr388ohs0uh7" path="res://resources/locations/village_outskirts.tres" id="11_c5mia"]
 [ext_resource type="PackedScene" uid="uid://c1jeqwho8kh0m" path="res://scenes/world/location_view.tscn" id="12_kvbvn"]
+[ext_resource type="PackedScene" uid="uid://dlofsiel3rtrm" path="res://scenes/world/side_view_location.tscn" id="13_q444b"]
 
 [node name="RunTest" type="Node" unique_id=1512471838]
 script = ExtResource("1_f3lfm")
@@ -20,3 +21,4 @@ run_nodes = Array[ExtResource("3_y1tdi")]([ExtResource("4_lpb5k"), ExtResource("
 combat_test_scene = ExtResource("9_y1tdi")
 route_locations = Array[ExtResource("8_qjajn")]([ExtResource("9_q444b"), ExtResource("10_qh46i"), ExtResource("11_c5mia")])
 location_view_scene = ExtResource("12_kvbvn")
+side_view_location_scene = ExtResource("13_q444b")
