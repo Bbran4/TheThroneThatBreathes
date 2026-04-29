@@ -8,6 +8,7 @@ card_name = "Heavy Cleave"
 description = "Damage: 13
 Dice: 5+
 Target enemy: true"
+flavor_text = "It does not tire. It does not stop. It was built for this road."
 dice_required = 5
 dice_requirement_type = 1
 target_mode = 3

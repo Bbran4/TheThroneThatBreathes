@@ -8,6 +8,7 @@ card_name = "Chanting Guard"
 description = "Guard: 7
 Dice: Any
 Target self: true"
+flavor_text = "The words have no meaning you can name. They make your ears bleed."
 card_type = 1
 base_guard = 7
 can_target_self = true

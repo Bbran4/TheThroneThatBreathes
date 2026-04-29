@@ -8,6 +8,7 @@ card_name = "Bite"
 description = "Damage: 5
 Dice: Any
 Target enemy: true"
+flavor_text = "Still hunting. Still hungry. Whatever it was, it isn't anymore."
 base_damage = 5
 can_target_enemy = true
 animation_name = "attack_1"

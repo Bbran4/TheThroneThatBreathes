@@ -8,6 +8,7 @@ card_name = "Bone Knife"
 description = "Damage: 6
 Dice: Any
 Target enemy: true"
+flavor_text = "They carved it themselves. From what, you'd rather not know."
 base_damage = 6
 can_target_enemy = true
 animation_name = "attack_1"

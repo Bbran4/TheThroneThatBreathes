@@ -7,7 +7,7 @@ script = ExtResource("1_cegqs")
 card_name = "Strike"
 description = "Deal 6 damage.
 Requires: Any die"
-flavor_text = "Basic sword attack."
+flavor_text = "The sword is heavy. You've stopped noticing."
 base_damage = 6
 can_target_enemy = true
 animation_name = "attack_1"

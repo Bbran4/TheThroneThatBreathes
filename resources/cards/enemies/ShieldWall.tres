@@ -8,6 +8,7 @@ card_name = "Shield Wall"
 description = "Guard: 10
 Dice: Any
 Target self: true"
+flavor_text = "The king's colours hang from rotted armour. The wall holds anyway."
 card_type = 1
 base_guard = 10
 can_target_self = true

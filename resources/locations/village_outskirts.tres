@@ -6,7 +6,6 @@
 [resource]
 script = ExtResource("1_tig0l")
 location_name = "Village Outskirts"
-description = "The village is not abandoned.
-It is hiding."
+description = "Smoke rises from cookfires but no voices carry. The doors are barred from the outside, all of them. Someone did this deliberately, from out here, to the people inside. The bell in the crooked tower rings once and does not ring again. You saw no wind move it."
 entry_node = ExtResource("2_blipx")
 metadata/_custom_type_script = "uid://byl0426pkhvcv"

@@ -7,6 +7,7 @@ script = ExtResource("1_psuy8")
 card_name = "Heavy Blow"
 description = "Deal 12 damage.
 Requires: 4+"
+flavor_text = "All your weight. All your exhaustion. One direction."
 dice_requirement_type = 1
 required_die_value = 4
 base_damage = 12

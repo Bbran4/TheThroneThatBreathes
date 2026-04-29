@@ -9,6 +9,7 @@ description = "Draw 1 card
 Guard: 3
 Dice: 3 or lower
 Target self: true"
+flavor_text = "It kneels. Something answers."
 card_type = 2
 dice_required = 3
 dice_requirement_type = 2

@@ -9,6 +9,7 @@ description = "Deal 18 damage.
 Lose 3 HP.
 Exhaust.
 Permanent -3 Guard from the altar curse."
+flavor_text = "The altar took something that night. This is what it gave back."
 card_type = 3
 dice_required = 0
 base_damage = 18

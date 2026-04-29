@@ -7,6 +7,7 @@ script = ExtResource("1_o5nhl")
 card_name = "Guard"
 description = "Gain 5 guard.
 Requires: Any die"
+flavor_text = "You've learned that surviving is its own kind of victory."
 card_type = 1
 target_mode = 2
 base_guard = 5

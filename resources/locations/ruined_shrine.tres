@@ -7,7 +7,6 @@
 script = ExtResource("1_rx6kw")
 location_name = "Ruined Shrine"
 location_type = 4
-description = "A broken altar waits beneath dead trees.
-Its stones remember blood."
+description = "The god this shrine was built for has been gone a long time. What remains is the basin, deep, stained, and dry only on the surface. The trees around it grow wrong: too close, too still, bark split in patterns that look almost intentional. Nothing here has been maintained. Nothing here has fallen to ruin either."
 entry_node = ExtResource("2_xyevo")
 metadata/_custom_type_script = "uid://byl0426pkhvcv"

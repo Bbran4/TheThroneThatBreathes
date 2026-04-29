@@ -8,6 +8,7 @@ card_name = "Quick Jab"
 description = "Deal 4 damage.
 Draw 1 card.
 Requires: 3 or less"
+flavor_text = "Low numbers, fast hands. Sometimes small is enough to open a door."
 dice_requirement_type = 2
 required_die_value = 3
 base_damage = 4

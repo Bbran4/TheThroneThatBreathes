@@ -7,6 +7,7 @@ script = ExtResource("1_at3r1")
 card_name = "Cleave"
 description = "Deal 8 damage.
 Requires: Even"
+flavor_text = "The swing doesn't stop. Neither do you."
 dice_requirement_type = 4
 required_die_value = 2
 target_mode = 3

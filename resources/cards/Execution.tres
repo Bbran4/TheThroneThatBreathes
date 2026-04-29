@@ -7,6 +7,7 @@ script = ExtResource("1_8s2ou")
 card_name = "Execution"
 description = "Deal 15 damage.
 Requires: EXACT 6"
+flavor_text = "Perfection. Cold. Final."
 dice_requirement_type = 3
 required_die_value = 6
 base_damage = 15

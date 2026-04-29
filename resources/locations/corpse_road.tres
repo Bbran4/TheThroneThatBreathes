@@ -6,7 +6,6 @@
 [resource]
 script = ExtResource("1_nyo6s")
 location_name = "Corpse Road"
-description = "A road of broken carts, ash, and carrion birds.
-The dead lie where they fell, but something has been moving among them."
+description = "The carts have been here for weeks. Their horses are long dead, stripped to bone by birds that still circle overhead, patient and unhurried. The road runs straight between leaning pines, and somewhere ahead something is dragging metal across stone. It hasn't stopped."
 entry_node = ExtResource("2_cco3t")
 metadata/_custom_type_script = "uid://byl0426pkhvcv"

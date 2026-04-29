@@ -6,6 +6,7 @@
 script = ExtResource("1_jjmeb")
 card_name = "Fate Twist"
 description = "Reroll one available die."
+flavor_text = "The dice fall as they will. But the road has its own opinions."
 card_type = 2
 dice_required = 0
 effect_type = 1

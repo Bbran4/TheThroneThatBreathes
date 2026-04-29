@@ -8,6 +8,7 @@ card_name = "Dark Ritual"
 description = "Draw 2 cards.
 Lose 3 HP.
 Requires: Any die"
+flavor_text = "The road offers knowledge freely. The cost comes later."
 target_mode = 0
 self_damage = 3
 cards_to_draw = 2

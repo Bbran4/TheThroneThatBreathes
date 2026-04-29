@@ -8,6 +8,7 @@ card_name = "Rustblade"
 description = "Damage: 7
 Dice: Any
 Target enemy: true"
+flavor_text = "The sword is old. The hand holding it is older."
 base_damage = 7
 can_target_enemy = true
 animation_name = "attack_3"

@@ -7,6 +7,7 @@ script = ExtResource("1_5xhd0")
 card_name = "Twin Strike"
 description = "Deal 10 damage.
 Requires: 2 dice (any)"
+flavor_text = "Two cuts. One motion. The body knows what the mind forgot."
 dice_required = 2
 base_damage = 10
 can_target_enemy = true

@@ -8,6 +8,7 @@ card_name = "Claw"
 description = "Damage: 8
 Dice: 4+
 Target enemy: true"
+flavor_text = "Something in the rot has made it stronger. You notice this too late."
 dice_required = 4
 dice_requirement_type = 1
 base_damage = 8
