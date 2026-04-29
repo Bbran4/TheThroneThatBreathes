@@ -220,24 +220,38 @@ This ensures:
 
 ## 🗺️ DEVELOPMENT ROADMAP
 
-The project follows a **combat-first approach**. Systems are built in layers, with each stage unlocking the next.
+The project follows a **combat-first vertical slice approach**. Systems are built in layers, with each stage unlocking the next.
 
 ---
 
-### 🔴 NOW — Milestone: Playable Combat Core
+### ✅ COMPLETED — Milestone: Playable Combat Core
 
-**Goal:** A fully playable, satisfying combat loop
+**Goal:** A fully playable, satisfying combat loop.
 
-#### Tasks:
+#### Completed:
 
-* Implement `CharacterStats.gd`
-* Implement `Combatant.gd` (base combat logic)
-* Create `PlayerCombatant.gd` and `EnemyCombatant.gd`
-* Implement basic dice system (roll, assign, resolve)
-* Implement core `CardData` system
-* Create 5–10 test cards
-* Basic enemy using card logic
-* Turn system (player → enemy → repeat)
+* `CharacterStats.gd`
+* `Combatant.gd` base combat logic
+* `PlayerCombatant.gd` and `EnemyCombatant.gd`
+* Dice rolling, assigning, and spending
+* CardData-driven cards
+* Multiple enemies in combat
+* Manual target selection
+* Ally/enemy targeting rules
+* Slot-based attacks such as Cleave
+* Enemy intents
+* HP, guard, damage, and death handling
+* Combatant status UI
+* Floating damage / guard feedback
+* Victory and defeat states
+* Basic reward placeholder
+
+#### Current Combat Feel:
+
+* Fights are tense and lethal
+* Win/loss rate is close to even
+* Winning often leaves the player near death
+* Dice + card decisions feel meaningful
 
 #### Success Criteria:
 
@@ -247,59 +261,94 @@ The project follows a **combat-first approach**. Systems are built in layers, wi
 
 ---
 
+### 🔴 NOW — Milestone: Run Structure Prototype
+
+**Goal:** Connect combat encounters into a tiny playable run loop.
+
+#### Tasks:
+
+* Create `RunTest.tscn`
+* Add a simple route/node selection screen
+* Create 3 test nodes:
+  * Basic combat
+  * Event / risk-reward choice
+  * Hard combat or boss-lite encounter
+* Carry player HP between encounters
+* Add post-combat reward choices
+* Add simple card reward flow
+* Add basic healing/rest reward option
+* Return to route screen after each node
+
+#### Success Criteria:
+
+* Player can complete a short 3-node run
+* Combat tension carries across encounters
+* Rewards meaningfully affect later fights
+* The player feels pressure from HP attrition
+* The game starts to feel like a roguelike, not just a combat test
+
+---
+
 ### 🟠 NEXT — Milestone: World Structure & Flow
 
-**Goal:** Connect combat to exploration and progression
+**Goal:** Replace the temporary run test with actual exploration structure.
 
 #### Tasks:
 
 * Create node/location system
 * Implement side-view location exploration
 * Add branching decisions within locations
-* Build overworld map (top-down movement)
+* Build overworld map or route map
 * Implement location entry roll system
-* Add 2–3 fully playable locations (e.g. cave, village outskirts)
+* Add 2–3 fully playable locations, such as:
+  * cave
+  * village outskirts
+  * ruined shrine
+  * corpse road
 
 #### Success Criteria:
 
 * Player can move between locations
 * Locations contain meaningful decisions
 * Combat is triggered naturally from exploration
+* The run has a beginning, middle, and endpoint
 
 ---
 
 ### 🟡 LATER — Milestone: World Depth & Narrative
 
-**Goal:** Expand the world and player experience
+**Goal:** Expand the world and player experience.
 
 #### Tasks:
 
-* Implement towns (shops, NPCs, services)
-* Add dialogue system (minimalist, event-driven)
-* Create event system (branching outcomes)
+* Implement towns, shops, NPCs, and services
+* Add minimalist event-driven dialogue
+* Create branching event system
 * Expand enemy variety and behaviors
 * Add relics and progression systems
-* Balance combat and economy
+* Balance combat, healing, and economy
+* Add Rot pressure across the run
 
 #### Success Criteria:
 
-* Player experiences a full run loop (explore → fight → progress)
+* Player experiences a full run loop: explore → fight → choose → progress
 * World feels reactive and cohesive
-* Narrative is delivered through events and tone
+* Narrative is delivered through events, enemies, and tone
 
 ---
 
 ### 🔵 FINAL PHASE — Milestone: Expansion & Polish
 
-**Goal:** Refine and expand systems
+**Goal:** Refine and expand systems.
 
 #### Tasks:
 
 * Add new character archetypes
 * Expand card pool
-* Add advanced dice mechanics (cursed, mutated, etc.)
+* Add advanced dice mechanics, such as cursed, cracked, or mutated dice
 * Improve UI/UX
 * Add audio and visual polish
+* Add more enemies, bosses, and locations
 
 #### Success Criteria:
 
