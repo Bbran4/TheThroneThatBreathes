@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cfnhq48xmkgcx"]
+[gd_scene format=3 uid="uid://cyyggiqx4atgc"]
 
 [ext_resource type="Script" uid="uid://xbbs8rj3rrok" path="res://scripts/run/RunTest.gd" id="1_f3lfm"]
 [ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="2_og16b"]

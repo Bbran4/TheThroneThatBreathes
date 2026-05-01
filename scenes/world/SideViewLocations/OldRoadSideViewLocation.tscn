@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://8ab5k7ddcvn0" path="res://scripts/world/SideViewLocation.gd" id="1_tgc5s"]
 [ext_resource type="PackedScene" uid="uid://c354sbdwds3m7" path="res://scenes/world/InteractionResultView.tscn" id="2_drgwo"]
-[ext_resource type="Texture2D" path="res://assets/ChatGPT Image Apr 29, 2026, 03_17_45 PM.png" id="3_4n4x4"]
+[ext_resource type="Texture2D" uid="uid://c7fq8dadenp82" path="res://assets/backgrounds/image.jpg" id="3_0cxs5"]
 [ext_resource type="Script" uid="uid://cnjuslky0wu3a" path="res://scripts/world/LocationPlayer.gd" id="4_om828"]
 [ext_resource type="Texture2D" uid="uid://chby2hohg0khx" path="res://assets/sprites/player/exiled_knight/Attack 1.png" id="5_c0gbu"]
 [ext_resource type="Texture2D" uid="uid://jm3pkbexd4jy" path="res://assets/sprites/player/exiled_knight/Attack 2.png" id="6_v6wso"]
@@ -15,7 +15,6 @@
 [ext_resource type="Texture2D" uid="uid://cwfmmammkj2g7" path="res://assets/sprites/player/exiled_knight/Run.png" id="13_4ea6t"]
 [ext_resource type="Texture2D" uid="uid://4s2vyf6sgghh" path="res://assets/sprites/player/exiled_knight/Walk.png" id="14_qhsjm"]
 [ext_resource type="Script" uid="uid://hn32sr8q5ci6" path="res://scripts/world/LocationInteractable.gd" id="15_1edxp"]
-[ext_resource type="Resource" uid="uid://dy130hnp0ui7g" path="res://resources/run_choice/old road/01_enter_corpse_road.tres" id="16_sj4k2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3u1yb"]
 size = Vector2(1161, 20)
@@ -444,7 +443,7 @@ offset_bottom = 955.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.7599997, 0.7599997)
-texture = ExtResource("3_4n4x4")
+texture = ExtResource("3_0cxs5")
 
 [node name="Ground" type="StaticBody2D" parent="." unique_id=1289174704]
 position = Vector2(577, 393)
@@ -475,12 +474,9 @@ autoplay = "idle"
 position = Vector2(899, 377)
 script = ExtResource("15_1edxp")
 interactable_id = "old_road_entry"
-interaction_name = "Old Road"
 prompt_text = "Press E: Press On"
-linked_choice = ExtResource("16_sj4k2")
-becomes_used_after_interaction = null
 used_prompt_text = "Press E: Press On"
-used_result_text = null
+becomes_used_after_interaction = null
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/EnterCorpseRoad" unique_id=1978223266]
