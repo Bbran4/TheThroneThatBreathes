@@ -16,6 +16,19 @@ signal location_exit_requested
 @export_multiline var location_description: String = ""
 @export var map_flavour_text: String = ""
 
+# Camera bounds.
+# Set these per sideview scene in the Inspector.
+# Example for your current wide scenes:
+#   left  = 0
+#   right = 1155 or 1521, depending on the scene width
+@export var camera_limit_left: int = 0
+@export var camera_limit_right: int = 11520
+@export var camera_limit_top: int = -10000000
+@export var camera_limit_bottom: int = 10000000
+@export var camera_position_smoothing: bool = true
+@export var camera_smoothing_speed: float = 6.0
+@export var camera_offset: Vector2 = Vector2(0, -60)
+
 # Scene refs
 @export var interaction_result_view_scene: PackedScene
 
@@ -31,6 +44,8 @@ var nearby_interactable: LocationInteractable = null
 var active_result_view: Control = null
 var pending_outcome: InteractableOutcome = null
 
+var sideview_camera: Camera2D = null
+
 
 func _ready() -> void:
 	prompt_label.visible = false
@@ -39,6 +54,8 @@ func _ready() -> void:
 
 	if player_spawn != null and player != null:
 		player.global_position = player_spawn.global_position
+
+	_setup_camera()
 
 	if location_title_label != null:
 		location_title_label.text = location_name
@@ -50,6 +67,34 @@ func _ready() -> void:
 func setup(new_run_state: RunState) -> void:
 	run_state = new_run_state
 	_register_interactables()
+
+
+func _setup_camera() -> void:
+	if player == null:
+		push_warning("SideViewLocation: cannot setup camera because Player is missing.")
+		return
+
+	sideview_camera = player.get_node_or_null("SideViewCamera") as Camera2D
+
+	if sideview_camera == null:
+		sideview_camera = Camera2D.new()
+		sideview_camera.name = "SideViewCamera"
+		player.add_child(sideview_camera)
+
+	sideview_camera.position = camera_offset
+	sideview_camera.enabled = true
+	sideview_camera.make_current()
+
+	sideview_camera.limit_left = camera_limit_left
+	sideview_camera.limit_right = camera_limit_right
+	sideview_camera.limit_top = camera_limit_top
+	sideview_camera.limit_bottom = camera_limit_bottom
+
+	sideview_camera.position_smoothing_enabled = camera_position_smoothing
+	sideview_camera.position_smoothing_speed = camera_smoothing_speed
+
+	# Keeps the camera from dragging outside the limits at the edges.
+	sideview_camera.limit_smoothed = true
 
 
 func _register_interactables() -> void:
@@ -103,7 +148,6 @@ func _on_interaction_triggered(interactable: LocationInteractable) -> void:
 
 
 func _show_choice_panel(interactable: LocationInteractable) -> void:
-	# Show the result view with multiple choice buttons.
 	if interaction_result_view_scene == null:
 		push_error("SideViewLocation: missing interaction_result_view_scene.")
 		return
@@ -126,17 +170,14 @@ func _show_choice_panel(interactable: LocationInteractable) -> void:
 func _trigger_outcome(interactable: LocationInteractable, outcome: InteractableOutcome) -> void:
 	pending_outcome = outcome
 
-	# Apply run state changes immediately (heal, card, stat modifiers).
 	if run_state != null:
 		outcome.apply_to_run_state(run_state)
 
-	# Mark the interactable used.
 	if interactable.becomes_used_after_interaction:
 		interactable.mark_used()
 		if run_state != null:
 			run_state.mark_interactable_used(interactable.interactable_id)
 
-	# If there's result text or a reward, show the result view first.
 	if outcome.result_text != "" or outcome.has_reward() or outcome.has_stat_changes():
 		_show_result_view(outcome)
 	else:
@@ -174,8 +215,6 @@ func _resolve_navigation(outcome: InteractableOutcome) -> void:
 		location_travel_requested.emit(outcome.next_location)
 		return
 
-	# No navigation — stay in this location.
-	# Update nearby prompt in case used state changed.
 	if nearby_interactable != null:
 		prompt_label.text = nearby_interactable.get_prompt()
 
