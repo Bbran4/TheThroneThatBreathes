@@ -1,6 +1,9 @@
 extends Node
 class_name RunState
 
+# RunState persists player progression across locations and combat.
+# It is created once by RunManager and passed into every location and combat scene.
+
 var player_data: CombatantData
 var current_hp: int = 0
 var max_hp: int = 0
@@ -8,6 +11,7 @@ var deck: Array[CardData] = []
 var used_interactable_ids: Dictionary = {}
 var completed_nodes: int = 0
 
+# Permanent run modifiers — accumulate over the run.
 var max_hp_modifier: int = 0
 var power_modifier: int = 0
 var guard_modifier: int = 0
@@ -20,11 +24,11 @@ func setup_from_player_data(data: CombatantData) -> void:
 	player_data = data
 
 	if player_data == null:
-		push_error("RunState setup failed: missing player data.")
+		push_error("RunState: missing player data.")
 		return
 
 	if player_data.stats == null:
-		push_error("RunState setup failed: player data is missing stats.")
+		push_error("RunState: player data is missing stats.")
 		return
 
 	max_hp = player_data.stats.max_hp
@@ -50,7 +54,6 @@ func apply_to_player_combatant(player: PlayerCombatant) -> void:
 	player.stats.dice_count = max(player.stats.dice_count, 1)
 
 	current_hp = min(current_hp, player.stats.max_hp)
-
 	player.current_hp = clamp(current_hp, 0, player.stats.max_hp)
 	player.hp_changed.emit(player.current_hp, player.stats.max_hp)
 
@@ -62,55 +65,30 @@ func save_from_player_combatant(player: PlayerCombatant) -> void:
 	current_hp = player.current_hp
 	max_hp = player.stats.max_hp
 
-func apply_choice(choice: RunChoiceData) -> void:
-	if choice == null:
-		print("Tried to apply null choice.")
-		return
-
-	print("Applying run choice: ", choice.choice_text)
-
-	if choice.heal_amount > 0:
-		print("Healing: ", choice.heal_amount)
-		heal(choice.heal_amount)
-
-	if choice.card_reward != null:
-		print("Reward card from choice: ", choice.card_reward.card_name)
-		add_card(choice.card_reward)
-
-	max_hp_modifier += choice.max_hp_modifier
-	power_modifier += choice.power_modifier
-	guard_modifier += choice.guard_modifier
-	control_modifier += choice.control_modifier
-	luck_modifier += choice.luck_modifier
-	dice_count_modifier += choice.dice_count_modifier
-
-	print("Run modifiers now: Guard ", guard_modifier, " Power ", power_modifier)
-	print("Run deck size now: ", deck.size())
-
 
 func add_card(card: CardData) -> void:
 	if card == null:
-		print("Tried to add null card.")
 		return
-
-	print("Added card to run deck: ", card.card_name)
 	deck.append(card)
+	print("RunState: added card '%s'. Deck size: %s" % [card.card_name, deck.size()])
+
 
 func heal(amount: int) -> void:
 	current_hp = min(current_hp + max(amount, 0), max_hp)
+	print("RunState: healed %s. HP now %s / %s" % [amount, current_hp, max_hp])
+
 
 func has_used_interactable(interactable_id: String) -> bool:
 	if interactable_id == "":
 		return false
-
 	return used_interactable_ids.has(interactable_id)
 
 
 func mark_interactable_used(interactable_id: String) -> void:
 	if interactable_id == "":
 		return
-
 	used_interactable_ids[interactable_id] = true
-	
+
+
 func is_dead() -> bool:
 	return current_hp <= 0

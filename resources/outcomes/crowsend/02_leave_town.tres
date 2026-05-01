@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InteractableOutcome" format=3 uid="uid://crc3skfqii3sa"]
+
+[ext_resource type="Script" uid="uid://cqpltpaowr1au" path="res://scripts/world/InteractableOutcome.gd" id="1_c2h7k"]
+[ext_resource type="PackedScene" uid="uid://c20pm344iconu" path="res://scenes/world/SideViewLocations/OldRoadSideViewLocation.tscn" id="1_ku1qc"]
+
+[resource]
+script = ExtResource("1_c2h7k")
+label = "Take the Old Road"
+result_text = "You leave the tavern smoke behind. The road bends toward the castle."
+next_location = ExtResource("1_ku1qc")
+metadata/_custom_type_script = "uid://cqpltpaowr1au"

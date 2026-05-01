@@ -1,23 +1,36 @@
 extends Area2D
 class_name LocationInteractable
 
-signal interaction_requested(interactable: LocationInteractable)
-signal player_entered_interactable(interactable: LocationInteractable)
-signal player_exited_interactable(interactable: LocationInteractable)
+# LocationInteractable is placed directly in a SideViewLocation scene.
+# It owns all its outcome data — no separate RunNodeData or RunChoiceData needed.
+#
+# If outcomes has 1 entry  → triggers directly on interact.
+# If outcomes has 2+ entries → shows a choice panel for the player to pick.
 
+signal interaction_triggered(interactable: LocationInteractable)
+signal player_entered(interactable: LocationInteractable)
+signal player_exited(interactable: LocationInteractable)
+
+# Unique ID used to track whether this interactable has been used this run.
+# Set this in the Inspector. e.g. "corpse_road_cart", "shrine_altar"
 @export var interactable_id: String = ""
 
-@export var interaction_name: String = "Interact"
-@export var prompt_text: String = "Press E"
+# Text shown above the interactable when player is nearby.
+@export var prompt_text: String = "Press E to interact"
 
-@export var linked_choice: RunChoiceData
+# Text shown if the player returns after already using this interactable.
+@export var used_prompt_text: String = "Nothing left here."
 
+# Whether interacting marks this as used and prevents future interaction.
 @export var becomes_used_after_interaction: bool = true
-@export var used_prompt_text: String = "Press E: Inspect"
-@export_multiline var used_result_text: String = "There is nothing else here."
 
-var player_inside: bool = false
+# The outcomes. 
+# 1 outcome = fires directly.
+# 2+ outcomes = player is shown a choice panel.
+@export var outcomes: Array[InteractableOutcome] = []
+
 var is_used: bool = false
+var player_inside: bool = false
 
 
 func _ready() -> void:
@@ -37,27 +50,31 @@ func interact() -> void:
 	if not can_interact():
 		return
 
-	interaction_requested.emit(self)
+	interaction_triggered.emit(self)
 
 
-func get_current_prompt_text() -> String:
+func get_prompt() -> String:
 	if is_used:
 		return used_prompt_text
-
 	return prompt_text
 
 
-func get_prompt_position() -> Vector2:
+func get_prompt_world_position() -> Vector2:
 	return global_position + Vector2(0, -80)
+
+
+func mark_used() -> void:
+	if becomes_used_after_interaction:
+		is_used = true
 
 
 func _on_body_entered(body: Node) -> void:
 	if body is LocationPlayer:
 		player_inside = true
-		player_entered_interactable.emit(self)
+		player_entered.emit(self)
 
 
 func _on_body_exited(body: Node) -> void:
 	if body is LocationPlayer:
 		player_inside = false
-		player_exited_interactable.emit(self)
+		player_exited.emit(self)

@@ -15,8 +15,9 @@
 [ext_resource type="Texture2D" uid="uid://cwfmmammkj2g7" path="res://assets/sprites/player/exiled_knight/Run.png" id="13_qp6sv"]
 [ext_resource type="Texture2D" uid="uid://4s2vyf6sgghh" path="res://assets/sprites/player/exiled_knight/Walk.png" id="14_0vo4y"]
 [ext_resource type="Script" uid="uid://hn32sr8q5ci6" path="res://scripts/world/LocationInteractable.gd" id="15_qm07x"]
-[ext_resource type="Resource" uid="uid://c5enyy2niiqab" path="res://resources/run_choice/crowsend/01_first_quest.tres" id="16_lgtua"]
-[ext_resource type="Resource" uid="uid://b2sxglo70e8xf" path="res://resources/run_choice/crowsend/02_leave_town.tres" id="17_lgtua"]
+[ext_resource type="Script" uid="uid://cqpltpaowr1au" path="res://scripts/world/InteractableOutcome.gd" id="16_lgtua"]
+[ext_resource type="Resource" uid="uid://bpufcbxdrxced" path="res://resources/outcomes/crowsend/01_first_quest.tres" id="17_l1t27"]
+[ext_resource type="Resource" uid="uid://crc3skfqii3sa" path="res://resources/outcomes/crowsend/02_leave_town.tres" id="17_m41kj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3u1yb"]
 size = Vector2(1161, 20)
@@ -435,6 +436,8 @@ radius = 39.012817
 
 [node name="SideViewLocation" type="Node2D" unique_id=1589068925]
 script = ExtResource("1_m41kj")
+location_name = "Crowsend"
+location_description = "A town crouched beneath the shadow of the castle."
 interaction_result_view_scene = ExtResource("2_l1t27")
 
 [node name="Background" type="TextureRect" parent="." unique_id=477310011]
@@ -478,12 +481,9 @@ autoplay = "idle"
 [node name="CrowsendNPC" type="Area2D" parent="Interactables" unique_id=1231703639]
 position = Vector2(672, 348)
 script = ExtResource("15_qm07x")
-interactable_id = "CrowsendNPC"
-interaction_name = "Grave-Wife Mara"
-prompt_text = "Press E: Speak"
-linked_choice = ExtResource("16_lgtua")
-used_prompt_text = "Press E: Speak"
-used_result_text = "Mara watches the castle road and says nothing more."
+interactable_id = "NPC_Mara"
+prompt_text = "Press E to speak"
+outcomes = Array[ExtResource("16_lgtua")]([ExtResource("17_l1t27")])
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/CrowsendNPC" unique_id=704550195]
@@ -500,10 +500,9 @@ offset_bottom = 40.0
 position = Vector2(1018, 349)
 script = ExtResource("15_qm07x")
 interactable_id = "town_exit"
-interaction_name = "Leave Town"
-prompt_text = "Press E: Leave Town"
-linked_choice = ExtResource("17_lgtua")
-used_prompt_text = "Press E: Leave Town"
+prompt_text = "Press E to leave town"
+used_prompt_text = "Press E to leave town"
+outcomes = Array[ExtResource("16_lgtua")]([ExtResource("17_m41kj")])
 metadata/_custom_type_script = "uid://hn32sr8q5ci6"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interactables/TownExit" unique_id=1978223266]

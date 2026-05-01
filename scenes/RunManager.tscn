@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cfnhq48xmkgcx"]
+
+[ext_resource type="Script" uid="uid://dbprdf1cntc17" path="res://scripts/run/RunManager.gd" id="1_wuehs"]
+[ext_resource type="PackedScene" uid="uid://b3bdhx3p7fhra" path="res://scenes/world/WorldMap.tscn" id="2_t2xsa"]
+[ext_resource type="Resource" uid="uid://wuq22glnh27c" path="res://resources/characters/ExiledKnight.tres" id="2_w3q1r"]
+[ext_resource type="PackedScene" uid="uid://crbkm405myocr" path="res://scenes/world/SideViewLocations/CrowsendLocation.tscn" id="3_qorpy"]
+[ext_resource type="PackedScene" uid="uid://dh7rjavsrrbyi" path="res://scenes/ui/CombatantStatusUI.tscn" id="4_qorpy"]
+
+[node name="RunManager" type="Node" unique_id=1512471838]
+script = ExtResource("1_wuehs")
+player_data = ExtResource("2_w3q1r")
+starting_location = ExtResource("3_qorpy")
+combatant_status_ui_scene = ExtResource("4_qorpy")
+
+[node name="WorldMap" parent="." unique_id=673826231 instance=ExtResource("2_t2xsa")]

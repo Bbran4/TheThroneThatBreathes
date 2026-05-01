@@ -32,32 +32,21 @@ grow_vertical = 2
 [node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=1175458974]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer" unique_id=1580691124]
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=1481060466]
 layout_mode = 2
 
-[node name="SceneVisual" type="TextureRect" parent="Panel/MarginContainer/HBoxContainer" unique_id=1994789194]
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/HBoxContainer" unique_id=1073409194]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=594933031]
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=594933031]
 layout_mode = 2
 text = "Title Label"
 
-[node name="ResultTextLabel" type="RichTextLabel" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1341914040]
+[node name="ResultTextLabel" type="RichTextLabel" parent="Panel/MarginContainer/VBoxContainer" unique_id=1341914040]
 layout_mode = 2
 text = "Text"
 fit_content = true
 
-[node name="RewardCardPanel" type="PanelContainer" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=304239674]
+[node name="RewardContainer" type="Control" parent="Panel/MarginContainer/VBoxContainer" unique_id=1030950972]
+custom_minimum_size = Vector2(180, 270)
 layout_mode = 2
 
-[node name="RewardCardLabel" type="Label" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer/RewardCardPanel" unique_id=2057306049]
+[node name="ButtonsContainer" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=2018617217]
 layout_mode = 2
-text = "Reward"
-
-[node name="ContinueButton" type="Button" parent="Panel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=299512490]
-layout_mode = 2
-text = "Continue"

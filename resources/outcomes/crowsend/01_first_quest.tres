@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="InteractableOutcome" format=3 uid="uid://bpufcbxdrxced"]
+
+[ext_resource type="Script" uid="uid://cqpltpaowr1au" path="res://scripts/world/InteractableOutcome.gd" id="1_a2vo7"]
+
+[resource]
+script = ExtResource("1_a2vo7")
+label = "Speak to Mara"
+result_text = "The woman points toward the castle road. 'The King still breathes. That is why the dead do not sleep.'"
+metadata/_custom_type_script = "uid://cqpltpaowr1au"
