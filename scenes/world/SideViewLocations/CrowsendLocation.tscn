@@ -2,8 +2,9 @@
 
 [ext_resource type="Script" uid="uid://8ab5k7ddcvn0" path="res://scripts/world/SideViewLocation.gd" id="1_m41kj"]
 [ext_resource type="PackedScene" uid="uid://c354sbdwds3m7" path="res://scenes/world/InteractionResultView.tscn" id="2_l1t27"]
-[ext_resource type="Texture2D" uid="uid://c7fq8dadenp82" path="res://assets/backgrounds/image.jpg" id="3_m41kj"]
+[ext_resource type="Texture2D" uid="uid://beapme0ogdqxn" path="res://assets/backgrounds/ChatGPT Image May 1, 2026, 03_03_27 PM.png" id="4_82m4m"]
 [ext_resource type="Script" uid="uid://cnjuslky0wu3a" path="res://scripts/world/LocationPlayer.gd" id="4_cocas"]
+[ext_resource type="Texture2D" uid="uid://dcyvrntx4nl74" path="res://assets/backgrounds/ChatGPT Image May 1, 2026, 03_02_07 PM.png" id="4_l1t27"]
 [ext_resource type="Texture2D" uid="uid://chby2hohg0khx" path="res://assets/sprites/player/exiled_knight/Attack 1.png" id="5_6q0ol"]
 [ext_resource type="Texture2D" uid="uid://jm3pkbexd4jy" path="res://assets/sprites/player/exiled_knight/Attack 2.png" id="6_kemvj"]
 [ext_resource type="Texture2D" uid="uid://4qh5b3hfuil3" path="res://assets/sprites/player/exiled_knight/Attack 3.png" id="7_c3wuu"]
@@ -20,9 +21,11 @@
 [ext_resource type="Resource" uid="uid://crc3skfqii3sa" path="res://resources/outcomes/crowsend/02_leave_town.tres" id="17_m41kj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3u1yb"]
-size = Vector2(1161, 20)
+size = Vector2(2059.7554, 224)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_viajb"]
+radius = 9.5
+height = 64.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tgc18"]
 atlas = ExtResource("5_6q0ol")
@@ -440,35 +443,63 @@ location_name = "Crowsend"
 location_description = "A town crouched beneath the shadow of the castle."
 interaction_result_view_scene = ExtResource("2_l1t27")
 
-[node name="Background" type="TextureRect" parent="." unique_id=477310011]
+[node name="Background" type="TextureRect" parent="." unique_id=615622433]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -15.0
+offset_left = -6.0
 offset_top = -69.000015
-offset_right = 1521.0
+offset_right = 1696.0
 offset_bottom = 955.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.7599997, 0.7599997)
-texture = ExtResource("3_m41kj")
+texture = ExtResource("4_l1t27")
+
+[node name="Background2" type="TextureRect" parent="." unique_id=1593886633]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1289.0001
+offset_top = -69.000015
+offset_right = 2983.0
+offset_bottom = 955.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.7599997, 0.7599997)
+texture = ExtResource("4_82m4m")
+
+[node name="Background3" type="TextureRect" parent="." unique_id=209078564]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2569.0002
+offset_top = -69.000015
+offset_right = 4263.0
+offset_bottom = 955.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.7599997, 0.7599997)
+texture = ExtResource("4_82m4m")
 
 [node name="Ground" type="StaticBody2D" parent="." unique_id=1289174704]
 position = Vector2(577, 393)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=414187247]
+position = Vector2(844.82996, 197)
 scale = Vector2(1.88, 1)
 shape = SubResource("RectangleShape2D_3u1yb")
 
 [node name="PlayerSpawn" type="Marker2D" parent="." unique_id=927118479]
-position = Vector2(132, 340)
+position = Vector2(132, 348)
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=938940466]
-position = Vector2(132, 320)
+position = Vector2(132, 348)
 scale = Vector2(2, 2)
 script = ExtResource("4_cocas")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=291696413]
+position = Vector2(-11, 32)
 shape = SubResource("CapsuleShape2D_viajb")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player" unique_id=1364158932]
